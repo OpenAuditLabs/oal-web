@@ -30,7 +30,7 @@ The OpenAuditLabs Web Dashboard is designed to be the central hub for users to i
 ### Prerequisites
 
 - Node.js (version X.X.X or higher)
-- npm or yarn
+- pnpm
 - Access to an OpenAuditLabs backend instance
 
 ### Installation
@@ -43,9 +43,7 @@ The OpenAuditLabs Web Dashboard is designed to be the central hub for users to i
 
 2. **Install Dependencies:**
    ```bash
-   npm install
-   # or
-   yarn install
+   pnpm install
    ```
 
 3. **Configure Environment:**
@@ -53,9 +51,7 @@ The OpenAuditLabs Web Dashboard is designed to be the central hub for users to i
 
 4. **Start the Development Server:**
    ```bash
-   npm start
-   # or
-   yarn start
+   pnpm start
    ```
 
 ## Usage
