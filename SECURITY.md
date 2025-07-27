@@ -84,14 +84,17 @@ OpenAuditLabs encourages responsible security research and will not take legal a
 
 ---
 
-## Additional Resources
+## Acknowledgments
 
-- Next.js Security Documentation: [https://nextjs.org/docs/advanced-features/security](https://nextjs.org/docs/advanced-features/security)
-- OWASP Top 10 Web Application Security Risks: [https://owasp.org/www-project-top-ten/](https://owasp.org/www-project-top-ten/)
-- How to Secure Your Node.js App: [https://expressjs.com/en/advanced/best-practice-security.html](https://expressjs.com/en/advanced/best-practice-security.html)
+We thank the security research community for their contributions to making OpenAuditLabs Agent more secure. Responsible disclosure helps protect our users and the broader smart contract ecosystem.
+
+### Hall of Fame
+*Contributors who have responsibly disclosed vulnerabilities will be listed here with their permission.*
 
 ---
 
-Thank you for helping us improve the security of OpenAuditLabs/Web.  
-**OpenAuditLabs Security Team**  
-security@openauditlabs.org
+**Note**: This security policy is reviewed and updated regularly. Please check back for the latest version. Last updated: July 2025.
+
+---
+
+*This document is licensed under the same terms as the OpenAuditLabs/agent repository.*
