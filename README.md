@@ -29,7 +29,7 @@ The OpenAuditLabs Web Dashboard is designed to be the central hub for users to i
 
 ### Prerequisites
 
-- Node.js (version X.X.X or higher)
+- Node.js (version 18.X or higher)
 - pnpm
 - Access to an OpenAuditLabs backend instance
 
