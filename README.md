@@ -51,7 +51,7 @@ The OpenAuditLabs Web Dashboard is designed to be the central hub for users to i
 
 4. **Start the Development Server:**
    ```bash
-   pnpm start
+   pnpm dev
    ```
 
 ## Usage
@@ -68,7 +68,7 @@ We welcome contributions to improve the dashboard! Please read our [CONTRIBUTING
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU Affero General Public License v3 (AGPLv3) - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
