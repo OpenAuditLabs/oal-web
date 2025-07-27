@@ -73,5 +73,8 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 For questions, support, or feedback, please contact the OpenAuditLabs team at support@openauditlabs.org.
+--
 
-*Thank you for using OpenAuditLabs. We strive to make auditing simple, transparent, and effective for all users.*
+<div align="center">
+  <strong>OpenAuditLabs</strong> - Securing the Future of Smart Contracts with AI
+</div>
