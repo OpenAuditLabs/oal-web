@@ -35,7 +35,7 @@ export function DeviceForm() {
 
   function onSubmit(values: DeviceFormValues) {
     // Handle form submission (e.g., send to API)
-    console.log(values);
+    // console.log(values);
   }
 
   return (
