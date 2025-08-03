@@ -26,7 +26,7 @@ Please review and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a r
 Before you begin, ensure you have the following installed:
 
 - **Node.js** (version 18.18 or later)
-- **npm** (comes with Node.js) or **yarn**
+- **pnpm** (comes with Node.js) or **yarn**
 - **Git** for version control
 - A modern code editor (VS Code recommended)
 
@@ -50,7 +50,7 @@ Before you begin, ensure you have the following installed:
 
 4. **Install Dependencies**
    ```bash
-   npm install
+   pnpm install
    # or
    yarn install
    ```
@@ -63,7 +63,7 @@ Before you begin, ensure you have the following installed:
 
 6. **Start Development Server**
    ```bash
-   npm run dev
+   pnpm run dev
    # or
    yarn dev
    ```
@@ -127,16 +127,16 @@ We welcome various types of contributions:
 3. **Test Your Changes**
    ```bash
    # Run the development server
-   npm run dev
+   pnpm run dev
    
    # Run tests
-   npm test
+   pnpm test
    
    # Run linting
-   npm run lint
+   pnpm run lint
    
    # Run type checking
-   npm run type-check
+   pnpm run type-check
    ```
 
 4. **Commit Your Changes**
@@ -238,13 +238,13 @@ We use the following testing tools:
 
 ```bash
 # Run all tests
-npm test
+pnpm test
 
 # Run tests in watch mode
-npm run test:watch
+pnpm run test:watch
 
 # Run tests with coverage
-npm run test:coverage
+pnpm run test:coverage
 ```
 
 ## Submitting Changes
