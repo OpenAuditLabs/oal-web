@@ -1,3 +1,5 @@
+import { Compass, MoveLeft } from "lucide-react";
+
 export default function NotFound() {
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
@@ -33,10 +35,40 @@ export default function NotFound() {
         </h1>
 
         {/* Descriptive subheading */}
-        <p className="text-lg md:text-xl lg:text-2xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
+        <p
+          className="text-lg md:text-xl lg:text-2xl leading-relaxed max-w-2xl mx-auto"
+          style={{ color: "var(--ring)" }}
+        >
           The page you're looking for doesn't exist, has been moved, or is
           temporarily unavailable.
         </p>
+
+        {/* CTA Buttons */}
+        <div className="mt-10 flex flex-row items-center justify-center gap-2">
+          <a
+            href="/"
+            className="group flex items-center gap-1 px-3 py-2 sm:px-7 sm:py-3 rounded-xl font-semibold text-sm sm:text-lg bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 text-black shadow-lg hover:shadow-xl hover:text-white hover:brightness-110 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400 whitespace-nowrap flex-shrink-0"
+          >
+            <MoveLeft
+              size={18}
+              className="sm:mr-2 text-black group-hover:text-white transition-colors"
+            />
+            <span className="hidden xs:inline sm:inline">Back to Home</span>
+            <span className="md:hidden">Home</span>
+          </a>
+
+          <a
+            href="/portfolio"
+            className="group flex items-center gap-1 px-3 py-2 sm:px-7 sm:py-3 rounded-xl font-semibold text-sm sm:text-lg border-2 border-cyan-400 text-cyan-300 bg-transparent hover:bg-cyan-950/10 hover:border-cyan-300 hover:shadow-xl hover:brightness-110 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400 whitespace-nowrap flex-shrink-0"
+          >
+            <Compass
+              size={18}
+              className="sm:mr-2 text-cyan-400 group-hover:text-cyan-300 transition-colors"
+            />
+            <span className="hidden xs:inline sm:inline">Explore our work</span>
+            <span className="md:hidden">Explore</span>
+          </a>
+        </div>
       </div>
 
       {/* Subtle animated elements for visual interest */}
