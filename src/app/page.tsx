@@ -1,4 +1,5 @@
-import Sidebar from "../components/common/Sidebar";
+import Header from "@/components/common/Header";
+import Sidebar from "@/components/common/Sidebar";
 
 export default function Dashboard() {
   return (
@@ -14,7 +15,11 @@ export default function Dashboard() {
         <main className="flex-1 p-8">
           
 
-          {/* TBD */}
+          {/* Dashboard Header */}
+          <Header 
+            title="Dashboard"
+            subtitle="Monitor real-time security analysis and threat detection"
+          />  
 
             
 
