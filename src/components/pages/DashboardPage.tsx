@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/common/Header";
+import KPIGrid from "@/components/common/KPIGrid";
 
 export default function DashboardPage() {
   return (
@@ -10,7 +11,8 @@ export default function DashboardPage() {
         title="Dashboard"
         subtitle="Monitor real-time security analysis and threat detection"
       />
-      
+
+      <KPIGrid />
     </main>
   );
 }
