@@ -1,7 +1,13 @@
-import Header from "@/components/common/Header";
+"use client";
+
+import { useState } from "react";
 import Sidebar from "@/components/common/Sidebar";
+import PageRouter from "@/components/common/PageRouter";
+import { TabType } from "@/components/common/PageRouter";
 
 export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+
   return (
     <div className="min-h-screen bg-white">
       {/* Top Bar */}
@@ -9,22 +15,10 @@ export default function Dashboard() {
       
       <div className="flex">
         {/* Left Sidebar */}
-        <Sidebar />
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/* Main Content */}
-        <main className="flex-1 p-8">
-          
-
-          {/* Dashboard Header */}
-          <Header 
-            title="Dashboard"
-            subtitle="Monitor real-time security analysis and threat detection"
-          />  
-
-            
-
-                
-        </main>
+        <PageRouter activeTab={activeTab} />
       </div>
     </div>
   );
