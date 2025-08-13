@@ -3,6 +3,7 @@
 import Header from "@/components/common/Header";
 import KPIGrid from "@/components/common/KPIGrid";
 import UploadCard from "@/components/common/UploadCard";
+import RecentActivity from "@/components/common/RecentActivity";
 
 export default function DashboardPage() {
   return (
@@ -17,6 +18,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <UploadCard />
+        <RecentActivity />
       </div>
     </main>
   );
