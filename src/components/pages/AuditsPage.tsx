@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Header from "@/components/common/Header";
 import AuditStatusCard from "@/components/ui/AuditStatusCard";
+import ActiveAuditCount from "@/components/ui/ActiveAuditCount";
 import auditsData from "@/data/audits.json";
 
 interface AuditCard {
@@ -50,6 +51,9 @@ export default function AuditsPage({ initialAudits = [] }: AuditsPageProps) {
         title="Audits"
         subtitle="Monitor real-time security analysis and threat detection"
       />
+
+      {/* Active Audit Count Section */}
+      <ActiveAuditCount count={activeAudits.length} />
 
       {/* Active Audits Section */}
       <div className="mb-8">
