@@ -1,6 +1,9 @@
+"use client";
+
 import { FileText, Clock, Activity, Play, Pause, X } from "lucide-react";
 
 interface AuditStatusCardProps {
+  id: string;
   title: string;
   currentStatus: string;
   size: string;
@@ -9,12 +12,12 @@ interface AuditStatusCardProps {
   progress: number;
   statusMessage: string;
   statusType: "active" | "queued";
-  onPlay?: () => void;
-  onPause?: () => void;
-  onClose?: () => void;
+  onStatusChange: (id: string, newStatus: "active" | "queued") => void;
+  onClose: (id: string) => void;
 }
 
 export default function AuditStatusCard({
+  id,
   title,
   currentStatus,
   size,
@@ -23,11 +26,19 @@ export default function AuditStatusCard({
   progress,
   statusMessage,
   statusType,
-  onPlay,
-  onPause,
+  onStatusChange,
   onClose
 }: AuditStatusCardProps) {
   const isActive = statusType === "active";
+  
+  const handleStatusToggle = () => {
+    const newStatus = isActive ? "queued" : "active";
+    onStatusChange(id, newStatus);
+  };
+
+  const handleClose = () => {
+    onClose(id);
+  };
   
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -37,21 +48,21 @@ export default function AuditStatusCard({
         <div className="flex items-center gap-2">
           {isActive ? (
             <button 
-              onClick={onPause}
+              onClick={handleStatusToggle}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <Pause className="w-4 h-4 text-gray-600" />
             </button>
           ) : (
             <button 
-              onClick={onPlay}
+              onClick={handleStatusToggle}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <Play className="w-4 h-4 text-gray-600" />
             </button>
           )}
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X className="w-4 h-4 text-gray-600" />
@@ -96,11 +107,11 @@ export default function AuditStatusCard({
       </div>
 
       {/* Status message */}
-        <div className={`px-3 py-2 rounded-lg border ${
-          isActive ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"
-        }`}
-        style={isActive ? { borderColor: '#008937' } : { borderColor: '#C9BC00' }}
-        >
+      <div className={`px-3 py-2 rounded-lg border ${
+        isActive ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700"
+      }`}
+      style={isActive ? { borderColor: '#008937' } : { borderColor: '#C9BC00' }}
+      >
         <span className="text-sm">{statusMessage}</span>
       </div>
     </div>

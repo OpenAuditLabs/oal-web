@@ -1,0 +1,26 @@
+{
+  "audits": [
+    {
+      "id": "1",
+      "title": "E-Commerce App",
+      "currentStatus": "scanning paymentModule.ts",
+      "size": "2.6 MB",
+      "started": "16th August, 2025; 9:21 PM",
+      "duration": "1h 45m",
+      "progress": 69,
+      "statusMessage": "Analyzing security vulnerabilities and threat patterns...",
+      "statusType": "active"
+    },
+    {
+      "id": "2",
+      "title": "Transport API",
+      "currentStatus": "in queue",
+      "size": "6.9 MB",
+      "started": "16th August, 2025; 9:21 PM",
+      "duration": "n/a",
+      "progress": 10,
+      "statusMessage": "Queued for analysis...",
+      "statusType": "queued"
+    }
+  ]
+}
