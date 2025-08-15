@@ -4,6 +4,7 @@ import Header from "@/components/common/Header";
 import KPIGrid from "@/components/common/KPIGrid";
 import UploadCard from "@/components/common/UploadCard";
 import RecentActivity from "@/components/common/RecentActivity";
+import dashboardKpiData from "@/data/dashboardKPI.json";
 
 export default function DashboardPage() {
   return (
@@ -14,7 +15,7 @@ export default function DashboardPage() {
         subtitle="Monitor real-time security analysis and threat detection"
       />
 
-      <KPIGrid />
+      <KPIGrid kpiData={dashboardKpiData} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <UploadCard />

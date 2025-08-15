@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "project": "ABC BANK",
+    "size": "4.3MB",
+    "status": "completed",
+    "severity": "Medium",
+    "findings": 3,
+    "duration": "30:05",
+    "completed": "1st August 2025"
+  },
+  {
+    "id": 2,
+    "project": "ABC BANK",
+    "size": "4.3MB", 
+    "status": "completed",
+    "severity": "Medium",
+    "findings": 3,
+    "duration": "30:05",
+    "completed": "1st August 2025"
+  },
+  {
+    "id": 3,
+    "project": "ABC BANK",
+    "size": "4.3MB",
+    "status": "failed",
+    "severity": "n/a",
+    "findings": 0,
+    "duration": "n/a",
+    "completed": "n/a"
+  }
+]
