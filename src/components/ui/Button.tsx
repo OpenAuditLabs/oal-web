@@ -21,18 +21,29 @@ export default function Button({
   const baseClasses = "inline-flex items-center gap-2 rounded-lg cursor-pointer font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
   
   const variantClasses = {
-    primary: "bg-green-600 hover:bg-green-700 text-white focus:ring-green-500",
+    primary: "text-white hover:opacity-90",
     secondary: "bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500",
-    outline: "border-2 border-green-600 text-green-600 hover:bg-green-50 focus:ring-green-500"
+    outline: "border-2 bg-transparent hover:text-white"
   };
   
   const sizeClasses = {
     sm: "px-3 py-1.5 text-sm",
-    md: "px-6 py-2 text-base",
+    md: "px-6 py-2 text-base", 
     lg: "px-8 py-3 text-lg"
   };
   
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+  
+  const getButtonStyle = () => {
+    switch (variant) {
+      case "primary":
+        return { backgroundColor: "#008937", borderColor: "#008937" };
+      case "outline":
+        return { borderColor: "#008937", color: "#008937" };
+      default:
+        return {};
+    }
+  };
   
   const content = (
     <>
@@ -43,14 +54,22 @@ export default function Button({
   
   if (asLabel) {
     return (
-      <label className={classes} {...(props as any)}>
+      <label 
+        className={classes} 
+        style={getButtonStyle()}
+        {...(props as any)}
+      >
         {content}
       </label>
     );
   }
   
   return (
-    <button className={classes} {...props}>
+    <button 
+      className={classes} 
+      style={getButtonStyle()}
+      {...props}
+    >
       {content}
     </button>
   );
