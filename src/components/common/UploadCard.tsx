@@ -1,6 +1,7 @@
 "use client";
 
 import { UploadCloud, Upload } from "lucide-react";
+import Button from "@/components/ui/Button";
 
 interface UploadCardProps {
   onFilesSelected?: (files: FileList) => void;
@@ -22,11 +23,16 @@ export default function UploadCard({ onFilesSelected }: UploadCardProps) {
           Upload a file to run a quick scan
         </a>
 
-        <label className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg cursor-pointer mb-4">
-          <Upload className="w-4 h-4" />
-          <span>Add Files</span>
+        <Button
+          variant="primary"
+          size="md"
+          icon={Upload}
+          asLabel={true}
+          className="mb-4"
+        >
+          Add Files
           <input type="file" className="hidden" onChange={handleChange} />
-        </label>
+        </Button>
 
         <p className="text-sm text-gray-600">
           To upload multiple files, create a project

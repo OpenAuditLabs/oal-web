@@ -1,33 +1,30 @@
-import { BarChart3, Hourglass, CheckCircle, Shield } from "lucide-react";
+import { BarChart3, Hourglass, CheckCircle, ShieldAlert ,CircleX} from "lucide-react";
 import StatsCard from "@/components/ui/StatsCard";
 
-export default function KPIGrid() {
-  const stats = [
-    {
-      icon: BarChart3,
-      label: "Projects",
-      value: "4",
-      iconColor: "text-black-600"
-    },
-    {
-      icon: Hourglass,
-      label: "Running Audits",
-      value: "1",
-      iconColor: "text-black-600"
-    },
-    {
-      icon: CheckCircle,
-      label: "Completed",
-      value: "2",
-      iconColor: "text-black-600"
-    },
-    {
-      icon: Shield,
-      label: "Total Findings",
-      value: "8",
-      iconColor: "text-black-600"
-    }
-  ];
+interface KPIData {
+  icon: string;
+  label: string;
+  value: string;
+  iconColor: string;
+}
+
+interface KPIGridProps {
+  kpiData: KPIData[];
+}
+
+export default function KPIGrid({ kpiData }: KPIGridProps) {
+  const iconMap = {
+    BarChart3,
+    Hourglass,
+    CheckCircle,
+    ShieldAlert,
+    CircleX
+  };
+
+  const stats = kpiData.map(item => ({
+    ...item,
+    icon: iconMap[item.icon as keyof typeof iconMap]
+  }));
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
