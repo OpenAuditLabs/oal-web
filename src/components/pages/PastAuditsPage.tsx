@@ -1,4 +1,6 @@
 import Header from "@/components/common/Header";
+import KPIGrid from "../common/KPIGrid";
+import pastAuditData from "@/data/pastAuditKPI.json";
 
 
 export default function PastAuditPage(){
@@ -8,6 +10,7 @@ export default function PastAuditPage(){
                 title="Audit History"
                 subtitle="Review completed security analysis and findings"
             />
+            <KPIGrid kpiData={pastAuditData} />
         </main>
     );
 }
