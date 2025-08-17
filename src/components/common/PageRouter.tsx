@@ -3,6 +3,7 @@
 import DashboardPage from "@/components/pages/DashboardPage";
 import AuditsPage from "@/components/pages/AuditsPage";
 import PastAuditPage from "../pages/PastAuditsPage";
+import ProjectsPage from "../pages/ProjectsPage";
 
 type TabType = "dashboard" | "audits" | "past-audits" | "projects";
 
@@ -20,7 +21,7 @@ export default function PageRouter({ activeTab }: PageRouterProps) {
       case "past-audits":
         return <PastAuditPage/>
       case "projects":
-        return <div className="flex-1 p-8">Projects Page - Coming Soon</div>;
+        return <ProjectsPage />;
       default:
         return <DashboardPage />;
     }
