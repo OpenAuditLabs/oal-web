@@ -9,9 +9,9 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Top Bar */}
-      <div className="h-1 bg-gray-700"></div>
+      <div className="h-1 bg-primary"></div>
       
       <div className="flex">
         {/* Left Sidebar */}

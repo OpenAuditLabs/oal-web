@@ -57,7 +57,7 @@ export default function AuditsPage({ initialAudits = [] }: AuditsPageProps) {
 
       {/* Active Audits Section */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Active Audits</h2>
+        <h2 className="text-xl font-bold text-foreground mb-4">Active Audits</h2>
         {activeAudits.map(card => (
           <AuditStatusCard
             key={card.id}
@@ -78,7 +78,7 @@ export default function AuditsPage({ initialAudits = [] }: AuditsPageProps) {
 
       {/* Queued Audits Section */}
       <div>
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Queued Audits</h2>
+        <h2 className="text-xl font-bold text-foreground mb-4">Queued Audits</h2>
         {queuedAudits.map(card => (
           <AuditStatusCard
             key={card.id}
