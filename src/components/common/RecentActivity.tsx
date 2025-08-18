@@ -26,25 +26,25 @@ export default function RecentActivity() {
   ];
 
   return (
-    <div className="bg-gray-50 rounded-xl p-8">
-      <h3 className="text-lg font-bold text-gray-800 mb-4">Recent Activity</h3>
+    <div className="bg-secondary rounded-xl p-8">
+      <h3 className="text-lg font-bold text-foreground mb-4">Recent Activity</h3>
       <div className="space-y-3">
         {activities.map((activity, index) => (
-          <div key={index} className="bg-white p-4 rounded-lg shadow-sm">
+          <div key={index} className="bg-card p-4 rounded-lg shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="font-medium text-gray-800">{activity.title}</h4>
-              <span className="text-sm text-gray-600">{activity.status}</span>
+              <h4 className="font-medium text-foreground">{activity.title}</h4>
+              <span className="text-sm text-muted-foreground">{activity.status}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">{activity.details}</span>
+              <span className="text-sm text-muted-foreground">{activity.details}</span>
               {activity.progress && (
-                <span className="text-sm text-gray-600">{activity.progress}</span>
+                <span className="text-sm text-muted-foreground">{activity.progress}</span>
               )}
             </div>
             {activity.progress && (
-              <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+              <div className="w-full bg-muted rounded-full h-1.5 mt-2">
                 <div 
-                  className="bg-gray-600 h-1.5 rounded-full" 
+                  className="bg-primary h-1.5 rounded-full" 
                   style={{ width: activity.progress }}
                 ></div>
               </div>

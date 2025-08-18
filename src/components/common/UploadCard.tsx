@@ -13,13 +13,13 @@ export default function UploadCard({ onFilesSelected }: UploadCardProps) {
   };
 
   return (
-    <div className="bg-gray-50 rounded-xl p-8">
-      <div className="border-2 border-dashed border-green-500 rounded-lg p-10 text-center">
-        <div className="mx-auto w-10 h-10 bg-green-50 rounded-full flex items-center justify-center mb-4">
-          <UploadCloud className="w-5 h-5 text-green-600" />
+    <div className="bg-secondary rounded-xl p-8">
+      <div className="border-dashed-wide rounded-lg p-10 text-center">
+        <div className="mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-4">
+          <UploadCloud className="w-5 h-5 text-primary" />
         </div>
 
-        <a href="#" className="text-black-900 text-lg block mb-4">
+        <a href="#" className="text-foreground text-lg block mb-4">
           Upload a file to run a quick scan
         </a>
 
@@ -34,7 +34,7 @@ export default function UploadCard({ onFilesSelected }: UploadCardProps) {
           <input type="file" className="hidden" onChange={handleChange} />
         </Button>
 
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           To upload multiple files, create a project
         </p>
       </div>

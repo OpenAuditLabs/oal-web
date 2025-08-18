@@ -21,9 +21,9 @@ export default function Button({
   const baseClasses = "inline-flex items-center gap-2 rounded-lg cursor-pointer font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
   
   const variantClasses = {
-    primary: "text-white hover:opacity-90",
-    secondary: "bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500",
-    outline: "border-2 bg-transparent hover:text-white"
+    primary: "bg-primary text-primary-foreground hover:opacity-90 focus:ring-primary",
+    secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-secondary",
+    outline: "border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground"
   };
   
   const sizeClasses = {
@@ -33,17 +33,6 @@ export default function Button({
   };
   
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
-  
-  const getButtonStyle = () => {
-    switch (variant) {
-      case "primary":
-        return { backgroundColor: "#008937", borderColor: "#008937" };
-      case "outline":
-        return { borderColor: "#008937", color: "#008937" };
-      default:
-        return {};
-    }
-  };
   
   const content = (
     <>
@@ -56,7 +45,6 @@ export default function Button({
     return (
       <label 
         className={classes} 
-        style={getButtonStyle()}
         {...(props as any)}
       >
         {content}
@@ -67,7 +55,6 @@ export default function Button({
   return (
     <button 
       className={classes} 
-      style={getButtonStyle()}
       {...props}
     >
       {content}
