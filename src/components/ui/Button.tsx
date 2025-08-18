@@ -45,7 +45,7 @@ export default function Button({
     return (
       <label 
         className={classes} 
-        {...(props as any)}
+        {...(props as React.LabelHTMLAttributes<HTMLLabelElement>)}
       >
         {content}
       </label>
