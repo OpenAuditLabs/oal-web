@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "node scripts/db.js reset",
+    "db:fresh": "node scripts/db.js fresh",
+    "db:status": "node scripts/db.js status"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",

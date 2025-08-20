@@ -1,12 +1,10 @@
-"use client";
-
 import Header from "@/components/common/Header";
 import KPIGrid from "@/components/common/KPIGrid";
 import UploadCard from "@/components/common/UploadCard";
-import { RecentActivity } from "@/components/dashboard"; ;
+import { RecentActivity } from "@/components/dashboard";
 import dashboardKpiData from "@/data/dashboardKPI.json";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   return (
     <main className="flex-1 p-8">
       {/* Dashboard Header */}
