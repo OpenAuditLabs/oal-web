@@ -1,7 +1,7 @@
-import Header from "../common/Header";
+import Header from "@/components/common/Header";
 import Button from "@/components/ui/Button";
 import { Plus } from "lucide-react";
-import { ProjectCard } from "../project";
+import { ProjectCard } from "@/components/project";
 import { projectsData } from "@/data/projects";
 
 export default function ProjectsPage(){
