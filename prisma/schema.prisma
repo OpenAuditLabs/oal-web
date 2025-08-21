@@ -13,15 +13,69 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  fileCount   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  audits Audit[]
+
+  @@map("projects")
+}
+
+model Audit {
+  id             String        @id @default(cuid())
+  projectId      String
+  projectName    String        // Denormalized for faster queries
+  size           String        // File size (e.g., "4.3MB", "2.6 GB")
+  status         AuditStatus
+  overallSeverity SeverityLevel?
+  findingsCount  Int           @default(0)
+  duration       String?       // Duration in format like "30:05" (minutes:seconds)
+  completedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  findings Finding[]
+
+  @@map("audits")
+}
+
+model Finding {
+  id          String        @id @default(cuid())
+  auditId     String
+  title       String
+  description String
+  severity    SeverityLevel
+  category    String?       // e.g., "SQL Injection", "XSS", "Authentication"
+  fileName    String?       // File where the finding was discovered
+  lineNumber  Int?          // Line number in the file
+  remediation String?       // Suggested fix/remediation
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  audit Audit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@map("findings")
+}
+
 model Activity {
-  id        String   @id @default(cuid())
+  id        String         @id @default(cuid())
   title     String
-  fileCount Int      // Number of files
-  fileSize  String   // File size (e.g., "2.6 MB", "1.2 GB")
+  fileCount Int            // Number of files
+  fileSize  String         // File size (e.g., "2.6 MB", "1.2 GB")
   status    ActivityStatus
-  progress  Int?     // Progress percentage (0-100), null for queued items
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  progress  Int?           // Progress percentage (0-100), null for queued items
+  auditId   String?        // Link to the audit record when completed
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 
   @@map("activities")
 }
@@ -33,4 +87,20 @@ enum ActivityStatus {
   FAILED
 
   @@map("activity_status")
+}
+
+enum AuditStatus {
+  COMPLETED
+  FAILED
+
+  @@map("audit_status")
+}
+
+enum SeverityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+
+  @@map("severity_level")
 }
