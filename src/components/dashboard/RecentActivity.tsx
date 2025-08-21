@@ -11,7 +11,7 @@ export default function RecentActivity() {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const data = await getRecentActivities(4)
+        const data = await getRecentActivities(5)
         setActivities(data)
       } catch (error) {
         console.error('Error fetching activities:', error)
