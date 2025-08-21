@@ -1,8 +1,39 @@
-import { getRecentActivities, formatActivityStatus, formatFileInfo } from '@/actions/activities'
+'use client'
 
-export default async function RecentActivity() {
-  // Fetch activities from database
-  const activities = await getRecentActivities(4)
+import { useEffect, useState } from 'react'
+import { getRecentActivities, type ActivityData } from '@/actions/activities'
+import { formatActivityStatus, formatFileInfo } from '@/lib/activity-utils'
+
+export default function RecentActivity() {
+  const [activities, setActivities] = useState<ActivityData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const data = await getRecentActivities(4)
+        setActivities(data)
+      } catch (error) {
+        console.error('Error fetching activities:', error)
+        setActivities([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchActivities()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="bg-secondary rounded-xl p-8">
+        <h3 className="text-lg font-bold text-foreground mb-4">Recent Activity</h3>
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Loading activities...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (activities.length === 0) {
     return (

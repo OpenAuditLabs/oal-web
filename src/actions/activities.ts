@@ -1,3 +1,5 @@
+'use server'
+
 import { prisma } from '@/lib/prisma'
 import { ActivityStatus } from '@prisma/client'
 
@@ -41,23 +43,4 @@ export async function getActivityById(id: string): Promise<ActivityData | null> 
   }
 }
 
-// Helper function to format status for display
-export function formatActivityStatus(status: ActivityStatus): string {
-  switch (status) {
-    case 'IN_PROGRESS':
-      return 'In Progress'
-    case 'QUEUED':
-      return 'Queued'
-    case 'COMPLETED':
-      return 'Completed'
-    case 'FAILED':
-      return 'Failed'
-    default:
-      return status
-  }
-}
 
-// Helper function to combine file info for display
-export function formatFileInfo(fileCount: number, fileSize: string): string {
-  return `${fileCount} files - ${fileSize}`
-}
