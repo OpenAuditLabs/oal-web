@@ -12,3 +12,25 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Activity {
+  id        String   @id @default(cuid())
+  title     String
+  fileCount Int      // Number of files
+  fileSize  String   // File size (e.g., "2.6 MB", "1.2 GB")
+  status    ActivityStatus
+  progress  Int?     // Progress percentage (0-100), null for queued items
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("activities")
+}
+
+enum ActivityStatus {
+  IN_PROGRESS
+  QUEUED
+  COMPLETED
+  FAILED
+
+  @@map("activity_status")
+}
