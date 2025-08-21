@@ -1,6 +1,6 @@
 import Header from "@/components/common/Header";
-import KPIGrid from "../common/KPIGrid";
-import AuditTable from "../common/AuditTable";
+import KPIGrid from "@/components/common/KPIGrid";
+import { AuditTable } from "@/components/pastAudits";
 import pastAuditData from "@/data/pastAuditKPI.json";
 import pastAuditsData from "@/data/pastAudits.json";
 

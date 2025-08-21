@@ -3,7 +3,7 @@
 import Header from "@/components/common/Header";
 import KPIGrid from "@/components/common/KPIGrid";
 import UploadCard from "@/components/common/UploadCard";
-import RecentActivity from "@/components/common/RecentActivity";
+import { RecentActivity } from "@/components/dashboard"; ;
 import dashboardKpiData from "@/data/dashboardKPI.json";
 
 export default function DashboardPage() {

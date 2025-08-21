@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Header from "@/components/common/Header";
-import AuditStatusCard from "@/components/ui/AuditStatusCard";
-import ActiveAuditCount from "@/components/ui/ActiveAuditCount";
+import { AuditStatusCard , ActiveAuditCount } from "@/components/audits";
 import auditsData from "@/data/audits.json";
 
 interface AuditCard {
