@@ -156,6 +156,7 @@ export async function getAuditStatistics() {
       completedAudits,
       failedAudits,
       recentAudits,
+      totalFindings,
       severityStats
     ] = await Promise.all([
       // Total audits
@@ -180,6 +181,13 @@ export async function getAuditStatistics() {
         }
       }),
       
+      // Total findings across all audits
+      prisma.audit.aggregate({
+        _sum: {
+          findingsCount: true
+        }
+      }),
+      
       // Severity distribution
       prisma.audit.groupBy({
         by: ['overallSeverity'],
@@ -200,6 +208,7 @@ export async function getAuditStatistics() {
       completed: completedAudits,
       failed: failedAudits,
       recent: recentAudits,
+      totalFindings: totalFindings._sum.findingsCount || 0,
       severityDistribution: severityStats.reduce((acc, item) => {
         if (item.overallSeverity) {
           acc[item.overallSeverity] = item._count.overallSeverity
