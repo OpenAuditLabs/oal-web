@@ -4,7 +4,7 @@ import UploadCard from "@/components/common/UploadCard";
 import { RecentActivity } from "@/components/dashboard";
 import dashboardKpiData from "@/data/dashboardKPI.json";
 
-export default async function DashboardPage() {
+export default function DashboardPage() {
   return (
     <main className="flex-1 p-8">
       {/* Dashboard Header */}
