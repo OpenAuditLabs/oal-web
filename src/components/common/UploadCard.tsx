@@ -13,30 +13,33 @@ export default function UploadCard({ onFilesSelected }: UploadCardProps) {
   };
 
   return (
-    <div className="bg-secondary rounded-xl p-8">
-      <div className="border-dashed-wide rounded-lg p-10 text-center">
-        <div className="mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-4">
-          <UploadCloud className="w-5 h-5 text-primary" />
+    <div className="rounded-xl p-8">
+      <div className="bg-secondary rounded-lg p-6 mb-4">
+        <div className="border-dashed-wide rounded-lg p-8 text-center">
+          <div className="mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-4">
+            <UploadCloud className="w-5 h-5 text-primary" />
+          </div>
+
+          <a href="#" className="text-foreground text-lg block mb-4">
+            Upload a file to run a quick scan
+          </a>
+
+          <Button
+            variant="primary"
+            size="md"
+            icon={Upload}
+            asLabel={true}
+            className="mb-4"
+          >
+            Add Files
+            <input type="file" className="hidden" onChange={handleChange} />
+          </Button>
+        
+      
+      <p className="text-sm text-muted-foreground text-center">
+        To upload multiple files, create a project
+      </p>
         </div>
-
-        <a href="#" className="text-foreground text-lg block mb-4">
-          Upload a file to run a quick scan
-        </a>
-
-        <Button
-          variant="primary"
-          size="md"
-          icon={Upload}
-          asLabel={true}
-          className="mb-4"
-        >
-          Add Files
-          <input type="file" className="hidden" onChange={handleChange} />
-        </Button>
-
-        <p className="text-sm text-muted-foreground">
-          To upload multiple files, create a project
-        </p>
       </div>
     </div>
   );
