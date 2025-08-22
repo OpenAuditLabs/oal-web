@@ -1,19 +1,19 @@
-import Header from "@/components/common/Header";
-import KPIGrid from "@/components/common/KPIGrid";
-import { AuditTable } from "@/components/pastAudits";
-import pastAuditData from "@/data/pastAuditKPI.json";
-import pastAuditsData from "@/data/pastAudits.json";
+'use client';
 
+import React from 'react';
+import Header from '@/components/common/Header';
+import KPIGrid from '@/components/common/KPIGrid';
+import { AuditTable } from '@/components/pastAudits';
+import pastAuditKPI from '@/data/pastAuditKPI.json';
 
-export default function PastAuditPage(){
-    return (
-        <main className="flex-1 p-8">
-            <Header 
-                title="Audit History"
-                subtitle="Review completed security analysis and findings"
-            />
-            <KPIGrid kpiData={pastAuditData} />
-            <AuditTable audits={pastAuditsData} />
-        </main>
-    );
+export default function PastAuditsPage() {
+  return (
+    <div className="flex-1 p-8 space-y-8">
+      <Header title="Past Audits" subtitle="Review and manage completed audit history" />
+      
+      <KPIGrid kpiData={pastAuditKPI} />
+      
+      <AuditTable />
+    </div>
+  );
 }
