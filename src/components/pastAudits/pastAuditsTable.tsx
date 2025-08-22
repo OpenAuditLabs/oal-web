@@ -29,32 +29,72 @@ export default function AuditTable() {
     }
   });
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rerunningAudits, setRerunningAudits] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchData = async () => {
+      setLoading(true);
       try {
-        const historyData = await getAuditHistory({ page: 1, limit: 20 });
+        const historyData = await getAuditHistory({ page: currentPage, limit: 20 });
         
-        setAuditHistory(historyData);
+        if (isMounted) {
+          setAuditHistory(historyData);
+        }
       } catch (error) {
         console.error('Error fetching audit data:', error);
-        setAuditHistory({
-          audits: [],
-          pagination: {
-            currentPage: 1,
-            totalPages: 0,
-            totalCount: 0,
-            hasNextPage: false,
-            hasPreviousPage: false,
-          }
-        });
+        if (isMounted) {
+          setAuditHistory({
+            audits: [],
+            pagination: {
+              currentPage: 1,
+              totalPages: 0,
+              totalCount: 0,
+              hasNextPage: false,
+              hasPreviousPage: false,
+            }
+          });
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
-  }, []);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [currentPage]);
+
+  const handleRerun = async (auditId: string) => {
+    setRerunningAudits(prev => new Set(prev).add(auditId));
+    setError(null);
+    
+    try {
+      const formData = new FormData();
+      formData.set('auditId', auditId);
+      await rerunAuditAction(formData);
+      
+      // Refresh the current page data
+      const historyData = await getAuditHistory({ page: currentPage, limit: 20 });
+      setAuditHistory(historyData);
+    } catch (error) {
+      console.error('Failed to rerun audit:', error);
+      setError(error instanceof Error ? error.message : 'Failed to rerun audit');
+    } finally {
+      setRerunningAudits(prev => {
+        const next = new Set(prev);
+        next.delete(auditId);
+        return next;
+      });
+    }
+  };
 
   const getStatusIcon = (status: AuditStatus) => {
     switch (status) {
@@ -73,7 +113,7 @@ export default function AuditTable() {
       day: 'numeric',
       month: 'long',
       year: 'numeric'
-    }).format(new Date(date));
+    }).format(date);
   };
 
   const formatSeverity = (severity: SeverityLevel | null) => {
@@ -107,16 +147,16 @@ export default function AuditTable() {
           >
             <Download className="w-4 h-4 text-muted-foreground" />
           </button>
-          <form action={rerunAuditAction} className="inline">
-            <input type="hidden" name="auditId" value={auditId} />
-            <button 
-              type="submit"
-              className="p-1 hover:bg-secondary rounded"
-              title="Re-run Audit"
-            >
-              <RefreshCw className="w-4 h-4 text-muted-foreground" />
-            </button>
-          </form>
+          <button 
+            onClick={() => handleRerun(auditId)}
+            disabled={rerunningAudits.has(auditId)}
+            className="p-1 hover:bg-secondary rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            title={rerunningAudits.has(auditId) ? "Re-running..." : "Re-run Audit"}
+            aria-disabled={rerunningAudits.has(auditId)}
+            aria-busy={rerunningAudits.has(auditId)}
+          >
+            <RefreshCw className={`w-4 h-4 text-muted-foreground ${rerunningAudits.has(auditId) ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       );
     } else if (status === "FAILED") {
@@ -131,16 +171,16 @@ export default function AuditTable() {
           >
             <Eye className="w-4 h-4 text-muted-foreground" />
           </button>
-          <form action={rerunAuditAction} className="inline">
-            <input type="hidden" name="auditId" value={auditId} />
-            <button 
-              type="submit"
-              className="p-1 hover:bg-secondary rounded"
-              title="Re-run Audit"
-            >
-              <RefreshCw className="w-4 h-4 text-muted-foreground" />
-            </button>
-          </form>
+          <button 
+            onClick={() => handleRerun(auditId)}
+            disabled={rerunningAudits.has(auditId)}
+            className="p-1 hover:bg-secondary rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            title={rerunningAudits.has(auditId) ? "Re-running..." : "Re-run Audit"}
+            aria-disabled={rerunningAudits.has(auditId)}
+            aria-busy={rerunningAudits.has(auditId)}
+          >
+            <RefreshCw className={`w-4 h-4 text-muted-foreground ${rerunningAudits.has(auditId) ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       );
     }
@@ -230,7 +270,9 @@ export default function AuditTable() {
               disabled={!auditHistory.pagination.hasPreviousPage}
               className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary"
               onClick={() => {
-                console.log('Previous page');
+                if (auditHistory.pagination.hasPreviousPage) {
+                  setCurrentPage(prev => prev - 1);
+                }
               }}
             >
               Previous
@@ -242,7 +284,9 @@ export default function AuditTable() {
               disabled={!auditHistory.pagination.hasNextPage}
               className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary"
               onClick={() => {
-                console.log('Next page');
+                if (auditHistory.pagination.hasNextPage) {
+                  setCurrentPage(prev => prev + 1);
+                }
               }}
             >
               Next
