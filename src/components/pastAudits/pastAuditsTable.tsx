@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, CircleX, Eye, Download, RefreshCw } from "lucide-react";
 import { getAuditHistory, type AuditHistoryItem } from "@/actions/audits";
-import { AuditStatus, SeverityLevel } from "@prisma/client";
+import type { AuditStatus, SeverityLevel } from "@prisma/client";
 import { rerunAuditAction } from "@/actions/rerun-audit";
 
 interface PaginationInfo {
