@@ -39,20 +39,18 @@ Before you begin, ensure you have the following installed:
 
 2. **Clone Your Fork**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/web.git
+   git clone https://github.com/YOUR_USERNAME/oal-web.git
    cd web
    ```
 
 3. **Set Up Remote**
    ```bash
-   git remote add upstream https://github.com/OpenAuditLabs/web.git
+   git remote add upstream https://github.com/OpenAuditLabs/oal-web.git
    ```
 
 4. **Install Dependencies**
    ```bash
-   pnpm install
-   # or
-   yarn install
+   npm install
    ```
 
 5. **Environment Configuration**
@@ -63,9 +61,7 @@ Before you begin, ensure you have the following installed:
 
 6. **Start Development Server**
    ```bash
-   pnpm run dev
-   # or
-   yarn dev
+   npm run dev
    ```
 
    The dashboard will be available at `http://localhost:3000`
@@ -105,7 +101,7 @@ We welcome various types of contributions:
 
 ### Before You Start
 
-1. **Check existing issues** - Browse our [GitHub issues](https://github.com/OpenAuditLabs/web/issues) to avoid duplicate work
+1. **Check existing issues** - Browse our [GitHub issues](https://github.com/OpenAuditLabs/oal-web/issues) to avoid duplicate work
 2. **Create an issue** - For new features or significant changes, create an issue first to discuss the approach
 3. **Look for good first issues** - New contributors should look for issues labeled `good first issue`
 
@@ -127,16 +123,16 @@ We welcome various types of contributions:
 3. **Test Your Changes**
    ```bash
    # Run the development server
-   pnpm run dev
+   npm run dev
    
    # Run tests
-   pnpm test
+   npm test
    
    # Run linting
-   pnpm run lint
+   npm run lint
    
    # Run type checking
-   pnpm run type-check
+   npm run type-check
    ```
 
 4. **Commit Your Changes**
@@ -238,13 +234,13 @@ We use the following testing tools:
 
 ```bash
 # Run all tests
-pnpm test
+npm test
 
 # Run tests in watch mode
-pnpm run test:watch
+npm run test:watch
 
 # Run tests with coverage
-pnpm run test:coverage
+npm run test:coverage
 ```
 
 ## Submitting Changes
@@ -378,4 +374,4 @@ By contributing to OpenAuditLabs Web Dashboard, you agree that your contribution
 
 Thank you for contributing to OpenAuditLabs! Your efforts help make audit data more accessible and actionable for everyone. 🚀
 
-For questions about this contributing guide, please [open an issue](https://github.com/OpenAuditLabs/web/issues/new) or contact the maintainers.
+For questions about this contributing guide, please [open an issue](https://github.com/OpenAuditLabs/oal-web/issues/new) or contact the maintainers.
