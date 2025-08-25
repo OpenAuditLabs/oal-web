@@ -3,7 +3,7 @@ import PageRouter from "@/components/common/PageRouter";
 import { TabType } from "@/components/common/PageRouter";
 
 interface PageProps {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function Dashboard({ searchParams }: PageProps) {
