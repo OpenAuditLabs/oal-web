@@ -9,7 +9,7 @@ interface Project {
   name: string;
   description: string | null;
   fileCount: number;
-  createdAt: Date;
+  createdAt: string | Date;
   auditCount: number;
   _count: { audits: number };
 }
@@ -19,10 +19,11 @@ interface ProjectsClientProps {
 }
 
 export default function ProjectsClient({ projects }: ProjectsClientProps) {
-  const formatDate = (date: Date) => {
-    const day = date.getDate();
-    const month = date.toLocaleDateString('en-US', { month: 'long' });
-    const year = date.getFullYear();
+  const formatDate = (date: string | Date) => {
+    const d = date instanceof Date ? date : new Date(date);
+    const day = d.getDate();
+    const month = d.toLocaleDateString('en-US', { month: 'long' });
+    const year = d.getFullYear();
     
     // Add ordinal suffix to day
     const getOrdinalSuffix = (day: number) => {
@@ -79,7 +80,7 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
             title={project.name}
             description={project.description || "No description provided."}
             fileCount={project.fileCount}
-            date={formatDate(new Date(project.createdAt))}
+            date={formatDate(project.createdAt)}
             onEdit={handleEditProject}
             onDelete={handleDeleteProject}
             onAddFiles={handleAddFiles}
