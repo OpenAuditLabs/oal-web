@@ -3,11 +3,11 @@ import PageRouter from "@/components/common/PageRouter";
 import { TabType } from "@/components/common/PageRouter";
 
 interface PageProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 export default async function Dashboard({ searchParams }: PageProps) {
-  const params = await searchParams;
+  const params = await searchParams || {};
   const tab = params.tab as TabType;
   const activeTab: TabType = tab && ["dashboard", "audits", "past-audits", "projects"].includes(tab) 
     ? tab 
