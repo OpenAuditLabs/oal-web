@@ -31,7 +31,6 @@ export default function AuditTable() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rerunningAudits, setRerunningAudits] = useState<Set<string>>(new Set());
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -74,7 +73,6 @@ export default function AuditTable() {
 
   const handleRerun = async (auditId: string) => {
     setRerunningAudits(prev => new Set(prev).add(auditId));
-    setError(null);
     
     try {
       const formData = new FormData();
@@ -86,7 +84,6 @@ export default function AuditTable() {
       setAuditHistory(historyData);
     } catch (error) {
       console.error('Failed to rerun audit:', error);
-      setError(error instanceof Error ? error.message : 'Failed to rerun audit');
     } finally {
       setRerunningAudits(prev => {
         const next = new Set(prev);
