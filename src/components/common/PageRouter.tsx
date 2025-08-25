@@ -1,5 +1,3 @@
-"use client";
-
 import DashboardPage from "@/components/pages/DashboardPage";
 import AuditsPage from "@/components/pages/AuditsPage";
 import PastAuditPage from "../pages/PastAuditsPage";

@@ -33,7 +33,6 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   return (
     <div className="bg-secondary rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow max-w-sm">
-      {/* Header with title and actions */}
       <div className="flex items-start justify-between mb-3">
         <h3 className="text-lg font-semibold text-foreground flex-1 pr-2">{title}</h3>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -54,10 +53,8 @@ export default function ProjectCard({
         </div>
       </div>
 
-      {/* Description */}
       <p className="text-foreground text-sm mb-4 line-clamp-2">{description}</p>
 
-      {/* Project stats */}
       <div className="flex items-center justify-between mb-4 text-sm text-foreground">
         <div className="flex items-center gap-1">
           <FileText className="w-4 h-4" />
@@ -69,7 +66,7 @@ export default function ProjectCard({
         </div>
       </div>
 
-      {/* Action buttons */}
+
       <div className="flex items-center gap-2">
         <Button
           onClick={() => onAddFiles?.(id)}
