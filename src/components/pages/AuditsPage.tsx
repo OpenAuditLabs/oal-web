@@ -1,8 +1,5 @@
-"use client";
-
-import { useState } from "react";
 import Header from "@/components/common/Header";
-import { AuditStatusCard , ActiveAuditCount } from "@/components/audits";
+import AuditsClient from "@/components/audits/AuditsClient";
 import auditsData from "@/data/audits.json";
 
 interface AuditCard {
@@ -17,32 +14,9 @@ interface AuditCard {
   statusType: "active" | "queued";
 }
 
-interface AuditsPageProps {
-  initialAudits?: AuditCard[];
-}
-
-export default function AuditsPage({ initialAudits = [] }: AuditsPageProps) {
-  const [auditCards, setAuditCards] = useState<AuditCard[]>(
-    initialAudits.length > 0 ? initialAudits : (auditsData.audits as AuditCard[])
-  );
-
-  const handleStatusChange = (id: string, newStatus: "active" | "queued") => {
-    setAuditCards(prev => prev.map(card => 
-      card.id === id 
-        ? { 
-            ...card, 
-            statusType: newStatus
-          }
-        : card
-    ));
-  };
-
-  const handleClose = (id: string) => {
-    setAuditCards(prev => prev.filter(card => card.id !== id));
-  };
-
-  const activeAudits = auditCards.filter(card => card.statusType === "active");
-  const queuedAudits = auditCards.filter(card => card.statusType === "queued");
+export default async function AuditsPage() {
+  // This could be replaced with actual database fetching later
+  const initialAudits: AuditCard[] = auditsData.audits as AuditCard[];
 
   return (
     <main className="flex-1 p-8">
@@ -51,50 +25,7 @@ export default function AuditsPage({ initialAudits = [] }: AuditsPageProps) {
         subtitle="Monitor real-time security analysis and threat detection"
       />
 
-      {/* Active Audit Count Section */}
-      <ActiveAuditCount count={activeAudits.length} />
-
-      {/* Active Audits Section */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-foreground mb-4">Active Audits</h2>
-        {activeAudits.map(card => (
-          <AuditStatusCard
-            key={card.id}
-            id={card.id}
-            title={card.title}
-            currentStatus={card.currentStatus}
-            size={card.size}
-            started={card.started}
-            duration={card.duration}
-            progress={card.progress}
-            statusMessage={card.statusMessage}
-            statusType={card.statusType}
-            onStatusChange={handleStatusChange}
-            onClose={handleClose}
-          />
-        ))}
-      </div>
-
-      {/* Queued Audits Section */}
-      <div>
-        <h2 className="text-xl font-bold text-foreground mb-4">Queued Audits</h2>
-        {queuedAudits.map(card => (
-          <AuditStatusCard
-            key={card.id}
-            id={card.id}
-            title={card.title}
-            currentStatus={card.currentStatus}
-            size={card.size}
-            started={card.started}
-            duration={card.duration}
-            progress={card.progress}
-            statusMessage={card.statusMessage}
-            statusType={card.statusType}
-            onStatusChange={handleStatusChange}
-            onClose={handleClose}
-          />
-        ))}
-      </div>
+      <AuditsClient initialAudits={initialAudits} />
     </main>
   );
 }

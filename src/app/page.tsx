@@ -1,12 +1,17 @@
-"use client";
-
-import { useState } from "react";
-import Sidebar from "@/components/common/Sidebar";
+import SidebarClient from "@/components/common/SidebarClient";
 import PageRouter from "@/components/common/PageRouter";
 import { TabType } from "@/components/common/PageRouter";
 
-export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+interface PageProps {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function Dashboard({ searchParams }: PageProps) {
+  const params = await searchParams || {};
+  const tab = params.tab as TabType;
+  const activeTab: TabType = tab && ["dashboard", "audits", "past-audits", "projects"].includes(tab) 
+    ? tab 
+    : "dashboard";
 
   return (
     <div className="min-h-screen bg-background">
@@ -15,7 +20,7 @@ export default function Dashboard() {
       
       <div className="flex">
         {/* Left Sidebar */}
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <SidebarClient activeTab={activeTab} />
 
         {/* Main Content */}
         <PageRouter activeTab={activeTab} />
