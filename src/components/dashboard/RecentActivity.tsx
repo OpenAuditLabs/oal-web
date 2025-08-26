@@ -1,8 +1,22 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getRecentActivities, type ActivityData } from '@/actions/activities'
+import type { ActivityData } from '@/actions/activities'
+import { getRecentActivities } from '@/actions/activities'
 import { formatActivityStatus, formatFileInfo } from '@/lib/activity-utils'
+
+// Helper function to get progress bar color based on status
+const getProgressBarColor = (status: ActivityData['status']): string => {
+  switch (status) {
+    case 'FAILED':
+      return 'bg-red-500'
+    case 'IN_PROGRESS':
+    case 'COMPLETED':
+    case 'QUEUED':
+    default:
+      return 'bg-primary'
+  }
+}
 
 export default function RecentActivity() {
   const [activities, setActivities] = useState<ActivityData[]>([])
@@ -69,7 +83,7 @@ export default function RecentActivity() {
             {activity.progress !== null && (
               <div className="w-full bg-muted rounded-full h-1.5 mt-2">
                 <div 
-                  className="bg-primary h-1.5 rounded-full"
+                  className={`${getProgressBarColor(activity.status)} h-1.5 rounded-full`}
                   style={{ width: `${activity.progress}%` }}
                 ></div>
               </div>
