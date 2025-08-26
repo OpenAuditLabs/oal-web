@@ -2,9 +2,11 @@ import Header from "@/components/common/Header";
 import KPIGrid from "@/components/common/KPIGrid";
 import UploadCard from "@/components/common/UploadCard";
 import { RecentActivity } from "@/components/dashboard";
-import dashboardKpiData from "@/data/dashboardKPI.json";
+import { getDashboardKPIs } from "@/actions/dashboard";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const kpiData = await getDashboardKPIs();
+
   return (
     <main className="flex-1 p-8">
       {/* Dashboard Header */}
@@ -13,7 +15,7 @@ export default function DashboardPage() {
         subtitle="Monitor real-time security analysis and threat detection"
       />
 
-      <KPIGrid kpiData={dashboardKpiData} />
+      <KPIGrid kpiData={kpiData} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <UploadCard />
