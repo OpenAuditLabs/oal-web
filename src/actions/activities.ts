@@ -121,7 +121,7 @@ export async function getActiveAudits(): Promise<AuditCard[]> {
       duration: activity.status === ActivityStatus.IN_PROGRESS 
         ? calculateDuration(activity.createdAt) 
         : 'n/a',
-      progress: activity.progress || (activity.status === ActivityStatus.QUEUED ? 0 : 50),
+      progress: Math.min(100, Math.max(0, activity.progress ?? (activity.status === ActivityStatus.QUEUED ? 0 : 50))),
       statusMessage: activity.status === ActivityStatus.IN_PROGRESS 
         ? 'Analyzing security vulnerabilities and threat patterns...'
         : 'Queued for analysis...',
