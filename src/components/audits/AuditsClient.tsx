@@ -2,18 +2,7 @@
 
 import { useState } from "react";
 import { AuditStatusCard, ActiveAuditCount } from "@/components/audits";
-
-interface AuditCard {
-  id: string;
-  title: string;
-  currentStatus: string;
-  size: string;
-  started: string;
-  duration: string;
-  progress: number;
-  statusMessage: string;
-  statusType: "active" | "queued";
-}
+import { type AuditCard } from "@/actions/activities";
 
 interface AuditsClientProps {
   initialAudits: AuditCard[];
