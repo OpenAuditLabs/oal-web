@@ -1,5 +1,6 @@
 "use client";
 
+import { Filter } from "lucide-react";
 import SearchInput from "@/components/ui/SearchInput";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 
@@ -41,12 +42,23 @@ export default function SearchAndFilter({
         />
       )}
       
-      {showFilter && filterOptions.length > 0 && (
-        <FilterDropdown
-          options={filterOptions}
-          selectedValues={selectedFilters}
-          onFilterChange={onFilterChange || (() => {})}
-        />
+      {showFilter && (
+        <>
+          {filterOptions.length > 0 ? (
+            <FilterDropdown
+              options={filterOptions}
+              selectedValues={selectedFilters}
+              onFilterChange={onFilterChange || (() => {})}
+            />
+          ) : (
+            <button 
+              className="p-2 border border-border rounded-lg hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              onClick={() => {}} // No functionality yet
+            >
+              <Filter className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
+        </>
       )}
     </div>
   );

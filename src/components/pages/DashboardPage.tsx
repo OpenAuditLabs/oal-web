@@ -1,4 +1,5 @@
 import Header from "@/components/common/Header";
+import SearchAndFilter from "@/components/ui/SearchAndFilter";
 import KPIGrid from "@/components/common/KPIGrid";
 import UploadCard from "@/components/common/UploadCard";
 import { RecentActivity } from "@/components/dashboard";
@@ -13,7 +14,9 @@ export default async function DashboardPage() {
       <Header 
         title="Dashboard"
         subtitle="Monitor real-time security analysis and threat detection"
-      />
+      >
+        <SearchAndFilter searchPlaceholder="Search dashboard..." />
+      </Header>
 
       <KPIGrid kpiData={kpiData} />
 
