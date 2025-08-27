@@ -17,7 +17,6 @@ interface SearchAndFilterProps {
   filterOptions?: FilterOption[];
   selectedFilters?: string[];
   onFilterChange?: (values: string[]) => void;
-  filterPlaceholder?: string;
 }
 
 export default function SearchAndFilter({
@@ -27,8 +26,7 @@ export default function SearchAndFilter({
   onSearch,
   filterOptions = [],
   selectedFilters = [],
-  onFilterChange,
-  filterPlaceholder = "Filter"
+  onFilterChange
 }: SearchAndFilterProps) {
   if (!showSearch && !showFilter) {
     return null;
@@ -48,7 +46,6 @@ export default function SearchAndFilter({
           options={filterOptions}
           selectedValues={selectedFilters}
           onFilterChange={onFilterChange || (() => {})}
-          placeholder={filterPlaceholder}
         />
       )}
     </div>

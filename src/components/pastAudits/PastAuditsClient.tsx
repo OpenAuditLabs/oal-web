@@ -51,12 +51,12 @@ export function SearchInput() {
     { 
       value: 'completed', 
       label: '',
-      icon: <CheckCircle className="w-4 h-4 text-green-500" />
+      icon: <CheckCircle className="w-4 h-4 text-primary" />
     },
     { 
       value: 'failed', 
       label: '',
-      icon: <CircleX className="w-4 h-4 text-red-500" />
+      icon: <CircleX className="w-4 h-4 text-destructive" />
     }
   ];
 
@@ -67,7 +67,6 @@ export function SearchInput() {
       filterOptions={filterOptions}
       selectedFilters={selectedFilters}
       onFilterChange={handleFilterChange}
-      filterPlaceholder="Status"
     />
   );
 }

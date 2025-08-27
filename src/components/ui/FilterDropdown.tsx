@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Filter, ChevronDown, CheckCircle, CircleX } from "lucide-react";
+import { Filter, ChevronDown } from "lucide-react";
 
 interface FilterOption {
   value: string;
@@ -13,14 +13,12 @@ interface FilterDropdownProps {
   options: FilterOption[];
   selectedValues: string[];
   onFilterChange: (values: string[]) => void;
-  placeholder?: string;
 }
 
 export default function FilterDropdown({
   options,
   selectedValues,
-  onFilterChange,
-  placeholder = "Filter"
+  onFilterChange
 }: FilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
