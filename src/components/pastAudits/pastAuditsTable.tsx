@@ -8,6 +8,7 @@ import { rerunAuditAction } from "@/actions/rerun-audit";
 
 interface AuditTableProps {
   searchQuery?: string;
+  statusFilter?: string[];
 }
 
 interface PaginationInfo {
@@ -18,7 +19,10 @@ interface PaginationInfo {
   hasPreviousPage: boolean;
 }
 
-export default function AuditTable({ searchQuery = '' }: AuditTableProps) {
+export default function AuditTable({ 
+  searchQuery = '', 
+  statusFilter = [] 
+}: AuditTableProps) {
   const [auditHistory, setAuditHistory] = useState<{
     audits: AuditHistoryItem[];
     pagination: PaginationInfo;
@@ -45,7 +49,8 @@ export default function AuditTable({ searchQuery = '' }: AuditTableProps) {
         const historyData = await getAuditHistory({ 
           page: currentPage, 
           limit: 20,
-          search: searchQuery 
+          search: searchQuery,
+          status: statusFilter
         });
         
         if (isMounted) {
@@ -77,12 +82,12 @@ export default function AuditTable({ searchQuery = '' }: AuditTableProps) {
     return () => {
       isMounted = false;
     };
-  }, [currentPage, searchQuery]);
+  }, [currentPage, searchQuery, statusFilter]);
 
-  // Reset to first page when search query changes
+  // Reset to first page when search query or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, statusFilter]);
 
   const handleRerun = async (auditId: string) => {
     setRerunningAudits(prev => new Set(prev).add(auditId));
@@ -92,11 +97,12 @@ export default function AuditTable({ searchQuery = '' }: AuditTableProps) {
       formData.set('auditId', auditId);
       await rerunAuditAction(formData);
       
-      // Refresh the current page data with current search query
+      // Refresh the current page data with current search query and filters
       const historyData = await getAuditHistory({ 
         page: currentPage, 
         limit: 20,
-        search: searchQuery 
+        search: searchQuery,
+        status: statusFilter
       });
       setAuditHistory(historyData);
     } catch (error) {

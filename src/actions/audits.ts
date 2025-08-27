@@ -21,13 +21,15 @@ interface PaginationParams {
   page?: number
   limit?: number
   search?: string
+  status?: string[] // Array of status values to filter by
 }
 
 // Get paginated audit history (Past Audits page)
 export async function getAuditHistory({ 
   page = 1, 
   limit = 20,
-  search = ''
+  search = '',
+  status = []
 }: PaginationParams = {}) {
   try {
     const skip = (page - 1) * limit
@@ -52,10 +54,15 @@ export async function getAuditHistory({
       ]
     } : {}
 
+    // Build status filter - if no status specified, default to both COMPLETED and FAILED
+    const statusFilter = status.length > 0 
+      ? status.map(s => s.toUpperCase() as keyof typeof AuditStatus)
+      : [AuditStatus.COMPLETED, AuditStatus.FAILED];
+
     // Combine filters
     const whereClause = {
       status: {
-        in: [AuditStatus.COMPLETED, AuditStatus.FAILED]
+        in: statusFilter
       },
       ...searchFilter
     }

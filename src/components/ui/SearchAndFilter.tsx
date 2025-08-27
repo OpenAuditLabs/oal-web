@@ -1,14 +1,23 @@
 "use client";
 
-import { Filter } from "lucide-react";
 import SearchInput from "@/components/ui/SearchInput";
+import FilterDropdown from "@/components/ui/FilterDropdown";
+
+interface FilterOption {
+  value: string;
+  label: string;
+  icon: React.ReactNode;
+}
 
 interface SearchAndFilterProps {
   showSearch?: boolean;
   showFilter?: boolean;
   searchPlaceholder?: string;
   onSearch?: (value: string) => void;
-  onFilter?: () => void;
+  filterOptions?: FilterOption[];
+  selectedFilters?: string[];
+  onFilterChange?: (values: string[]) => void;
+  filterPlaceholder?: string;
 }
 
 export default function SearchAndFilter({
@@ -16,7 +25,10 @@ export default function SearchAndFilter({
   showFilter = true,
   searchPlaceholder = "Search",
   onSearch,
-  onFilter
+  filterOptions = [],
+  selectedFilters = [],
+  onFilterChange,
+  filterPlaceholder = "Filter"
 }: SearchAndFilterProps) {
   if (!showSearch && !showFilter) {
     return null;
@@ -31,13 +43,13 @@ export default function SearchAndFilter({
         />
       )}
       
-      {showFilter && (
-        <button 
-          className="p-2 border border-border rounded-lg hover:bg-secondary"
-          onClick={onFilter}
-        >
-          <Filter className="w-4 h-4 text-muted-foreground" />
-        </button>
+      {showFilter && filterOptions.length > 0 && (
+        <FilterDropdown
+          options={filterOptions}
+          selectedValues={selectedFilters}
+          onFilterChange={onFilterChange || (() => {})}
+          placeholder={filterPlaceholder}
+        />
       )}
     </div>
   );
