@@ -1,4 +1,5 @@
 import Header from "@/components/common/Header";
+import SearchAndFilter from "@/components/ui/SearchAndFilter";
 import AuditsClient from "@/components/audits/AuditsClient";
 import { getActiveAudits, type AuditCard } from "@/actions/activities";
 
@@ -10,7 +11,9 @@ export default async function AuditsPage() {
       <Header 
         title="Audits"
         subtitle="Monitor real-time security analysis and threat detection"
-      />
+      >
+        <SearchAndFilter searchPlaceholder="Search audits..." />
+      </Header>
 
       <AuditsClient initialAudits={initialAudits} />
     </main>
