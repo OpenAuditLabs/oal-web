@@ -1,25 +1,15 @@
-"use client";
-
-import { Search, Filter } from "lucide-react";
+import React from 'react';
 
 interface HeaderProps {
   title: string;
   subtitle: string;
-  showSearch?: boolean;
-  showFilter?: boolean;
-  searchPlaceholder?: string;
-  onSearch?: (value: string) => void;
-  onFilter?: () => void;
+  children?: React.ReactNode;
 }
 
 export default function Header({
   title,
   subtitle,
-  showSearch = true,
-  showFilter = true,
-  searchPlaceholder = "Search",
-  onSearch,
-  onFilter
+  children
 }: HeaderProps) {
   return (
     <div className="mb-8">
@@ -29,28 +19,9 @@ export default function Header({
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
         
-        {(showSearch || showFilter) && (
+        {children && (
           <div className="flex items-center gap-3">
-            {showSearch && (
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder={searchPlaceholder}
-                  className="pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background"
-                  onChange={(e) => onSearch?.(e.target.value)}
-                />
-              </div>
-            )}
-            
-            {showFilter && (
-              <button 
-                className="p-2 border border-border rounded-lg hover:bg-secondary"
-                onClick={onFilter}
-              >
-                <Filter className="w-4 h-4 text-muted-foreground" />
-              </button>
-            )}
+            {children}
           </div>
         )}
       </div>

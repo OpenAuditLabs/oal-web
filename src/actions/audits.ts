@@ -16,28 +16,54 @@ export interface AuditHistoryItem {
   createdAt: Date
 }
 
-// Pagination parameters
+// Pagination and search parameters
 interface PaginationParams {
   page?: number
   limit?: number
+  search?: string
 }
 
 // Get paginated audit history (Past Audits page)
 export async function getAuditHistory({ 
   page = 1, 
-  limit = 20 
+  limit = 20,
+  search = ''
 }: PaginationParams = {}) {
   try {
     const skip = (page - 1) * limit
 
-    // Get audits with pagination
-    const [audits, totalCount] = await Promise.all([
-      prisma.audit.findMany({
-        where: {
-          status: {
-            in: ['COMPLETED', 'FAILED']
+    // Build search filter
+    const searchFilter = search.trim() ? {
+      OR: [
+        {
+          projectName: {
+            contains: search,
+            mode: 'insensitive' as const
           }
         },
+        {
+          project: {
+            name: {
+              contains: search,
+              mode: 'insensitive' as const
+            }
+          }
+        }
+      ]
+    } : {}
+
+    // Combine filters
+    const whereClause = {
+      status: {
+        in: [AuditStatus.COMPLETED, AuditStatus.FAILED]
+      },
+      ...searchFilter
+    }
+
+    // Get audits with pagination and search
+    const [audits, totalCount] = await Promise.all([
+      prisma.audit.findMany({
+        where: whereClause,
         select: {
           id: true,
           projectName: true,
@@ -56,11 +82,7 @@ export async function getAuditHistory({
         take: limit,
       }),
       prisma.audit.count({
-        where: {
-          status: {
-            in: ['COMPLETED', 'FAILED']
-          }
-        }
+        where: whereClause
       })
     ])
 

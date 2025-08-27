@@ -1,17 +1,23 @@
-'use client';
-
 import React from 'react';
 import Header from '@/components/common/Header';
-import { AuditStatsSection, AuditTable } from '@/components/pastAudits';
+import { AuditStatsSection } from '@/components/pastAudits';
+import { SearchProvider, SearchInput, SearchableAuditTable } from '@/components/pastAudits/PastAuditsClient';
 
-export default function PastAuditsPage() {
+export default async function PastAuditsPage() {
   return (
-    <div className="flex-1 p-8 space-y-8">
-      <Header title="Past Audits" subtitle="Review and manage completed audit history" />
-      
-      <AuditStatsSection />
-      
-      <AuditTable />
-    </div>
+    <SearchProvider>
+      <div className="flex-1 p-8 space-y-8">
+        <Header
+          title="Past Audits"
+          subtitle="Review previously completed security audits and their findings"
+        >
+          <SearchInput />
+        </Header>
+        
+        <AuditStatsSection />
+        
+        <SearchableAuditTable />
+      </div>
+    </SearchProvider>
   );
 }
