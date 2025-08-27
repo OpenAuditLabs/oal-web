@@ -21,16 +21,24 @@ interface PaginationParams {
   page?: number
   limit?: number
   search?: string
+  status?: string[] // Array of status values to filter by
 }
 
 // Get paginated audit history (Past Audits page)
 export async function getAuditHistory({ 
   page = 1, 
   limit = 20,
-  search = ''
+  search = '',
+  status = []
 }: PaginationParams = {}) {
   try {
-    const skip = (page - 1) * limit
+    // Define maximum limit to prevent excessive queries
+    const MAX_LIMIT = 100;
+    
+    // Validate and sanitize inputs
+    const safePage = Math.max(1, Number.isFinite(page) ? Math.floor(page) : 1);
+    const safeLimit = Math.min(MAX_LIMIT, Math.max(1, Number.isFinite(limit) ? Math.floor(limit) : 20));
+    const skip = (safePage - 1) * safeLimit;
 
     // Build search filter
     const searchFilter = search.trim() ? {
@@ -52,10 +60,38 @@ export async function getAuditHistory({
       ]
     } : {}
 
+    // Build status filter with proper validation
+    // Default to showing both COMPLETED and FAILED audits
+    let statusFilter: AuditStatus[] = [AuditStatus.COMPLETED, AuditStatus.FAILED];
+    
+    if (status.length > 0) {
+      // Normalize and validate each status string against AuditStatus enum
+      const validStatuses: AuditStatus[] = [];
+      
+      for (const statusStr of status) {
+        // Normalize input: trim whitespace and convert to uppercase
+        const normalizedStatus = statusStr.trim().toUpperCase();
+        
+        // Validate against AuditStatus enum values
+        if (Object.values(AuditStatus).includes(normalizedStatus as AuditStatus)) {
+          validStatuses.push(normalizedStatus as AuditStatus);
+        } else {
+          // Log warning for invalid status but continue processing other valid ones
+          console.warn(`Invalid audit status ignored: "${statusStr}" (normalized: "${normalizedStatus}"). Valid options: ${Object.values(AuditStatus).join(', ')}`);
+        }
+      }
+      
+      // Use validated statuses if any are valid, otherwise keep default behavior
+      if (validStatuses.length > 0) {
+        statusFilter = validStatuses;
+      }
+      // If no valid statuses were found, statusFilter remains the default
+    }
+
     // Combine filters
     const whereClause = {
       status: {
-        in: [AuditStatus.COMPLETED, AuditStatus.FAILED]
+        in: statusFilter
       },
       ...searchFilter
     }
@@ -79,23 +115,23 @@ export async function getAuditHistory({
           completedAt: 'desc'
         },
         skip,
-        take: limit,
+        take: safeLimit,
       }),
       prisma.audit.count({
         where: whereClause
       })
     ])
 
-    const totalPages = Math.ceil(totalCount / limit)
+    const totalPages = Math.ceil(totalCount / safeLimit)
 
     return {
       audits: audits as AuditHistoryItem[],
       pagination: {
-        currentPage: page,
+        currentPage: safePage,
         totalPages,
         totalCount,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
+        hasNextPage: safePage < totalPages,
+        hasPreviousPage: safePage > 1,
       }
     }
   } catch (error) {
