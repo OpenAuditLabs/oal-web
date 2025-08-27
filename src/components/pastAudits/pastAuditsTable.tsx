@@ -6,6 +6,10 @@ import { getAuditHistory, type AuditHistoryItem } from "@/actions/audits";
 import type { AuditStatus, SeverityLevel } from "@prisma/client";
 import { rerunAuditAction } from "@/actions/rerun-audit";
 
+interface AuditTableProps {
+  searchQuery?: string;
+}
+
 interface PaginationInfo {
   currentPage: number;
   totalPages: number;
@@ -14,7 +18,7 @@ interface PaginationInfo {
   hasPreviousPage: boolean;
 }
 
-export default function AuditTable() {
+export default function AuditTable({ searchQuery = '' }: AuditTableProps) {
   const [auditHistory, setAuditHistory] = useState<{
     audits: AuditHistoryItem[];
     pagination: PaginationInfo;
@@ -38,7 +42,11 @@ export default function AuditTable() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const historyData = await getAuditHistory({ page: currentPage, limit: 20 });
+        const historyData = await getAuditHistory({ 
+          page: currentPage, 
+          limit: 20,
+          search: searchQuery 
+        });
         
         if (isMounted) {
           setAuditHistory(historyData);
@@ -69,7 +77,12 @@ export default function AuditTable() {
     return () => {
       isMounted = false;
     };
-  }, [currentPage]);
+  }, [currentPage, searchQuery]);
+
+  // Reset to first page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const handleRerun = async (auditId: string) => {
     setRerunningAudits(prev => new Set(prev).add(auditId));
@@ -79,8 +92,12 @@ export default function AuditTable() {
       formData.set('auditId', auditId);
       await rerunAuditAction(formData);
       
-      // Refresh the current page data
-      const historyData = await getAuditHistory({ page: currentPage, limit: 20 });
+      // Refresh the current page data with current search query
+      const historyData = await getAuditHistory({ 
+        page: currentPage, 
+        limit: 20,
+        search: searchQuery 
+      });
       setAuditHistory(historyData);
     } catch (error) {
       console.error('Failed to rerun audit:', error);
