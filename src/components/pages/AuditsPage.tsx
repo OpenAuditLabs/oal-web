@@ -1,21 +1,22 @@
+
 import Header from "@/components/common/Header";
-import SearchAndFilter from "@/components/ui/SearchAndFilter";
-import AuditsClient from "@/components/audits/AuditsClient";
 import { getActiveAudits, type AuditCard } from "@/actions/activities";
+import { SearchProvider, SearchInput, SearchableActiveAuditList } from "@/components/audits/ActiveAuditClient";
 
 export default async function AuditsPage() {
   const initialAudits: AuditCard[] = await getActiveAudits();
-
   return (
-    <main className="flex-1 p-8">
-      <Header 
-        title="Audits"
-        subtitle="Monitor real-time security analysis and threat detection"
-      >
-        <SearchAndFilter searchPlaceholder="Search audits..." />
-      </Header>
+    <SearchProvider>
+      <main className="flex-1 p-8">
+        <Header 
+          title="Audits"
+          subtitle="Monitor real-time security analysis and threat detection"
+        >
+          <SearchInput />
+        </Header>
 
-      <AuditsClient initialAudits={initialAudits} />
-    </main>
+        <SearchableActiveAuditList initialAudits={initialAudits} />
+      </main>
+    </SearchProvider>
   );
 }
