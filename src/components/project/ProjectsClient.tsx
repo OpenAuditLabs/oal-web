@@ -3,6 +3,8 @@
 import Button from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 import { ProjectCard } from "@/components/project";
+import CreateProjectModal from "@/components/project/CreateProjectModal";
+import { useState } from "react";
 
 interface Project {
   id: string;
@@ -19,6 +21,8 @@ interface ProjectsClientProps {
 }
 
 export default function ProjectsClient({ projects }: ProjectsClientProps) {
+  const [modalOpen, setModalOpen] = useState(false);
+
   const formatDate = (date: string | Date) => {
     const d = date instanceof Date ? date : new Date(date);
     const day = d.getDate();
@@ -56,7 +60,7 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
   };
 
   const handleCreateProject = () => {
-    console.log('Create new project');
+    setModalOpen(true);
   };
 
   return (
@@ -71,7 +75,7 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
           Create a New Project
         </Button>
       </div>
-      
+      <CreateProjectModal open={modalOpen} onClose={() => setModalOpen(false)} />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-20">
         {projects.map((project) => (
           <ProjectCard
