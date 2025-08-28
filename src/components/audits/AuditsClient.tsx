@@ -5,21 +5,22 @@ import { useState } from "react";
 import { AuditStatusCard, ActiveAuditCount } from "@/components/audits";
 import { type AuditCard } from "@/actions/activities";
 
-
 interface AuditsClientProps {
   initialAudits: AuditCard[];
   searchQuery?: string;
+  statusFilter?: string[];
 }
 
-
-export default function AuditsClient({ initialAudits, searchQuery = "" }: AuditsClientProps) {
+export function AuditsClient({ initialAudits, searchQuery = "", statusFilter = ["active", "queued"] }: AuditsClientProps) {
   const [auditCards, setAuditCards] = useState<AuditCard[]>(initialAudits);
 
-  // Filter audits by search query before rendering
+  // Filter audits by search query and status before rendering
   const normalizedSearch = searchQuery.toLowerCase();
-  const filteredAudits = normalizedSearch
-    ? auditCards.filter(card => card.title.toLowerCase().includes(normalizedSearch))
-    : auditCards;
+  const filteredAudits = auditCards.filter(card => {
+    const matchesSearch = normalizedSearch ? card.title.toLowerCase().includes(normalizedSearch) : true;
+    const matchesStatus = statusFilter.length > 0 ? statusFilter.includes(card.statusType) : true;
+    return matchesSearch && matchesStatus;
+  });
 
   const handleStatusChange = (id: string, newStatus: "active" | "queued") => {
     setAuditCards(prev => prev.map(card => 
