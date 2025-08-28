@@ -5,7 +5,6 @@ import { useState } from "react";
 import { AuditStatusCard, ActiveAuditCount } from "@/components/audits";
 import { type AuditCard } from "@/actions/activities";
 
-
 interface AuditsClientProps {
   initialAudits: AuditCard[];
   searchQuery?: string;
