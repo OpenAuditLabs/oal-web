@@ -4,7 +4,7 @@ import React, { useState, createContext, useContext } from "react";
 import SearchAndFilter from "@/components/ui/SearchAndFilter";
 import { AuditsClient } from "@/components/audits/AuditsClient";
 import { type AuditCard } from "@/actions/activities";
-import { CirclePauseIcon , CirclePlayIcon } from "lucide-react";
+import { CirclePause , CirclePlay } from "lucide-react";
 
 // Context for search state
 const SearchContext = createContext<{
@@ -16,7 +16,7 @@ const SearchContext = createContext<{
 
 export function SearchProvider({ children }: { children: React.ReactNode }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(["active", "queued"]);
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   return (
     <SearchContext.Provider value={{ searchTerm, setSearchTerm, selectedFilters, setSelectedFilters }}>
       {children}
@@ -31,12 +31,12 @@ export function SearchInput() {
     {
       value: "active",
       label: "",
-      icon: <CirclePlayIcon className="w-4 h-4 text-primary" />
+      icon: <CirclePlay className="w-4 h-4 text-primary" />
     },
     {
       value: "queued",
       label: "",
-      icon: <CirclePauseIcon className="w-4 h-4 text-destructive" />
+      icon: <CirclePause className="w-4 h-4 text-destructive" />
     }
   ];
   return (
