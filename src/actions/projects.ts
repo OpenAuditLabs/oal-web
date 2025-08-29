@@ -56,19 +56,22 @@ export async function getProjectWithAudits(projectId: string) {
 }
 
 // Create a new project
-export async function createProject(data: {
-  name: string
-  description?: string
-  fileCount: number
-}) {
+export async function createProject(formData: FormData) {
   try {
-    const project = await prisma.project.create({
-      data
-    })
-
-    return project
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string | null;
+    const fileCountRaw = formData.get('fileCount');
+    const fileCount = fileCountRaw ? Number(fileCountRaw) : 0;
+    await prisma.project.create({
+      data: {
+        name,
+        description,
+        fileCount
+      }
+    });
+    return void 0;
   } catch (error) {
-    console.error('Error creating project:', error)
-    throw new Error('Failed to create project')
+    console.error('Error creating project:', error);
+    throw new Error('Failed to create project');
   }
 }
