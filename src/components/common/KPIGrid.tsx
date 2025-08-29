@@ -6,6 +6,7 @@ interface KPIData {
   label: string;
   value: string;
   iconColor: string;
+  link?: string;
 }
 
 interface KPIGridProps {
@@ -35,6 +36,7 @@ export default function KPIGrid({ kpiData }: KPIGridProps) {
           label={stat.label}
           value={stat.value}
           iconColor={stat.iconColor}
+          link={stat.link}
         />
       ))}
     </div>
