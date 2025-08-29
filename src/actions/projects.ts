@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { revalidatePath } from "next/cache";
 
 // Get all projects
 export async function getProjects() {
@@ -69,6 +70,7 @@ export async function createProject(formData: FormData) {
         fileCount
       }
     });
+    revalidatePath("/projects");
     return void 0;
   } catch (error) {
     console.error('Error creating project:', error);
