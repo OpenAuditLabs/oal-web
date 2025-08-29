@@ -8,6 +8,7 @@ export interface DashboardKPI {
   label: string
   value: string
   iconColor: string
+  link?: string
 }
 
 export async function getDashboardKPIs(): Promise<DashboardKPI[]> {
@@ -44,25 +45,29 @@ export async function getDashboardKPIs(): Promise<DashboardKPI[]> {
         icon: "BarChart3",
         label: "Projects",
         value: projectCount.toString(),
-        iconColor: "text-black-600"
+        iconColor: "text-black-600",
+        link: "?tab=projects"
       },
       {
         icon: "Hourglass",
         label: "Running Audits",
         value: runningAudits.toString(),
-        iconColor: "text-black-600"
+        iconColor: "text-black-600",
+        link: "/?tab=audits"
       },
       {
         icon: "CheckCircle",
         label: "Completed",
         value: completedAudits.toString(),
-        iconColor: "text-black-600"
+        iconColor: "text-black-600",
+        link: "?tab=past-audits"
       },
       {
         icon: "ShieldAlert",
         label: "Total Findings",
         value: (totalFindings._sum.findingsCount || 0).toString(),
-        iconColor: "text-black-600"
+        iconColor: "text-black-600",
+        link: "?tab=past-audits"
       }
     ]
 
@@ -75,25 +80,29 @@ export async function getDashboardKPIs(): Promise<DashboardKPI[]> {
         icon: "BarChart3",
         label: "Projects",
         value: "0",
-        iconColor: "text-black-600"
+        iconColor: "text-black-600",
+        link: "?tab=projects"
       },
       {
         icon: "Hourglass",
         label: "Running Audits",
         value: "0",
-        iconColor: "text-black-600"
+        iconColor: "text-black-600",
+        link: "?tab=audits"
       },
       {
         icon: "CheckCircle",
         label: "Completed",
         value: "0",
-        iconColor: "text-black-600"
+        iconColor: "text-black-600",
+        link: "?tab=past-audits"
       },
       {
         icon: "ShieldAlert",
         label: "Total Findings",
         value: "0",
-        iconColor: "text-black-600"
+        iconColor: "text-black-600",
+        link: "?tab=past-audits"
       }
     ]
   }
