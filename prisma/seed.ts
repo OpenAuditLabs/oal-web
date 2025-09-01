@@ -99,19 +99,16 @@ async function main() {
   await prisma.activity.deleteMany()
   console.log('🧹 Cleared existing data')
   
-  // Create projects first
-  const projects = []
-  for (let i = 0; i < 6; i++) {
-    projects.push({
-      name: faker.helpers.arrayElement(projectTypes),
-      description: faker.company.catchPhrase(),
-      fileCount: faker.number.int({ min: 50, max: 400 }),
-    })
-  }
-  
-  const createdProjects = await Promise.all(
-    projects.map(project => prisma.project.create({ data: project }))
-  )
+  // Create projects first (ensure unique names)
+  const shuffledTypes = faker.helpers.shuffle(projectTypes)
+  const selectedTypes = shuffledTypes.slice(0, 6)
+  const projects = selectedTypes.map(name => ({
+    name,
+    description: faker.company.catchPhrase(),
+    fileCount: faker.number.int({ min: 50, max: 400 })
+  }))
+
+  const createdProjects = await Promise.all(projects.map(project => prisma.project.create({ data: project })))
   console.log(`✅ Created ${createdProjects.length} projects`)
   
   // Create audits with findings
@@ -177,28 +174,39 @@ async function main() {
   
   console.log(`✅ Created ${audits.length} audits`)
   
-  // Generate activities
-  const activities = []
-  
-  for (let i = 0; i < 15; i++) {
-    const status = faker.helpers.arrayElement(['IN_PROGRESS', 'QUEUED', 'COMPLETED', 'FAILED'] as ActivityStatus[])
-    const progress = generateProgress(status)
-    
-    activities.push({
-      title: faker.helpers.arrayElement(projectTypes),
-      fileCount: faker.number.int({ min: 5, max: 150 }),
-      fileSize: generateFileSize(),
-      status,
-      progress,
-      createdAt: faker.date.recent({ days: 30 }),
-    })
+  // Generate activities tied to existing projects only (so active audits match Projects page)
+  const activities: {
+    title: string;
+    fileCount: number;
+    fileSize: string;
+    status: ActivityStatus;
+    progress: number | null;
+    createdAt: Date;
+  }[] = []
+
+  for (const project of createdProjects) {
+    // 0-2 active/queued activities per project
+    const activityCount = faker.number.int({ min: 0, max: 2 })
+    for (let i = 0; i < activityCount; i++) {
+      const status = faker.helpers.arrayElement(['IN_PROGRESS', 'QUEUED'] as ActivityStatus[])
+      const progress = generateProgress(status)
+      activities.push({
+        title: project.name, // ensure title matches an existing project
+        fileCount: project.fileCount,
+        fileSize: generateFileSize(),
+        status,
+        progress,
+        createdAt: faker.date.recent({ days: 7 })
+      })
+    }
   }
-  
-  const createdActivities = await prisma.activity.createMany({
-    data: activities,
-  })
-  
-  console.log(`✅ Created ${createdActivities.count} activities`)
+
+  if (activities.length > 0) {
+    const createdActivities = await prisma.activity.createMany({ data: activities })
+    console.log(`✅ Created ${createdActivities.count} activities (all linked by name to existing projects)`)    
+  } else {
+    console.log('ℹ️ No in-progress/queued activities generated this run')
+  }
   
   // Display summary
   const auditStatusCounts = await prisma.audit.groupBy({
