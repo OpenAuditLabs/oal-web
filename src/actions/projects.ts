@@ -110,6 +110,16 @@ export async function updateProject(formData: FormData) {
       data: { name, description }
     });
 
+    // Keep denormalized audit.projectName in sync so past audits reflect the new project name
+    try {
+      await prisma.audit.updateMany({
+        where: { projectId: id },
+        data: { projectName: name }
+      });
+    } catch (syncErr) {
+      console.warn('Failed to sync audit.projectName values for project', id, syncErr);
+    }
+
     // Revalidate relevant paths. Root layout to cascade, projects page specifically.
     const pathsToRevalidate = [
       '/',
