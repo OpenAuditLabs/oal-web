@@ -4,6 +4,7 @@ import Button from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 import { ProjectCard } from "@/components/project";
 import CreateProjectModal from "@/components/project/CreateProjectModal";
+import EditProjectModal from "@/components/project/EditProjectModal";
 import { useState } from "react";
 
 interface Project {
@@ -22,6 +23,8 @@ interface ProjectsClientProps {
 
 export default function ProjectsClient({ projects }: ProjectsClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [projectBeingEdited, setProjectBeingEdited] = useState<Project | null>(null);
 
   const formatDate = (date: string | Date) => {
     const d = date instanceof Date ? date : new Date(date);
@@ -44,7 +47,9 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
   };
 
   const handleEditProject = (id: string) => {
-    console.log(`Edit project ${id}`);
+    const proj = projects.find(p => p.id === id) || null;
+    setProjectBeingEdited(proj);
+    setEditModalOpen(true);
   };
 
   const handleDeleteProject = (id: string) => {
@@ -76,6 +81,11 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
         </Button>
       </div>
       <CreateProjectModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <EditProjectModal 
+        open={editModalOpen} 
+        onClose={() => { setEditModalOpen(false); setProjectBeingEdited(null); }} 
+        project={projectBeingEdited}
+      />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-20">
         {projects.map((project) => (
           <ProjectCard
