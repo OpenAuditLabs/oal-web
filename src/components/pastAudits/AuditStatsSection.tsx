@@ -43,16 +43,27 @@ export default function AuditStatsSection() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {kpiData.map((k, i) => {
+      {kpiData.map((k) => {
         const Icon = iconMap[k.icon] || BarChart3;
         const isToggle = k.label === 'Completed' || k.label === 'Failed';
         const filterValue = k.label === 'Completed' ? 'completed' : k.label === 'Failed' ? 'failed' : null;
         const isActive = filterValue ? ctx?.selectedFilters.includes(filterValue) : false;
+        const handleClick = () => {
+          if (isToggle) handleCardClick(k.label);
+        };
         return (
-          <div
-            key={i}
-            onClick={isToggle ? () => handleCardClick(k.label) : undefined}
-            className={(isToggle ? 'cursor-pointer ' : '') + ' rounded-lg'}
+          <button
+            key={k.label}
+            type="button"
+            onClick={handleClick}
+            disabled={!isToggle}
+            aria-pressed={isToggle ? isActive : undefined}
+            aria-disabled={!isToggle || undefined}
+            className={[
+              'group rounded-lg text-left outline-none transition focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:outline-none',
+              isToggle ? 'cursor-pointer' : 'cursor-default',
+              !isToggle ? 'disabled:opacity-60' : ''
+            ].join(' ')}
           >
             <StatsCard
               icon={Icon}
@@ -62,7 +73,7 @@ export default function AuditStatsSection() {
               active={isActive}
               activeClassName={k.label === 'Failed' ? 'bg-destructive/10 border border-destructive/30' : undefined}
             />
-          </div>
+          </button>
         );
       })}
     </div>
