@@ -86,3 +86,41 @@ export async function createProject(formData: FormData) {
     throw new Error('Failed to create project');
   }
 }
+
+// Update an existing project (name & description only for now)
+export async function updateProject(formData: FormData) {
+  try {
+    const rawId = formData.get('id');
+    const id = typeof rawId === 'string' ? rawId.trim() : '';
+    if (!id) {
+      throw new Error('Project id is required');
+    }
+    const rawName = formData.get('name');
+    const name = typeof rawName === 'string' ? rawName.trim() : '';
+    if (!name) {
+      throw new Error('Project name is required');
+    }
+    const rawDescription = formData.get('description');
+    const description = typeof rawDescription === 'string' && rawDescription.trim().length > 0
+      ? rawDescription.trim()
+      : null;
+
+    await prisma.project.update({
+      where: { id },
+      data: { name, description }
+    });
+
+    // Revalidate relevant paths. Root layout to cascade, projects page specifically.
+    const pathsToRevalidate = [
+      '/',
+      '/projects'
+    ];
+    pathsToRevalidate.forEach(p => {
+      try { revalidatePath(p); } catch (e) { console.warn('Failed revalidate', p, e); }
+    });
+    return void 0;
+  } catch (error) {
+    console.error('Error updating project:', error);
+    throw new Error('Failed to update project');
+  }
+}
