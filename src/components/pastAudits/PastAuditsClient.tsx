@@ -6,29 +6,38 @@ import SearchAndFilter from '@/components/ui/SearchAndFilter';
 import AuditTable from './pastAuditsTable';
 
 // Create a context for search and filter state
-const SearchFilterContext = createContext<{
+export const SearchFilterContext = createContext<{
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   selectedFilters: string[];
   setSelectedFilters: (filters: string[]) => void;
+  toggleFilter: (value: string) => void;
 }>({
   searchTerm: '',
   setSearchTerm: () => {},
   selectedFilters: [],
-  setSelectedFilters: () => {}
+  setSelectedFilters: () => {},
+  toggleFilter: () => {}
 });
 
 // Search and filter provider component
 export function SearchProvider({ children }: { children: React.ReactNode }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  
+
+  const toggleFilter = (value: string) => {
+    setSelectedFilters(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    );
+  };
+
   return (
     <SearchFilterContext.Provider value={{ 
       searchTerm, 
       setSearchTerm, 
       selectedFilters, 
-      setSelectedFilters 
+      setSelectedFilters,
+      toggleFilter
     }}>
       {children}
     </SearchFilterContext.Provider>
