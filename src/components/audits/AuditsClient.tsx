@@ -69,7 +69,7 @@ export function AuditsClient({ initialAudits, searchQuery = "", statusFilter = [
       <ActiveAuditCount count={activeAudits.length} />
 
       {/* Active Audits Section */}
-      <div className="mb-8">
+  <div className="mb-8 space-y-4">
         <h2 className="text-xl font-bold text-foreground mb-4">Active Audits</h2>
         {activeAudits.map(card => (
           <AuditStatusCard
@@ -90,7 +90,7 @@ export function AuditsClient({ initialAudits, searchQuery = "", statusFilter = [
       </div>
 
       {/* Queued Audits Section */}
-      <div>
+  <div className="space-y-4">
         <h2 className="text-xl font-bold text-foreground mb-4">Queued Audits</h2>
         {queuedAudits.map(card => (
           <AuditStatusCard
