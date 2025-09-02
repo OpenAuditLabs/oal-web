@@ -1,6 +1,7 @@
 "use client";
 
 import { FileText, Clock, Activity, Play, Pause, X } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface AuditStatusCardProps {
   id: string;
@@ -30,6 +31,26 @@ export default function AuditStatusCard({
   onClose
 }: AuditStatusCardProps) {
   const isActive = statusType === "active";
+  const [showConfirm, setShowConfirm] = useState(false);
+  const deleteBtnRef = useRef<HTMLButtonElement | null>(null);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
+
+  const handleDocumentClick = useCallback((e: MouseEvent) => {
+    if (!showConfirm) return;
+    const target = e.target as Node;
+    if (popoverRef.current && popoverRef.current.contains(target)) return;
+    if (deleteBtnRef.current && deleteBtnRef.current.contains(target)) return;
+    setShowConfirm(false);
+  }, [showConfirm]);
+
+  useEffect(() => {
+    if (showConfirm) {
+      document.addEventListener('mousedown', handleDocumentClick);
+    } else {
+      document.removeEventListener('mousedown', handleDocumentClick);
+    }
+    return () => document.removeEventListener('mousedown', handleDocumentClick);
+  }, [showConfirm, handleDocumentClick]);
   
   const handleStatusToggle = () => {
     const newStatus = isActive ? "queued" : "active";
@@ -37,8 +58,15 @@ export default function AuditStatusCard({
   };
 
   const handleClose = () => {
+    setShowConfirm(true);
+  };
+
+  const confirmClose = () => {
+    setShowConfirm(false);
     onClose(id);
   };
+
+  const cancelClose = () => setShowConfirm(false);
   
   return (
     <div className="bg-card p-6 rounded-lg shadow-sm border border-border">
@@ -61,12 +89,46 @@ export default function AuditStatusCard({
               <Play className="w-4 h-4 text-muted-foreground" />
             </button>
           )}
-          <button 
-            onClick={handleClose}
-            className="p-2 hover:bg-secondary rounded-lg transition-colors"
-          >
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
+          <div className="relative inline-block">
+            <button
+              ref={deleteBtnRef}
+              onClick={handleClose}
+              className="p-2 hover:bg-secondary rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50"
+              aria-haspopup="dialog"
+              aria-expanded={showConfirm}
+              aria-controls={showConfirm ? `confirm-popover-${id}` : undefined}
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+            {showConfirm && (
+              <div
+                ref={popoverRef}
+                id={`confirm-popover-${id}`}
+                role="dialog"
+                aria-modal="false"
+                className="absolute right-0 mt-2 w-60 z-20 rounded-md border border-border bg-popover shadow-lg p-4 animate-in fade-in-0 zoom-in-95"
+              >
+                <p className="text-sm text-foreground font-medium mb-2">Delete this audit?</p>
+                <p className="text-xs text-muted-foreground mb-3">This will permanently remove it from the active/queued list.</p>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={cancelClose}
+                    className="px-2 py-1 text-xs rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={confirmClose}
+                    className="px-2 py-1 text-xs rounded-md bg-destructive text-white hover:bg-destructive/90"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
