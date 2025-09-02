@@ -4,7 +4,7 @@ import { useAuditStats } from '@/hooks/useAuditStats';
 import { useContext } from 'react';
 import { SearchFilterContext } from './PastAuditsClient';
 import StatsCard from '@/components/ui/StatsCard';
-import { BarChart3, Hourglass, CheckCircle, ShieldAlert, CircleX } from 'lucide-react';
+import { BarChart3, Hourglass, CheckCircle, ShieldAlert, CircleX, type LucideIcon } from 'lucide-react';
 
 export default function AuditStatsSection() {
   const { kpiData, loading, error } = useAuditStats();
@@ -33,7 +33,8 @@ export default function AuditStatsSection() {
   };
 
   // Local render to keep KPIGrid unchanged globally while enabling per-card click here
-  const iconMap: Record<string, any> = {
+  // Map string identifiers from kpiData to icon components
+  const iconMap: Record<string, LucideIcon> = {
     BarChart3,
     Hourglass,
     CheckCircle,
