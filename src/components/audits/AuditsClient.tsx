@@ -48,14 +48,29 @@ export function AuditsClient({ initialAudits, searchQuery = "", statusFilter = [
   };
 
   const handleClose = (id: string) => {
-    // Optimistic removal
-    const snapshot = auditCards;
-    setAuditCards(prev => prev.filter(card => card.id !== id));
+    // Capture removed card + index from the freshest state inside functional update
+    let removedCard: AuditCard | null = null;
+    let removedIndex = -1;
+    setAuditCards(prev => {
+      removedIndex = prev.findIndex(c => c.id === id);
+      if (removedIndex === -1) return prev; // nothing to remove
+      removedCard = prev[removedIndex];
+      const next = [...prev];
+      next.splice(removedIndex, 1);
+      return next;
+    });
     startTransition(async () => {
       const result = await closeActivityAction(id);
-      if (!result.deleted) {
-        // Revert on failure
-        setAuditCards(snapshot);
+      if (!result.deleted && removedCard && removedIndex > -1) {
+        // Reinsert only the removed card at its original position
+        setAuditCards(prev => {
+          // If card already exists (added back concurrently), skip
+            if (prev.some(c => c.id === removedCard!.id)) return prev;
+            const next = [...prev];
+            const index = Math.min(removedIndex, next.length);
+            next.splice(index, 0, removedCard!);
+            return next;
+        });
       }
     });
   };
