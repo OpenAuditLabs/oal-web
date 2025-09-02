@@ -121,7 +121,8 @@ export async function getActiveAudits(): Promise<AuditCard[]> {
       duration: activity.status === ActivityStatus.IN_PROGRESS 
         ? calculateDuration(activity.createdAt) 
         : 'n/a',
-      progress: Math.min(100, Math.max(0, activity.progress ?? (activity.status === ActivityStatus.QUEUED ? 0 : 50))),
+      // Preserve whatever progress value exists; fall back to 0 only if null
+      progress: Math.min(100, Math.max(0, activity.progress ?? 0)),
       statusMessage: activity.status === ActivityStatus.IN_PROGRESS 
         ? 'Analyzing security vulnerabilities and threat patterns...'
         : 'Queued for analysis...',
@@ -146,8 +147,7 @@ export async function updateActivityStatusAction(id: string, newStatus: 'active'
       where: { id },
       data: {
         status: mappedStatus,
-        // If moved back to queue, progress should typically be null again
-        progress: mappedStatus === ActivityStatus.QUEUED ? null : undefined
+        // Do NOT reset progress; preserve existing value for pause/resume behavior
       }
     })
 
@@ -163,7 +163,7 @@ export async function updateActivityStatusAction(id: string, newStatus: 'active'
       duration: activity.status === ActivityStatus.IN_PROGRESS
         ? calculateDuration(activity.createdAt)
         : 'n/a',
-      progress: Math.min(100, Math.max(0, activity.progress ?? (activity.status === ActivityStatus.QUEUED ? 0 : 50))),
+  progress: Math.min(100, Math.max(0, activity.progress ?? 0)),
       statusMessage: activity.status === ActivityStatus.IN_PROGRESS
         ? 'Analyzing security vulnerabilities and threat patterns...'
         : 'Queued for analysis...',
