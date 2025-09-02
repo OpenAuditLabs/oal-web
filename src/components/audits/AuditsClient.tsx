@@ -1,9 +1,10 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { AuditStatusCard, ActiveAuditCount } from "@/components/audits";
 import { type AuditCard } from "@/actions/activities";
+import { updateActivityStatusAction, closeActivityAction } from "@/actions/activities";
 
 interface AuditsClientProps {
   initialAudits: AuditCard[];
@@ -22,19 +23,41 @@ export function AuditsClient({ initialAudits, searchQuery = "", statusFilter = [
     return matchesSearch && matchesStatus;
   });
 
+  const startTransition = useTransition()[1];
+
   const handleStatusChange = (id: string, newStatus: "active" | "queued") => {
-    setAuditCards(prev => prev.map(card => 
-      card.id === id 
-        ? { 
-            ...card, 
-            statusType: newStatus
-          }
-        : card
+    // Optimistic update
+    setAuditCards(prev => prev.map(card =>
+      card.id === id ? { ...card, statusType: newStatus } : card
     ));
+
+    startTransition(async () => {
+      const updated = await updateActivityStatusAction(id, newStatus);
+      if (!updated) {
+        // Revert if failed
+        setAuditCards(prev => prev.map(card =>
+          card.id === id ? { ...card, statusType: newStatus === 'active' ? 'queued' : 'active' } : card
+        ));
+      } else {
+        // Sync other computed fields from server (progress, messages, etc.)
+        setAuditCards(prev => prev.map(card =>
+          card.id === id ? { ...card, ...updated } : card
+        ));
+      }
+    });
   };
 
   const handleClose = (id: string) => {
+    // Optimistic removal
+    const snapshot = auditCards;
     setAuditCards(prev => prev.filter(card => card.id !== id));
+    startTransition(async () => {
+      const result = await closeActivityAction(id);
+      if (!result.deleted) {
+        // Revert on failure
+        setAuditCards(snapshot);
+      }
+    });
   };
 
   const activeAudits = filteredAudits.filter(card => card.statusType === "active");
