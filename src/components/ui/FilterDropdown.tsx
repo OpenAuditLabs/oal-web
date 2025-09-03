@@ -57,7 +57,8 @@ export default function FilterDropdown({
       {isOpen && (
         <div className="absolute top-full left-0 mt-1 w-17 bg-background border border-border rounded-lg shadow-lg z-50">
           <div className="py-1">
-            {options.map((option) => (
+            <p className="px-3 pb-1 pt-2 text-[10px] uppercase tracking-wide text-muted-foreground font-medium">Status</p>
+            {options.filter(o => !o.value.startsWith('sev:')).map(option => (
               <label
                 key={option.value}
                 className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-secondary cursor-pointer"
@@ -70,11 +71,32 @@ export default function FilterDropdown({
                 />
                 <div className="flex items-center gap-2">
                   {option.icon}
-                  <span className="text-foreground text-xs">{option.label}</span>
                 </div>
               </label>
             ))}
           </div>
+          {/* Severity section (only if severity options exist) */}
+          {options.some(o => o.value.startsWith('sev:')) && (
+            <div className="pt-1 border-t border-border">
+              <p className="px-3 pb-1 pt-2 text-[10px] uppercase tracking-wide text-muted-foreground font-medium">Severity</p>
+              {options.filter(o => o.value.startsWith('sev:')).map(option => (
+                <label
+                  key={option.value}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-secondary cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedValues.includes(option.value)}
+                    onChange={() => handleOptionToggle(option.value)}
+                    className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
+                  />
+                  <div className="flex items-center gap-2">
+                    {option.icon}
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { AuditStatus, SeverityLevel } from '@prisma/client'
+import { AuditStatus, SeverityLevel, Prisma } from '@prisma/client'
 
 // Types for the audit history
 export interface AuditHistoryItem {
@@ -22,6 +22,7 @@ interface PaginationParams {
   limit?: number
   search?: string
   status?: string[] // Array of status values to filter by
+  severity?: string[] // Array of severity levels to filter by
 }
 
 // Get paginated audit history (Past Audits page)
@@ -29,7 +30,8 @@ export async function getAuditHistory({
   page = 1, 
   limit = 20,
   search = '',
-  status = []
+  status = [],
+  severity = []
 }: PaginationParams = {}) {
   try {
     // Define maximum limit to prevent excessive queries
@@ -88,12 +90,33 @@ export async function getAuditHistory({
       // If no valid statuses were found, statusFilter remains the default
     }
 
+    // Build severity filter validation
+    let severityFilter: SeverityLevel[] | undefined = undefined;
+    if (severity.length > 0) {
+      const validSeverities: SeverityLevel[] = [];
+      for (const sev of severity) {
+        const normalized = sev.trim().toUpperCase();
+        if (Object.values(SeverityLevel).includes(normalized as SeverityLevel)) {
+          validSeverities.push(normalized as SeverityLevel);
+        } else {
+          console.warn(`Invalid severity ignored: "${sev}" (normalized: "${normalized}")`);
+        }
+      }
+      if (validSeverities.length > 0) {
+        severityFilter = validSeverities;
+      }
+    }
+
     // Combine filters
-    const whereClause = {
-      status: {
-        in: statusFilter
-      },
-      ...searchFilter
+    let whereClause: Prisma.AuditWhereInput = {
+      status: { in: statusFilter },
+      ...(searchFilter as Prisma.AuditWhereInput)
+    }
+    if (severityFilter) {
+      whereClause = {
+        ...whereClause,
+        overallSeverity: { in: severityFilter }
+      }
     }
 
     // Get audits with pagination and search

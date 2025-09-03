@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CheckCircle, CircleX, Eye, Download, RefreshCw } from "lucide-react";
+import { CheckCircle, CircleX, Eye, Download, RefreshCw, Flame, AlertTriangle, ShieldHalf, Info } from "lucide-react";
 import { getAuditHistory, type AuditHistoryItem } from "@/actions/audits";
 import type { AuditStatus, SeverityLevel } from "@prisma/client";
 import { rerunAuditAction } from "@/actions/rerun-audit";
@@ -9,6 +9,7 @@ import { rerunAuditAction } from "@/actions/rerun-audit";
 interface AuditTableProps {
   searchQuery?: string;
   statusFilter?: string[];
+  severityFilter?: string[];
 }
 
 interface PaginationInfo {
@@ -21,7 +22,8 @@ interface PaginationInfo {
 
 export default function AuditTable({ 
   searchQuery = '', 
-  statusFilter = [] 
+  statusFilter = [],
+  severityFilter = []
 }: AuditTableProps) {
   const [auditHistory, setAuditHistory] = useState<{
     audits: AuditHistoryItem[];
@@ -50,7 +52,8 @@ export default function AuditTable({
           page: currentPage, 
           limit: 20,
           search: searchQuery,
-          status: statusFilter
+          status: statusFilter,
+          severity: severityFilter
         });
         
         if (isMounted) {
@@ -82,12 +85,12 @@ export default function AuditTable({
     return () => {
       isMounted = false;
     };
-  }, [currentPage, searchQuery, statusFilter]);
+  }, [currentPage, searchQuery, statusFilter, severityFilter]);
 
   // Reset to first page when search query or filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, statusFilter]);
+  }, [searchQuery, statusFilter, severityFilter]);
 
   const handleRerun = async (auditId: string) => {
     setRerunningAudits(prev => new Set(prev).add(auditId));
@@ -139,6 +142,22 @@ export default function AuditTable({
   const formatSeverity = (severity: SeverityLevel | null) => {
     if (!severity) return "N/A";
     return severity.charAt(0).toUpperCase() + severity.slice(1).toLowerCase();
+  };
+
+  const getSeverityIcon = (severity: SeverityLevel | null) => {
+    if (!severity) return null;
+    switch (severity) {
+      case 'CRITICAL':
+        return <Flame className="w-4 h-4 text-red-600" />;
+      case 'HIGH':
+        return <AlertTriangle className="w-4 h-4 text-orange-500" />;
+      case 'MEDIUM':
+        return <ShieldHalf className="w-4 h-4 text-yellow-500" />;
+      case 'LOW':
+        return <Info className="w-4 h-4 text-blue-500" />;
+      default:
+        return null;
+    }
   };
 
   const formatStatus = (status: AuditStatus) => {
@@ -260,7 +279,10 @@ export default function AuditTable({
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-muted-foreground">
-                  {formatSeverity(audit.overallSeverity)}
+                  <div className="flex items-center gap-2">
+                    {getSeverityIcon(audit.overallSeverity)}
+                    <span>{formatSeverity(audit.overallSeverity)}</span>
+                  </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-muted-foreground">
                   {audit.findingsCount}
