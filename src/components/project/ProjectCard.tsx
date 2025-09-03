@@ -1,3 +1,4 @@
+"use client"
 import { 
   Edit, 
   Trash2, 
