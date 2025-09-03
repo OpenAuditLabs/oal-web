@@ -185,19 +185,20 @@ export async function createAuditRerun(originalAuditId: string) {
       throw new Error('Original audit not found')
     }
 
-    // Create a new activity for the re-run
-    const activity = await prisma.activity.create({
+    // Create a new queued audit (active audit)
+    const newAudit = await prisma.audit.create({
       data: {
-        title: originalAudit.projectName,
-        fileCount: originalAudit.project.fileCount,
-        fileSize: originalAudit.size,
+        projectId: originalAudit.projectId,
+        projectName: originalAudit.projectName,
+        size: originalAudit.size,
         status: 'QUEUED',
         progress: null,
+        fileCount: originalAudit.project.fileCount,
       }
     })
 
     return {
-      activityId: activity.id,
+      auditId: newAudit.id,
       message: 'Audit re-run has been queued successfully'
     }
   } catch (error) {

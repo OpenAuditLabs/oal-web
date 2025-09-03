@@ -3,7 +3,7 @@
 import React, { useState, createContext, useContext } from "react";
 import SearchAndFilter from "@/components/ui/SearchAndFilter";
 import { AuditsClient } from "@/components/audits/AuditsClient";
-import { type AuditCard } from "@/actions/activities";
+import { type ActiveAuditCard as AuditCard } from "@/actions/active-audits";
 import { CirclePause , CirclePlay } from "lucide-react";
 
 // Context for search state

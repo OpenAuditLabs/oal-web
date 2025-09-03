@@ -1,6 +1,6 @@
 
 import Header from "@/components/common/Header";
-import { getActiveAudits, type AuditCard } from "@/actions/activities";
+import { getActiveAuditsCards as getActiveAudits, type ActiveAuditCard as AuditCard } from "@/actions/active-audits";
 import { SearchProvider, SearchInput, SearchableActiveAuditList } from "@/components/audits/ActiveAuditClient";
 
 export default async function AuditsPage() {

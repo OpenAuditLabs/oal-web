@@ -1,4 +1,4 @@
-import { PrismaClient, ActivityStatus, AuditStatus, SeverityLevel } from '@prisma/client'
+import { PrismaClient, AuditStatus, SeverityLevel } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 
 const prisma = new PrismaClient()
@@ -59,7 +59,7 @@ function generateFileSize(): string {
 }
 
 // Generate realistic progress based on status
-function generateProgress(status: ActivityStatus): number | null {
+function generateProgress(status: AuditStatus): number | null {
   switch (status) {
     case 'QUEUED':
       return null // Queued items don't have progress
@@ -96,7 +96,6 @@ async function main() {
   await prisma.finding.deleteMany()
   await prisma.audit.deleteMany()
   await prisma.project.deleteMany()
-  await prisma.activity.deleteMany()
   console.log('🧹 Cleared existing data')
   
   // Create projects first (ensure unique names)
@@ -118,7 +117,7 @@ async function main() {
     const auditCount = faker.number.int({ min: 2, max: 4 })
     
     for (let i = 0; i < auditCount; i++) {
-      const status = faker.helpers.arrayElement(['COMPLETED', 'FAILED'] as AuditStatus[])
+  const status = faker.helpers.arrayElement(['COMPLETED', 'FAILED'] as AuditStatus[])
       const completedAt = faker.date.past({ years: 1 })
       
       const audit = await prisma.audit.create({
@@ -174,39 +173,27 @@ async function main() {
   
   console.log(`✅ Created ${audits.length} audits`)
   
-  // Generate activities tied to existing projects only (so active audits match Projects page)
-  const activities: {
-    title: string;
-    fileCount: number;
-    fileSize: string;
-    status: ActivityStatus;
-    progress: number | null;
-    createdAt: Date;
-  }[] = []
-
+  // Generate active (IN_PROGRESS / QUEUED) audits directly now that Activity model is removed
+  let activeCount = 0
   for (const project of createdProjects) {
-    // 0-2 active/queued activities per project
-    const activityCount = faker.number.int({ min: 0, max: 2 })
-    for (let i = 0; i < activityCount; i++) {
-      const status = faker.helpers.arrayElement(['IN_PROGRESS', 'QUEUED'] as ActivityStatus[])
-      const progress = generateProgress(status)
-      activities.push({
-        title: project.name, // ensure title matches an existing project
-        fileCount: project.fileCount,
-        fileSize: generateFileSize(),
-        status,
-        progress,
-        createdAt: faker.date.recent({ days: 7 })
+    const extraAudits = faker.number.int({ min: 0, max: 2 })
+    for (let i = 0; i < extraAudits; i++) {
+      const status = faker.helpers.arrayElement(['IN_PROGRESS', 'QUEUED'] as AuditStatus[])
+      const progressVal = generateProgress(status)
+      await prisma.audit.create({
+        data: {
+          projectId: project.id,
+            projectName: project.name,
+          size: generateFileSize(),
+          status,
+          progress: progressVal,
+          fileCount: project.fileCount,
+        }
       })
+      activeCount++
     }
   }
-
-  if (activities.length > 0) {
-    const createdActivities = await prisma.activity.createMany({ data: activities })
-    console.log(`✅ Created ${createdActivities.count} activities (all linked by name to existing projects)`)    
-  } else {
-    console.log('ℹ️ No in-progress/queued activities generated this run')
-  }
+  console.log(`✅ Created ${activeCount} active/queued audits`)
   
   // Display summary
   const auditStatusCounts = await prisma.audit.groupBy({
@@ -216,21 +203,9 @@ async function main() {
     },
   })
   
-  const activityStatusCounts = await prisma.activity.groupBy({
-    by: ['status'],
-    _count: {
-      status: true,
-    },
-  })
-  
   console.log('\n📊 Audit Summary:')
   auditStatusCounts.forEach(({ status, _count }) => {
     console.log(`   ${status}: ${_count.status} audits`)
-  })
-  
-  console.log('\n📊 Activity Summary:')
-  activityStatusCounts.forEach(({ status, _count }) => {
-    console.log(`   ${status}: ${_count.status} activities`)
   })
   
   console.log('\n🎉 Database seeding completed successfully!')

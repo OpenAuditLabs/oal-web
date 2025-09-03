@@ -1,7 +1,7 @@
-import { ActivityStatus } from '@prisma/client'
+import { AuditStatus } from '@prisma/client'
 
 // Helper function to format status for display
-export function formatActivityStatus(status: ActivityStatus): string {
+export function formatActivityStatus(status: AuditStatus): string {
   switch (status) {
     case 'IN_PROGRESS':
       return 'In Progress'

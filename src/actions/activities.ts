@@ -1,14 +1,14 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { ActivityStatus } from '@prisma/client'
+import { AuditStatus } from '@prisma/client'
 
-export interface ActivityData {
+export interface ActivityData { // now representing recent audit state
   id: string
   title: string
   fileCount: number
-  fileSize: string
-  status: ActivityStatus
+  size: string
+  status: AuditStatus
   progress: number | null
   createdAt: Date
   updatedAt: Date
@@ -16,29 +16,45 @@ export interface ActivityData {
 
 export async function getRecentActivities(limit: number = 10): Promise<ActivityData[]> {
   try {
-    const activities = await prisma.activity.findMany({
-      orderBy: {
-        createdAt: 'desc'
+    const audits = await prisma.audit.findMany({
+      where: {
+        status: { in: [AuditStatus.IN_PROGRESS, AuditStatus.QUEUED, AuditStatus.COMPLETED, AuditStatus.FAILED] }
       },
+      orderBy: { updatedAt: 'desc' },
       take: limit
     })
-    
-    return activities
+    return audits.map(a => ({
+      id: a.id,
+      title: a.projectName,
+      fileCount: a.fileCount ?? 0,
+      size: a.size,
+      status: a.status,
+      progress: a.progress,
+      createdAt: a.createdAt,
+      updatedAt: a.updatedAt
+    }))
   } catch (error) {
-    console.error('Error fetching recent activities:', error)
+    console.error('Error fetching recent audit activities:', error)
     return []
   }
 }
 
 export async function getActivityById(id: string): Promise<ActivityData | null> {
   try {
-    const activity = await prisma.activity.findUnique({
-      where: { id }
-    })
-    
-    return activity
+    const a = await prisma.audit.findUnique({ where: { id } })
+    if (!a) return null
+    return {
+      id: a.id,
+      title: a.projectName,
+      fileCount: a.fileCount ?? 0,
+      size: a.size,
+      status: a.status,
+      progress: a.progress,
+      createdAt: a.createdAt,
+      updatedAt: a.updatedAt
+    }
   } catch (error) {
-    console.error('Error fetching activity:', error)
+    console.error('Error fetching audit activity:', error)
     return null
   }
 }
@@ -98,10 +114,10 @@ function calculateDuration(startDate: Date): string {
 // Get active and queued audits for the audits page
 export async function getActiveAudits(): Promise<AuditCard[]> {
   try {
-    const activities = await prisma.activity.findMany({
+    const activities = await prisma.audit.findMany({
       where: {
         status: {
-          in: [ActivityStatus.IN_PROGRESS, ActivityStatus.QUEUED]
+          in: [AuditStatus.IN_PROGRESS, AuditStatus.QUEUED]
         }
       },
       orderBy: [
@@ -110,23 +126,22 @@ export async function getActiveAudits(): Promise<AuditCard[]> {
       ]
     })
 
-    return activities.map(activity => ({
-      id: activity.id,
-      title: activity.title,
-      currentStatus: activity.status === ActivityStatus.IN_PROGRESS 
-        ? `scanning files (${activity.fileCount} files)` 
+    return activities.map(audit => ({
+      id: audit.id,
+      title: audit.projectName,
+      currentStatus: audit.status === AuditStatus.IN_PROGRESS 
+        ? `scanning files (${audit.fileCount ?? 0} files)` 
         : 'in queue',
-      size: activity.fileSize,
-      started: formatDateForDisplay(activity.createdAt),
-      duration: activity.status === ActivityStatus.IN_PROGRESS 
-        ? calculateDuration(activity.createdAt) 
+      size: audit.size,
+      started: formatDateForDisplay(audit.createdAt),
+      duration: audit.status === AuditStatus.IN_PROGRESS 
+        ? calculateDuration(audit.createdAt) 
         : 'n/a',
-      // Preserve whatever progress value exists; fall back to 0 only if null
-      progress: Math.min(100, Math.max(0, activity.progress ?? 0)),
-      statusMessage: activity.status === ActivityStatus.IN_PROGRESS 
+      progress: Math.min(100, Math.max(0, audit.progress ?? 0)),
+      statusMessage: audit.status === AuditStatus.IN_PROGRESS 
         ? 'Analyzing security vulnerabilities and threat patterns...'
         : 'Queued for analysis...',
-      statusType: activity.status === ActivityStatus.IN_PROGRESS ? 'active' as const : 'queued' as const
+      statusType: audit.status === AuditStatus.IN_PROGRESS ? 'active' as const : 'queued' as const
     }))
   } catch (error) {
     console.error('Error fetching active audits:', error)
@@ -139,11 +154,11 @@ export async function getActiveAudits(): Promise<AuditCard[]> {
 export async function updateActivityStatusAction(id: string, newStatus: 'active' | 'queued'): Promise<AuditCard | null> {
   try {
     // Validate input
-    if (!id) throw new Error('Activity id is required')
+  if (!id) throw new Error('Audit id is required')
 
-    const mappedStatus = newStatus === 'active' ? ActivityStatus.IN_PROGRESS : ActivityStatus.QUEUED
+  const mappedStatus = newStatus === 'active' ? AuditStatus.IN_PROGRESS : AuditStatus.QUEUED
 
-    const activity = await prisma.activity.update({
+  const activity = await prisma.audit.update({
       where: { id },
       data: {
         status: mappedStatus,
@@ -154,20 +169,20 @@ export async function updateActivityStatusAction(id: string, newStatus: 'active'
     // Map updated record back to AuditCard shape
     const card: AuditCard = {
       id: activity.id,
-      title: activity.title,
-      currentStatus: activity.status === ActivityStatus.IN_PROGRESS
-        ? `scanning files (${activity.fileCount} files)`
+      title: activity.projectName,
+      currentStatus: activity.status === AuditStatus.IN_PROGRESS
+        ? `scanning files (${activity.fileCount ?? 0} files)`
         : 'in queue',
-      size: activity.fileSize,
+      size: activity.size,
       started: formatDateForDisplay(activity.createdAt),
-      duration: activity.status === ActivityStatus.IN_PROGRESS
+      duration: activity.status === AuditStatus.IN_PROGRESS
         ? calculateDuration(activity.createdAt)
         : 'n/a',
-  progress: Math.min(100, Math.max(0, activity.progress ?? 0)),
-      statusMessage: activity.status === ActivityStatus.IN_PROGRESS
+      progress: Math.min(100, Math.max(0, activity.progress ?? 0)),
+      statusMessage: activity.status === AuditStatus.IN_PROGRESS
         ? 'Analyzing security vulnerabilities and threat patterns...'
         : 'Queued for analysis...',
-      statusType: activity.status === ActivityStatus.IN_PROGRESS ? 'active' : 'queued'
+      statusType: activity.status === AuditStatus.IN_PROGRESS ? 'active' : 'queued'
     }
     return card
   } catch (error) {
@@ -180,8 +195,8 @@ export async function updateActivityStatusAction(id: string, newStatus: 'active'
 // Alternatively we could mark it FAILED/CANCELLED, but enum lacks CANCELLED so deletion is simplest.
 export async function closeActivityAction(id: string): Promise<{ id: string; deleted: boolean }> {
   try {
-    if (!id) throw new Error('Activity id is required')
-    await prisma.activity.delete({ where: { id } })
+  if (!id) throw new Error('Audit id is required')
+  await prisma.audit.delete({ where: { id } })
     return { id, deleted: true }
   } catch (error) {
     console.error('Error closing activity:', error)

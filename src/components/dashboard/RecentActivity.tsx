@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { ActivityData } from '@/actions/activities'
-import { getRecentActivities } from '@/actions/activities'
+import type { ActivityData } from '@/actions/active-audits'
+import { getRecentActivities } from '@/actions/active-audits'
 import { formatActivityStatus, formatFileInfo } from '@/lib/activity-utils'
 
 // Helper function to get progress bar color based on status
@@ -74,7 +74,7 @@ export default function RecentActivity() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                {formatFileInfo(activity.fileCount, activity.fileSize)}
+                {formatFileInfo(activity.fileCount, activity.size)}
               </span>
               {activity.progress !== null && (
                 <span className="text-sm text-muted-foreground">{activity.progress}%</span>
