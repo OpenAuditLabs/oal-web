@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import ToastProvider from "@/components/ui/ToastProvider";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],

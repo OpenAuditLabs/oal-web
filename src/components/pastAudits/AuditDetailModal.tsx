@@ -23,8 +23,8 @@ interface AuditDetailData {
   overallSeverity: SeverityLevel | null;
   findingsCount: number;
   duration: string | null;
-  completedAt: Date | null;
-  createdAt: Date;
+  completedAt: Date | string | null;
+  createdAt: Date | string;
   project: { id: string; name: string; description: string | null; fileCount: number; };
   findings: Finding[];
 }
@@ -46,9 +46,16 @@ export default function AuditDetailModal({ open, onClose, audit }: AuditDetailMo
 
   if (!open || !audit) return null;
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return 'N/A';
-    return new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+  const formatDate = (value: Date | string | number | null | undefined): string => {
+    if (value == null) return 'N/A';
+    let date: Date;
+    if (value instanceof Date) {
+      date = value;
+    } else {
+      date = new Date(value);
+    }
+    if (isNaN(date.getTime())) return 'N/A';
+    return new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
   };
 
   return (
