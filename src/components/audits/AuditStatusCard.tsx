@@ -135,8 +135,8 @@ export default function AuditStatusCard({
       {/* Current status */}
       <p className="text-sm text-muted-foreground mb-4">{currentStatus}</p>
 
-      {/* Details grid */}
-      <div className="grid grid-cols-3 gap-4 mb-4">
+      {/* Details row - evenly spaced */}
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Size: {size}</span>

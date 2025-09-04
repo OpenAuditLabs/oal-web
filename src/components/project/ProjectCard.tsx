@@ -10,6 +10,7 @@ import {
 import Button from "@/components/ui/Button";
 import { useTransition, useState, useRef, useEffect, useCallback } from 'react';
 import { deleteProjectAction } from '@/actions/projects';
+import { toast } from 'sonner';
 
 interface ProjectCardProps {
   id: string;
@@ -67,11 +68,12 @@ export default function ProjectCard({
     startTransition(async () => {
       const res = await deleteProjectAction(id);
       if (!res.deleted) {
-        setError(res.error || 'Failed to delete');
+        toast.error('Failed to delete');
         setShowConfirm(false);
         return;
       }
       onDelete?.(id);
+      toast.success('Project deleted');
       // No need to hide confirm since card will likely unmount; fallback hide
       setShowConfirm(false);
     });
