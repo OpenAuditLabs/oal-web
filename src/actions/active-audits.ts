@@ -84,12 +84,23 @@ export async function getActiveAuditsCards(): Promise<ActiveAuditCard[]> {
 
 export async function getRecentActivities(limit: number = 10): Promise<ActivityData[]> {
   try {
+    const safeLimit = Math.max(1, Math.min(100, Math.floor(Number.isFinite(limit) ? limit : 10)));
     const audits = await prisma.audit.findMany({
       where: {
         status: { in: [AuditStatus.IN_PROGRESS, AuditStatus.QUEUED, AuditStatus.COMPLETED, AuditStatus.FAILED] }
       },
       orderBy: { updatedAt: 'desc' },
-      take: limit
+      take: safeLimit,
+      select: {
+        id: true,
+        projectName: true,
+        fileCount: true,
+        size: true,
+        status: true,
+        progress: true,
+        createdAt: true,
+        updatedAt: true
+      }
     });
     return audits.map(a => ({
       id: a.id,
@@ -131,6 +142,21 @@ export async function updateActiveAuditStatus(id: string, newStatus: 'active' | 
 
 export async function removeActiveAudit(id: string): Promise<{ id: string; deleted: boolean }> {
   try {
+    // Only allow deletion of QUEUED audits to avoid losing historical data
+    const audit = await prisma.audit.findUnique({
+      where: { id },
+      select: { status: true }
+    });
+
+    if (!audit) {
+      return { id, deleted: false };
+    }
+
+    if (audit.status !== AuditStatus.QUEUED) {
+      console.warn(`Attempted delete blocked for audit ${id} with status ${audit.status}`);
+      return { id, deleted: false };
+    }
+
     await prisma.audit.delete({ where: { id } });
     return { id, deleted: true };
   } catch (e) {

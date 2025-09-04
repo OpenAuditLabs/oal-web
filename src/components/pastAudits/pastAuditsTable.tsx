@@ -105,7 +105,8 @@ export default function AuditTable({
         page: currentPage, 
         limit: 20,
         search: searchQuery,
-        status: statusFilter
+        status: statusFilter,
+        severity: severityFilter
       });
       setAuditHistory(historyData);
     } catch (error) {
