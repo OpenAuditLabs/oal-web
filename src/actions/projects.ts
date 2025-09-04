@@ -134,3 +134,28 @@ export async function updateProject(formData: FormData) {
     throw new Error('Failed to update project');
   }
 }
+
+// Delete a project by ID
+export async function deleteProjectAction(id: string) {
+  try {
+    const trimmed = id?.trim();
+    if (!trimmed) throw new Error('Project id is required');
+
+    await prisma.project.delete({ where: { id: trimmed } });
+
+    // Revalidate pages that may list or depend on projects
+    const pathsToRevalidate = [
+      '/projects',
+      '/',
+    ];
+    pathsToRevalidate.forEach(p => {
+      try { revalidatePath(p); } catch (e) { console.warn('Failed revalidate', p, e); }
+    });
+
+    return { id: trimmed, deleted: true } as const;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Delete failed';
+    console.error('Error deleting project:', error);
+    return { id, deleted: false, error: message } as const;
+  }
+}

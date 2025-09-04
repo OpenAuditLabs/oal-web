@@ -7,6 +7,8 @@ import {
   Play
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { useTransition, useState } from 'react';
+import { deleteProjectAction } from '@/actions/projects';
 
 interface ProjectCardProps {
   id: string;
@@ -31,24 +33,46 @@ export default function ProjectCard({
   onAddFiles,
   onRunAudit
 }: ProjectCardProps) {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  const handleDelete = () => {
+    setError(null);
+    startTransition(async () => {
+      const res = await deleteProjectAction(id);
+      if (!res.deleted) {
+        setError(res.error || 'Failed to delete');
+        return;
+      }
+      // Notify parent so it can remove from list optimistically
+      onDelete?.(id);
+    });
+  };
   return (
-    <div className="bg-secondary rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow max-w-sm">
+    <div className="bg-secondary rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow max-w-sm relative">
+      {error && (
+        <div className="absolute -top-2 right-2 bg-destructive/10 text-destructive text-xs px-2 py-1 rounded">
+          {error}
+        </div>
+      )}
       <div className="flex items-start justify-between mb-3">
         <h3 className="text-lg font-semibold text-foreground flex-1 pr-2">{title}</h3>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => onEdit?.(id)}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            title="Edit project"
+            className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+            title={isPending ? 'Please wait' : 'Edit project'}
+            disabled={isPending}
           >
             <Edit className="w-4 h-4" />
           </button>
           <button
-            onClick={() => onDelete?.(id)}
-            className="text-muted-foreground hover:text-destructive transition-colors"
-            title="Delete project"
+            onClick={handleDelete}
+            className="text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+            title={isPending ? 'Deleting...' : 'Delete project'}
+            disabled={isPending}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className={`w-4 h-4 ${isPending ? 'animate-pulse' : ''}`} />
           </button>
         </div>
       </div>
@@ -74,6 +98,7 @@ export default function ProjectCard({
           size="sm"
           icon={Download}
           className="flex-1 border-1 border-primary"
+          disabled={isPending}
         >
           Add Files
         </Button>
@@ -83,6 +108,7 @@ export default function ProjectCard({
           size="sm"
           icon={Play}
           className="flex-1 !text-foreground hover:!text-white"
+          disabled={isPending}
         >
           Run Audit
         </Button>
