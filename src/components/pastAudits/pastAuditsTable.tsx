@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { CheckCircle, CircleX, Eye, Download, RefreshCw, Flame, AlertTriangle, ShieldHalf, Info } from "lucide-react";
-import { getAuditHistory, type AuditHistoryItem } from "@/actions/audits";
+import { getAuditHistory, getAuditReport, type AuditHistoryItem } from "@/actions/audits";
+import AuditDetailModal from "./AuditDetailModal";
 import type { AuditStatus, SeverityLevel } from "@prisma/client";
 import { rerunAuditAction } from "@/actions/rerun-audit";
 
@@ -41,6 +42,9 @@ export default function AuditTable({
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rerunningAudits, setRerunningAudits] = useState<Set<string>>(new Set());
+  const [viewingAuditId, setViewingAuditId] = useState<string | null>(null);
+  const [auditDetail, setAuditDetail] = useState<any | null>(null);
+  const [auditDetailLoading, setAuditDetailLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -165,6 +169,25 @@ export default function AuditTable({
     return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
   };
 
+  const openAuditDetail = async (auditId: string) => {
+    setViewingAuditId(auditId);
+    setAuditDetail(null);
+    setAuditDetailLoading(true);
+    try {
+      const detail = await getAuditReport(auditId);
+      setAuditDetail(detail);
+    } catch (e) {
+      console.error('Failed to load audit detail', e);
+    } finally {
+      setAuditDetailLoading(false);
+    }
+  };
+
+  const closeAuditDetail = () => {
+    setViewingAuditId(null);
+    setAuditDetail(null);
+  };
+
   const getActionIcons = (status: AuditStatus, auditId: string) => {
     if (status === "COMPLETED") {
       return (
@@ -172,9 +195,7 @@ export default function AuditTable({
           <button 
             className="p-1 hover:bg-secondary rounded"
             title="View Report"
-            onClick={() => {
-              console.log('View report for audit:', auditId);
-            }}
+            onClick={() => openAuditDetail(auditId)}
           >
             <Eye className="w-4 h-4 text-muted-foreground" />
           </button>
@@ -205,9 +226,7 @@ export default function AuditTable({
           <button 
             className="p-1 hover:bg-secondary rounded"
             title="View Report"
-            onClick={() => {
-              console.log('View failed audit:', auditId);
-            }}
+            onClick={() => openAuditDetail(auditId)}
           >
             <Eye className="w-4 h-4 text-muted-foreground" />
           </button>
@@ -248,6 +267,8 @@ export default function AuditTable({
 
   return (
     <div className="bg-card rounded-lg border-2 border-border overflow-hidden">
+  {/* Audit Detail Modal */}
+  <AuditDetailModal open={!!viewingAuditId} onClose={closeAuditDetail} audit={auditDetail} />
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-secondary border-b">
