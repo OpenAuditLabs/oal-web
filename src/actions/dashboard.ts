@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import { AuditStatus, ActivityStatus } from '@prisma/client'
+import { AuditStatus } from '@prisma/client'
 
 export interface DashboardKPI {
   icon: string
@@ -16,10 +16,10 @@ export async function getDashboardKPIs(): Promise<DashboardKPI[]> {
     // Get total project count
     const projectCount = await prisma.project.count()
 
-    // Get running audits (activities with IN_PROGRESS status)
-    const runningAudits = await prisma.activity.count({
+    // Get running audits (audits with IN_PROGRESS status)
+    const runningAudits = await prisma.audit.count({
       where: {
-        status: ActivityStatus.IN_PROGRESS
+        status: AuditStatus.IN_PROGRESS
       }
     })
 

@@ -3,8 +3,7 @@
 
 import { useState, useTransition } from "react";
 import { AuditStatusCard, ActiveAuditCount } from "@/components/audits";
-import { type AuditCard } from "@/actions/activities";
-import { updateActivityStatusAction, closeActivityAction } from "@/actions/activities";
+import { type ActiveAuditCard as AuditCard, updateActiveAuditStatus as updateActivityStatusAction, removeActiveAudit as closeActivityAction } from "@/actions/active-audits";
 
 interface AuditsClientProps {
   initialAudits: AuditCard[];
