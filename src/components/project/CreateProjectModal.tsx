@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { createProject } from "@/actions/projects";
 import Button from "@/components/ui/Button";
+import { toast } from "sonner";
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -21,11 +22,19 @@ export default function CreateProjectModal({ open, onClose }: CreateProjectModal
     }
   };
 
-  // Close modal after submit
-  const handleFormSubmit = () => {
-    setTimeout(() => {
+  // Submit form via server action, show toast, close on success
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
+    const fd = new FormData(form);
+    try {
+      await createProject(fd);
+      toast.success("Project created");
       onClose();
-    }, 100); // allow server action to process
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to create project';
+      toast.error(msg);
+    }
   };
 
   return (
@@ -36,7 +45,7 @@ export default function CreateProjectModal({ open, onClose }: CreateProjectModal
     >
       <div className="bg-background rounded-lg shadow-lg p-8 w-full max-w-md" onClick={e => e.stopPropagation()}>
         <h2 className="text-xl font-bold mb-4">Create New Project</h2>
-        <form className="space-y-4" action={createProject} onSubmit={handleFormSubmit}>
+  <form className="space-y-4" onSubmit={handleFormSubmit}>
           <div>
             <label className="block text-sm font-medium mb-1">Project Name</label>
             <input

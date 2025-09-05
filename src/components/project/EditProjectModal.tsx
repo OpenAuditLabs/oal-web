@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import { updateProject } from "@/actions/projects";
+import { toast } from "sonner";
 
 interface EditProjectModalProps {
   open: boolean;
@@ -30,10 +31,18 @@ export default function EditProjectModal({ open, onClose, project }: EditProject
     }
   };
 
-  const handleFormSubmit = () => {
-    setTimeout(() => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
+    const fd = new FormData(form);
+    try {
+      await updateProject(fd);
+      toast.success("Project updated");
       onClose();
-    }, 100);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to update project';
+      toast.error(msg);
+    }
   };
 
   return (
@@ -44,7 +53,7 @@ export default function EditProjectModal({ open, onClose, project }: EditProject
     >
       <div className="bg-background rounded-lg shadow-lg p-8 w-full max-w-md" onClick={e => e.stopPropagation()}>
         <h2 className="text-xl font-bold mb-4">Edit Project</h2>
-        <form className="space-y-4" action={updateProject} onSubmit={handleFormSubmit}>
+  <form className="space-y-4" onSubmit={handleFormSubmit}>
           <input type="hidden" name="id" value={project.id} />
           <div>
             <label className="block text-sm font-medium mb-1">Project Name</label>
