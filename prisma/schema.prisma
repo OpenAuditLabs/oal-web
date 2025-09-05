@@ -23,6 +23,7 @@ model Project {
 
   // Relations
   audits Audit[]
+  files  File[]
 
   @@map("projects")
 }
@@ -52,11 +53,11 @@ model Audit {
 model Finding {
   id          String        @id @default(cuid())
   auditId     String
+  fileId      String?
   title       String
   description String
   severity    SeverityLevel
   category    String?       // e.g., "SQL Injection", "XSS", "Authentication"
-  fileName    String?       // File where the finding was discovered
   lineNumber  Int?          // Line number in the file
   remediation String?       // Suggested fix/remediation
   createdAt   DateTime      @default(now())
@@ -64,8 +65,27 @@ model Finding {
 
   // Relations
   audit Audit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  file  File?  @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
   @@map("findings")
+}
+
+model File {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  path      String?
+  language  String?
+  sizeBytes Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  findings Finding[]
+
+  @@index([projectId])
+  @@map("files")
 }
 
 enum AuditStatus {
