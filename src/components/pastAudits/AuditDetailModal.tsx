@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import type { AuditStatus, SeverityLevel } from '@prisma/client';
 
@@ -36,13 +36,56 @@ interface AuditDetailModalProps {
 }
 
 export default function AuditDetailModal({ open, onClose, audit }: AuditDetailModalProps) {
+  const backdropRef = useRef<HTMLDivElement | null>(null);
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
+  // Escape key, focus trap, auto-focus, and focus-restore
   useEffect(() => {
+    if (!open) return;
+    const prevFocus = document.activeElement as HTMLElement | null;
+    const getFocusable = () =>
+      contentRef.current
+        ? Array.from(
+            contentRef.current.querySelectorAll<HTMLElement>(
+              'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+            )
+          ).filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true')
+        : [];
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
+      if (e.key === 'Tab') {
+        const nodes = getFocusable();
+        if (!nodes.length) return;
+        const first = nodes[0];
+        const last = nodes[nodes.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+        if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+      }
     };
-    if (open) window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('keydown', onKey);
+    setTimeout(() => (closeBtnRef.current ?? contentRef.current)?.focus(), 0);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      prevFocus?.focus?.();
+    };
   }, [open, onClose]);
+
+  // Body scroll lock while modal is open
+  useEffect(() => {
+    if (!open) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = original; };
+  }, [open]);
+
+  // Outside click close
+  const handleBackdropMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === backdropRef.current) {
+      onClose();
+    }
+  };
 
   if (!open || !audit) return null;
 
@@ -59,11 +102,18 @@ export default function AuditDetailModal({ open, onClose, audit }: AuditDetailMo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start md:items-center justify-center bg-black/60 py-10">
-      <div className="bg-background w-full max-w-5xl rounded-lg shadow-lg border border-border p-6 relative animate-in fade-in zoom-in-95 flex flex-col max-h-[90vh]">
+    <div
+      ref={backdropRef}
+      onMouseDown={handleBackdropMouseDown}
+      className="fixed inset-0 z-50 flex items-start md:items-center justify-center bg-black/60 py-10"
+      role="dialog"
+      aria-modal="true"
+    >
+  <div ref={contentRef} className="bg-background w-full max-w-5xl rounded-lg shadow-lg border border-border p-6 relative animate-in fade-in zoom-in-95 flex flex-col max-h-[90vh]" role="document">
         <button
+          ref={closeBtnRef}
           onClick={onClose}
-          className="absolute top-3 right-3 p-2 rounded hover:bg-secondary text-muted-foreground"
+          className="absolute top-3 right-3 p-2 rounded hover:bg-secondary text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           aria-label="Close"
         >
           <X className="w-4 h-4" />
@@ -125,7 +175,7 @@ export default function AuditDetailModal({ open, onClose, audit }: AuditDetailMo
           ) : (
             <div className="overflow-x-auto overflow-y-auto flex-1">
               <table className="w-full text-sm">
-                <thead className="bg-secondary/50">
+                <thead className="bg-secondary/50 sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-secondary/40">
                   <tr>
                     <th className="text-left px-4 py-2 font-medium">Title</th>
                     <th className="text-left px-4 py-2 font-medium">Severity</th>
