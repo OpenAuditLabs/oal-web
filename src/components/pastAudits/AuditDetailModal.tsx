@@ -38,17 +38,38 @@ interface AuditDetailModalProps {
 export default function AuditDetailModal({ open, onClose, audit }: AuditDetailModalProps) {
   const backdropRef = useRef<HTMLDivElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
-  // Escape key handler & auto-focus close button
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
+  // Escape key, focus trap, auto-focus, and focus-restore
   useEffect(() => {
+    if (!open) return;
+    const prevFocus = document.activeElement as HTMLElement | null;
+    const getFocusable = () =>
+      contentRef.current
+        ? Array.from(
+            contentRef.current.querySelectorAll<HTMLElement>(
+              'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+            )
+          ).filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true')
+        : [];
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
+      if (e.key === 'Tab') {
+        const nodes = getFocusable();
+        if (!nodes.length) return;
+        const first = nodes[0];
+        const last = nodes[nodes.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+        if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+      }
     };
-    if (open) {
-      window.addEventListener('keydown', onKey);
-      // Focus close button for accessibility
-      setTimeout(() => closeBtnRef.current?.focus(), 0);
-    }
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('keydown', onKey);
+    setTimeout(() => (closeBtnRef.current ?? contentRef.current)?.focus(), 0);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      prevFocus?.focus?.();
+    };
   }, [open, onClose]);
 
   // Body scroll lock while modal is open
@@ -88,7 +109,7 @@ export default function AuditDetailModal({ open, onClose, audit }: AuditDetailMo
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-background w-full max-w-5xl rounded-lg shadow-lg border border-border p-6 relative animate-in fade-in zoom-in-95 flex flex-col max-h-[90vh]" role="document">
+  <div ref={contentRef} className="bg-background w-full max-w-5xl rounded-lg shadow-lg border border-border p-6 relative animate-in fade-in zoom-in-95 flex flex-col max-h-[90vh]" role="document">
         <button
           ref={closeBtnRef}
           onClick={onClose}
