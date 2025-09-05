@@ -7,9 +7,13 @@ import Button from "@/components/ui/Button";
 
 interface UploadCardProps {
   onFilesSelected?: (files: FileList) => void;
+  /** Optional custom headline text shown when not dragging */
+  headline?: string;
+  /** Optional footer note shown when not dragging; pass empty string to hide */
+  footerNote?: string | null;
 }
 
-export default function UploadCard({ onFilesSelected }: UploadCardProps) {
+export default function UploadCard({ onFilesSelected, headline, footerNote }: UploadCardProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
   const [isGlobalDrag, setIsGlobalDrag] = useState(false);
@@ -189,16 +193,16 @@ export default function UploadCard({ onFilesSelected }: UploadCardProps) {
               }`} />
             </div>
 
-            <a href="#" className={`text-foreground text-lg block mb-4 transition-colors duration-200 ${
+      <p className={`text-foreground text-lg block mb-4 transition-colors duration-200 ${
               isDragOver ? 'text-primary' : isGlobalDrag ? 'text-primary/80' : ''
             }`}>
               {isDragOver 
                 ? 'Drop files here to upload' 
                 : isGlobalDrag 
-                ? 'Drop files here to upload'
-                : 'Upload a file to run a quick scan'
+        ? 'Drop files here to upload'
+        : (headline || 'Upload a file to run a quick scan')
               }
-            </a>
+      </p>
 
             <Button
               variant="primary"
@@ -218,11 +222,15 @@ export default function UploadCard({ onFilesSelected }: UploadCardProps) {
             </Button>
           
         
-            <p className={`text-sm text-muted-foreground text-center transition-colors duration-200 ${
-              isDragOver ? 'text-primary/70' : isGlobalDrag ? 'text-primary/60' : ''
-            }`}>
-              {isDragOver || isGlobalDrag ? 'Release to upload files' : 'To upload multiple files, create a project'}
-            </p>
+            {((footerNote ?? undefined) !== '' && !isDragOver && !isGlobalDrag) || (isDragOver || isGlobalDrag) ? (
+              <p className={`text-sm text-muted-foreground text-center transition-colors duration-200 ${
+                isDragOver ? 'text-primary/70' : isGlobalDrag ? 'text-primary/60' : ''
+              }`}>
+                {isDragOver || isGlobalDrag
+                  ? 'Release to upload files'
+                  : (footerNote ?? 'To upload multiple files, create a project')}
+              </p>
+            ) : null}
           </div>
 
           {/* Selected Files Display */}

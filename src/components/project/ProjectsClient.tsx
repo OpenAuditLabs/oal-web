@@ -6,6 +6,7 @@ import { ProjectCard } from "@/components/project";
 import CreateProjectModal from "@/components/project/CreateProjectModal";
 import EditProjectModal from "@/components/project/EditProjectModal";
 import { useState } from "react";
+import AddFilesModal from '@/components/project/AddFilesModal';
 
 interface Project {
   id: string;
@@ -25,6 +26,8 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [projectBeingEdited, setProjectBeingEdited] = useState<Project | null>(null);
+  const [addFilesOpen, setAddFilesOpen] = useState(false);
+  const [projectForFiles, setProjectForFiles] = useState<Project | null>(null);
 
   const formatDate = (date: string | Date) => {
     const d = date instanceof Date ? date : new Date(date);
@@ -57,7 +60,9 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
   };
 
   const handleAddFiles = (id: string) => {
-    console.log(`Add files to project ${id}`);
+  const proj = projects.find(p => p.id === id) || null;
+  setProjectForFiles(proj);
+  setAddFilesOpen(true);
   };
 
   const handleRunAudit = (id: string) => {
@@ -85,6 +90,11 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
         open={editModalOpen} 
         onClose={() => { setEditModalOpen(false); setProjectBeingEdited(null); }} 
         project={projectBeingEdited}
+      />
+      <AddFilesModal 
+        open={addFilesOpen}
+        onClose={() => { setAddFilesOpen(false); setProjectForFiles(null); }}
+        project={projectForFiles ? { id: projectForFiles.id, name: projectForFiles.name } : null }
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-20">
         {projects.map((project) => (
