@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { AuditStatusCard, ActiveAuditCount } from "@/components/audits";
 import { type ActiveAuditCard as AuditCard, updateActiveAuditStatus as updateActivityStatusAction, removeActiveAudit as closeActivityAction } from "@/actions/active-audits";
 
@@ -70,6 +71,13 @@ export function AuditsClient({ initialAudits, searchQuery = "", statusFilter = [
             next.splice(index, 0, removedCard!);
             return next;
         });
+        if (removedCard.statusType === "active") {
+          toast.error("Cannot delete active audits. Only queued audits can be deleted.");
+        } else {
+          toast.error("Failed to delete audit.");
+        }
+      } else if (result.deleted) {
+        toast.success("Audit deleted successfully.");
       }
     });
   };
