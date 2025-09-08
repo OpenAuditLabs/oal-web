@@ -42,6 +42,7 @@ export default function AuditTable({
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rerunningAudits, setRerunningAudits] = useState<Set<string>>(new Set());
+  const [rerunConfirmId, setRerunConfirmId] = useState<string | null>(null);
   const [viewingAuditId, setViewingAuditId] = useState<string | null>(null);
   const [auditDetail, setAuditDetail] = useState<any | null>(null);
   const [auditDetailLoading, setAuditDetailLoading] = useState(false);
@@ -96,23 +97,23 @@ export default function AuditTable({
     setCurrentPage(1);
   }, [searchQuery, statusFilter, severityFilter]);
 
-  const handleRerun = async (auditId: string) => {
+  const handleRerun = (auditId: string) => {
+    setRerunConfirmId(auditId);
+  };
+
+  const confirmRerun = async (auditId: string) => {
     setRerunningAudits(prev => new Set(prev).add(auditId));
-    
+    setRerunConfirmId(null);
+    // Optimistically remove audit from table
+    setAuditHistory(prev => ({
+      ...prev,
+      audits: prev.audits.filter(a => a.id !== auditId)
+    }));
     try {
       const formData = new FormData();
       formData.set('auditId', auditId);
       await rerunAuditAction(formData);
-      
-      // Refresh the current page data with current search query and filters
-      const historyData = await getAuditHistory({ 
-        page: currentPage, 
-        limit: 20,
-        search: searchQuery,
-        status: statusFilter,
-        severity: severityFilter
-      });
-      setAuditHistory(historyData);
+      // Optionally, refresh active audits elsewhere
     } catch (error) {
       console.error('Failed to rerun audit:', error);
     } finally {
@@ -189,9 +190,9 @@ export default function AuditTable({
   };
 
   const getActionIcons = (status: AuditStatus, auditId: string) => {
-    if (status === "COMPLETED") {
+    if (status === "COMPLETED" || status === "FAILED") {
       return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 relative">
           <button 
             className="p-1 hover:bg-secondary rounded"
             title="View Report"
@@ -199,47 +200,51 @@ export default function AuditTable({
           >
             <Eye className="w-4 h-4 text-muted-foreground" />
           </button>
-          <button 
-            className="p-1 hover:bg-secondary rounded"
-            title="Download Report"
-            onClick={() => {
-              console.log('Download report for audit:', auditId);
-            }}
-          >
-            <Download className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <button 
-            onClick={() => handleRerun(auditId)}
-            disabled={rerunningAudits.has(auditId)}
-            className="p-1 hover:bg-secondary rounded disabled:opacity-50 disabled:cursor-not-allowed"
-            title={rerunningAudits.has(auditId) ? "Re-running..." : "Re-run Audit"}
-            aria-disabled={rerunningAudits.has(auditId)}
-            aria-busy={rerunningAudits.has(auditId)}
-          >
-            <RefreshCw className={`w-4 h-4 text-muted-foreground ${rerunningAudits.has(auditId) ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      );
-    } else if (status === "FAILED") {
-      return (
-        <div className="flex items-center gap-1">
-          <button 
-            className="p-1 hover:bg-secondary rounded"
-            title="View Report"
-            onClick={() => openAuditDetail(auditId)}
-          >
-            <Eye className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <button 
-            onClick={() => handleRerun(auditId)}
-            disabled={rerunningAudits.has(auditId)}
-            className="p-1 hover:bg-secondary rounded disabled:opacity-50 disabled:cursor-not-allowed"
-            title={rerunningAudits.has(auditId) ? "Re-running..." : "Re-run Audit"}
-            aria-disabled={rerunningAudits.has(auditId)}
-            aria-busy={rerunningAudits.has(auditId)}
-          >
-            <RefreshCw className={`w-4 h-4 text-muted-foreground ${rerunningAudits.has(auditId) ? 'animate-spin' : ''}`} />
-          </button>
+          {status === "COMPLETED" && (
+            <button 
+              className="p-1 hover:bg-secondary rounded"
+              title="Download Report"
+              onClick={() => {
+                console.log('Download report for audit:', auditId);
+              }}
+            >
+              <Download className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
+          <div className="relative inline-block">
+            <button 
+              onClick={() => handleRerun(auditId)}
+              disabled={rerunningAudits.has(auditId)}
+              className="p-1 hover:bg-secondary rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              title={rerunningAudits.has(auditId) ? "Re-running..." : "Re-run Audit"}
+              aria-disabled={rerunningAudits.has(auditId)}
+              aria-busy={rerunningAudits.has(auditId)}
+            >
+              <RefreshCw className={`w-4 h-4 text-muted-foreground ${rerunningAudits.has(auditId) ? 'animate-spin' : ''}`} />
+            </button>
+            {rerunConfirmId === auditId && (
+              <div className="absolute right-0 mt-2 w-64 z-30 rounded-md border border-border bg-popover shadow-lg p-4 animate-in fade-in-0 zoom-in-95">
+                <p className="text-sm font-medium text-foreground mb-2">Re-run this audit?</p>
+                <p className="text-xs text-muted-foreground mb-3">This will move the audit to active audits and remove it from past audits.</p>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRerunConfirmId(null)}
+                    className="px-2 py-1 text-xs rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => confirmRerun(auditId)}
+                    className="px-2 py-1 text-xs rounded-md bg-primary text-white hover:bg-primary/90"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       );
     }
