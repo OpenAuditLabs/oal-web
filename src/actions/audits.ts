@@ -195,33 +195,39 @@ export async function getAuditReport(auditId: string) {
 // Create a new audit (for re-run functionality)
 export async function createAuditRerun(originalAuditId: string) {
   try {
-    const originalAudit = await prisma.audit.findUnique({
-      where: {
-        id: originalAuditId
-      },
-      include: {
-        project: true
-      }
-    })
+    const result = await prisma.$transaction(async (tx) => {
+      const originalAudit = await tx.audit.findUnique({
+        where: { id: originalAuditId },
+        include: { project: true }
+      })
 
-    if (!originalAudit) {
-      throw new Error('Original audit not found')
-    }
-
-    // Create a new queued audit (active audit)
-    const newAudit = await prisma.audit.create({
-      data: {
-        projectId: originalAudit.projectId,
-        projectName: originalAudit.projectName,
-        size: originalAudit.size,
-        status: 'QUEUED',
-        progress: null,
-        fileCount: originalAudit.project.fileCount,
+      if (!originalAudit) {
+        throw new Error('Original audit not found')
       }
+
+      // Remove existing findings for this audit to reset state
+      await tx.finding.deleteMany({ where: { auditId: originalAuditId } })
+
+      // Move the existing audit back to active by updating its status and clearing completion fields
+      const updated = await tx.audit.update({
+        where: { id: originalAuditId },
+        data: {
+          status: 'QUEUED',
+          progress: null,
+          findingsCount: 0,
+          overallSeverity: null,
+          duration: null,
+          completedAt: null,
+          createdAt: new Date(),
+          fileCount: originalAudit.project.fileCount,
+        }
+      })
+
+      return updated
     })
 
     return {
-      auditId: newAudit.id,
+      auditId: result.id,
       message: 'Audit re-run has been queued successfully'
     }
   } catch (error) {
