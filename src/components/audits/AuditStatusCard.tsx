@@ -68,6 +68,7 @@ export default function AuditStatusCard({
   };
 
   const confirmClose = () => {
+    if (!canCancel) return;
     setShowConfirm(false);
     onClose(id);
   };
