@@ -31,6 +31,7 @@ export default function AuditStatusCard({
   onClose
 }: AuditStatusCardProps) {
   const isActive = statusType === "active";
+  const canCancel = statusType === "queued";
   const [showConfirm, setShowConfirm] = useState(false);
   const deleteBtnRef = useRef<HTMLButtonElement | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
@@ -51,6 +52,11 @@ export default function AuditStatusCard({
     }
     return () => document.removeEventListener('mousedown', handleDocumentClick);
   }, [showConfirm, handleDocumentClick]);
+
+  // Ensure confirm popover closes when cancel is not allowed anymore
+  useEffect(() => {
+    if (!canCancel && showConfirm) setShowConfirm(false);
+  }, [canCancel, showConfirm]);
   
   const handleStatusToggle = () => {
     const newStatus = isActive ? "queued" : "active";
@@ -89,11 +95,13 @@ export default function AuditStatusCard({
               <Play className="w-4 h-4 text-muted-foreground" />
             </button>
           )}
-          <div className="relative inline-block">
+      <div className="relative inline-block" title={canCancel ? undefined : "Only queued audits can be cancelled"}>
             <button
               ref={deleteBtnRef}
               onClick={handleClose}
-              className="p-2 hover:bg-secondary rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50"
+        className={`p-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50 ${canCancel ? 'hover:bg-secondary' : 'opacity-50 cursor-not-allowed'}`}
+        disabled={!canCancel}
+        aria-disabled={!canCancel}
               aria-haspopup="dialog"
               aria-expanded={showConfirm}
               aria-controls={showConfirm ? `confirm-popover-${id}` : undefined}
