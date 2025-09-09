@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from "sonner";
 import { CheckCircle, CircleX, Eye, Download, RefreshCw, Flame, AlertTriangle, ShieldHalf, Info } from "lucide-react";
 import { getAuditHistory, getAuditReport, type AuditHistoryItem } from "@/actions/audits";
 import AuditDetailModal from "./AuditDetailModal";
@@ -104,18 +105,39 @@ export default function AuditTable({
   const confirmRerun = async (auditId: string) => {
     setRerunningAudits(prev => new Set(prev).add(auditId));
     setRerunConfirmId(null);
-    // Optimistically remove audit from table
-    setAuditHistory(prev => ({
-      ...prev,
-      audits: prev.audits.filter(a => a.id !== auditId)
-    }));
+    // Optimistically remove audit from table, but keep a reference for rollback
+    let removedAudit: AuditHistoryItem | null = null;
+    let removedIndex = -1;
+    setAuditHistory(prev => {
+      removedIndex = prev.audits.findIndex(a => a.id === auditId);
+      if (removedIndex !== -1) {
+        removedAudit = prev.audits[removedIndex];
+      }
+      return {
+        ...prev,
+        audits: prev.audits.filter(a => a.id !== auditId)
+      };
+    });
     try {
       const formData = new FormData();
       formData.set('auditId', auditId);
       await rerunAuditAction(formData);
+  toast.success("Audit re-run successful and moved to queued audits.");
       // Optionally, refresh active audits elsewhere
     } catch (error) {
       console.error('Failed to rerun audit:', error);
+  toast.error("Failed to re-run audit.");
+      // Rollback the optimistic removal if the action fails
+      if (removedAudit) {
+        setAuditHistory(prev => {
+          // If audit already present (due to a refetch), skip reinserting
+          if (prev.audits.some(a => a.id === removedAudit!.id)) return prev;
+          const nextAudits = [...prev.audits];
+          const insertAt = removedIndex < 0 ? nextAudits.length : Math.min(removedIndex, nextAudits.length);
+          nextAudits.splice(insertAt, 0, removedAudit!);
+          return { ...prev, audits: nextAudits };
+        });
+      }
     } finally {
       setRerunningAudits(prev => {
         const next = new Set(prev);
