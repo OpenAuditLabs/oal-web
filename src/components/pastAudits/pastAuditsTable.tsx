@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { toast } from "sonner";
 import { CheckCircle, CircleX, Eye, Download, RefreshCw, Flame, AlertTriangle, ShieldHalf, Info } from "lucide-react";
 import { getAuditHistory, getAuditReport, type AuditHistoryItem } from "@/actions/audits";
+import { generateAuditPdf } from "@/lib/pdf";
 import AuditDetailModal from "./AuditDetailModal";
 import type { AuditStatus, SeverityLevel } from "@prisma/client";
 import { rerunAuditAction } from "@/actions/rerun-audit";
@@ -226,8 +227,45 @@ export default function AuditTable({
             <button 
               className="p-1 hover:bg-secondary rounded"
               title="Download Report"
-              onClick={() => {
-                console.log('Download report for audit:', auditId);
+              onClick={async () => {
+                try {
+                  const detail = await getAuditReport(auditId);
+                  const pdfBytes = await generateAuditPdf({
+                    id: detail.id,
+                    projectName: detail.projectName,
+                    size: detail.size,
+                    status: detail.status,
+                    overallSeverity: detail.overallSeverity,
+                    findingsCount: detail.findingsCount,
+                    duration: detail.duration,
+                    completedAt: detail.completedAt,
+                    createdAt: detail.createdAt,
+                    project: detail.project ? { name: detail.project.name, description: detail.project.description ?? null } : undefined,
+                    findings: detail.findings.map(f => ({
+                      title: f.title,
+                      description: f.description,
+                      severity: f.severity,
+                      category: f.category ?? null,
+                      lineNumber: f.lineNumber ?? null,
+                      remediation: f.remediation ?? null,
+                    }))
+                  })
+                  // Create a fresh Uint8Array copy to satisfy strict DOM typings
+                  const bytes = new Uint8Array(pdfBytes)
+                  const blob = new Blob([bytes], { type: 'application/pdf' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `audit-${detail.id}.pdf`
+                  document.body.appendChild(a)
+                  a.click()
+                  a.remove()
+                  URL.revokeObjectURL(url)
+                  toast.success('PDF downloaded.')
+                } catch (err) {
+                  console.error('Failed to download PDF', err)
+                  toast.error('Failed to generate/download PDF.')
+                }
               }}
             >
               <Download className="w-4 h-4 text-muted-foreground" />
