@@ -26,13 +26,24 @@ interface PaginationParams {
 }
 
 // Get paginated audit history (Past Audits page)
+export interface AuditHistoryResult {
+  audits: AuditHistoryItem[]
+  pagination: {
+    currentPage: number
+    totalPages: number
+    totalCount: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+  }
+}
+
 export async function getAuditHistory({ 
   page = 1, 
   limit = 20,
   search = '',
   status = [],
   severity = []
-}: PaginationParams = {}) {
+}: PaginationParams = {}): Promise<AuditHistoryResult> {
   try {
     // Define maximum limit to prevent excessive queries
     const MAX_LIMIT = 100;
@@ -157,14 +168,16 @@ export async function getAuditHistory({
         hasPreviousPage: safePage > 1,
       }
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching audit history:', error)
     throw new Error('Failed to fetch audit history')
   }
 }
 
 // Get detailed audit report with findings
-export async function getAuditReport(auditId: string) {
+export type AuditReportWithRelations = Prisma.AuditGetPayload<{ include: { project: true; findings: true } }>
+
+export async function getAuditReport(auditId: string): Promise<AuditReportWithRelations> {
   try {
     const audit = await prisma.audit.findUnique({
       where: {
@@ -186,7 +199,7 @@ export async function getAuditReport(auditId: string) {
     }
 
     return audit
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching audit report:', error)
     throw new Error('Failed to fetch audit report')
   }
@@ -230,7 +243,7 @@ export async function createAuditRerun(originalAuditId: string) {
       auditId: result.id,
       message: 'Audit re-run has been queued successfully'
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating audit re-run:', error)
     throw new Error('Failed to create audit re-run')
   }
@@ -304,7 +317,7 @@ export async function getAuditStatistics() {
         return acc
       }, {} as Record<SeverityLevel, number>)
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching audit statistics:', error)
     throw new Error('Failed to fetch audit statistics')
   }
@@ -331,8 +344,72 @@ export async function getRecentAuditActivity(limit = 5) {
     })
 
     return recentAudits
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching recent audit activity:', error)
     throw new Error('Failed to fetch recent audit activity')
   }
+}
+
+// Form-action wrappers to enable calling from Client Components via <form action={...}>
+export type AuditHistoryActionResult = AuditHistoryResult & { error?: string; requestId?: string }
+export type AuditReportState = AuditReportWithRelations | { error: string } | null
+
+export async function getAuditReportAction(formData: FormData): Promise<AuditReportState> {
+  try {
+    const auditId = (formData.get('auditId') as string | null)?.trim()
+    if (!auditId) {
+      return { error: 'Missing auditId' }
+    }
+    const report = await getAuditReport(auditId)
+    return report
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Failed to fetch audit report'
+    console.error('getAuditReportAction error:', err)
+    return { error: message }
+  }
+}
+
+export async function getAuditHistoryAction(formData: FormData): Promise<AuditHistoryActionResult> {
+  try {
+    // Basic params
+    const pageRaw = formData.get('page') as string | null
+    const limitRaw = formData.get('limit') as string | null
+    const search = (formData.get('search') as string | null) ?? ''
+    const requestId = (formData.get('requestId') as string | null) ?? undefined
+    // Multi-value fields
+    const status = formData.getAll('status').map(v => String(v))
+    const severity = formData.getAll('severity').map(v => String(v))
+
+    const page = pageRaw ? Number(pageRaw) : 1
+    const limit = limitRaw ? Number(limitRaw) : 20
+
+  console.debug('[getAuditHistoryAction:in]', { pageRaw, limitRaw, search, requestId, status, severity })
+  const result = await getAuditHistory({ page, limit, search, status, severity })
+  console.log('[getAuditHistoryAction]', { page, limit, search, status, severity, totalCount: result.pagination.totalCount })
+  return { ...result, requestId }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Failed to fetch audit history'
+    console.error('getAuditHistoryAction error:', err)
+    return {
+      audits: [],
+      pagination: {
+        currentPage: 1,
+        totalPages: 0,
+        totalCount: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+      error: message,
+      requestId: (formData.get('requestId') as string | null) ?? undefined
+    }
+  }
+}
+
+// Adapters for useFormState (prevState, formData) -> nextState
+export async function getAuditReportFormAction(_prevState: AuditReportState, formData: FormData): Promise<AuditReportState> {
+  return getAuditReportAction(formData)
+}
+
+export async function getAuditHistoryFormAction(_prevState: AuditHistoryActionResult, formData: FormData): Promise<AuditHistoryActionResult> {
+  return getAuditHistoryAction(formData)
 }

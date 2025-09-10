@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useActionState, startTransition, type ComponentProps } from 'react';
 import { toast } from "sonner";
 import { CheckCircle, CircleX, Eye, Download, RefreshCw, Flame, AlertTriangle, ShieldHalf, Info } from "lucide-react";
-import { getAuditHistory, getAuditReport, type AuditHistoryItem } from "@/actions/audits";
+import { getAuditHistoryFormAction, getAuditReportFormAction, type AuditHistoryItem, type AuditHistoryActionResult, type AuditReportState } from "@/actions/audits";
 import { generateAuditPdf } from "@/lib/pdf";
 import AuditDetailModal from "./AuditDetailModal";
 import type { AuditStatus, SeverityLevel } from "@prisma/client";
@@ -46,53 +46,92 @@ export default function AuditTable({
   const [rerunningAudits, setRerunningAudits] = useState<Set<string>>(new Set());
   const [rerunConfirmId, setRerunConfirmId] = useState<string | null>(null);
   const [viewingAuditId, setViewingAuditId] = useState<string | null>(null);
-  const [auditDetail, setAuditDetail] = useState<any | null>(null);
-  const [auditDetailLoading, setAuditDetailLoading] = useState(false);
+  const [viewAuditId, setViewAuditId] = useState<string | null>(null);
+  const [downloadAuditId, setDownloadAuditId] = useState<string | null>(null);
+  type AuditDetail = ComponentProps<typeof AuditDetailModal>["audit"];
+  const [auditDetail, setAuditDetail] = useState<AuditDetail>(null);
 
+  // Server action forms/state
+  const historyFormRef = useRef<HTMLFormElement>(null);
+  const [historyState, historyAction] = useActionState<AuditHistoryActionResult, FormData>(getAuditHistoryFormAction, {
+    audits: [],
+    pagination: {
+      currentPage: 1,
+      totalPages: 0,
+      totalCount: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+    error: undefined,
+  requestId: undefined,
+  });
+
+  const viewFormRef = useRef<HTMLFormElement>(null);
+  const [viewReportState, viewReportAction] = useActionState<AuditReportState, FormData>(getAuditReportFormAction, null);
+
+  const downloadFormRef = useRef<HTMLFormElement>(null);
+  const [downloadReportState, downloadReportAction] = useActionState<AuditReportState, FormData>(getAuditReportFormAction, null);
+
+  // Trigger server action to fetch history when inputs change
   useEffect(() => {
-    let isMounted = true;
-    
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const historyData = await getAuditHistory({ 
-          page: currentPage, 
-          limit: 20,
-          search: searchQuery,
-          status: statusFilter,
-          severity: severityFilter
-        });
-        
-        if (isMounted) {
-          setAuditHistory(historyData);
-        }
-      } catch (error) {
-        console.error('Error fetching audit data:', error);
-        if (isMounted) {
-          setAuditHistory({
-            audits: [],
-            pagination: {
-              currentPage: 1,
-              totalPages: 0,
-              totalCount: 0,
-              hasNextPage: false,
-              hasPreviousPage: false,
-            }
-          });
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchData();
-    
-    return () => {
-      isMounted = false;
-    };
+    const fd = new FormData();
+    fd.set('requestId', `${currentPage}-${searchQuery}-${statusFilter.join(',')}-${severityFilter.join(',')}`);
+    fd.set('page', String(currentPage));
+    fd.set('limit', '20');
+    fd.set('search', (searchQuery || '').trim());
+    if (statusFilter.length > 0) {
+      statusFilter.forEach(s => fd.append('status', s.toUpperCase()));
+    }
+    severityFilter.forEach(s => fd.append('severity', s.toUpperCase()));
+    startTransition(() => {
+      historyAction(fd);
+    });
   }, [currentPage, searchQuery, statusFilter, severityFilter]);
+
+
+  // Sync server response to local state
+  useEffect(() => {
+    if (!historyState || !historyState.requestId) return; // ignore initial placeholder
+    console.debug('[PastAudits] history response', {
+      page: historyState.pagination?.currentPage,
+      totalPages: historyState.pagination?.totalPages,
+      totalCount: historyState.pagination?.totalCount,
+      auditsLen: historyState.audits?.length,
+      requestId: historyState.requestId,
+      error: historyState.error
+    });
+    if (historyState.error) {
+      console.error('Error fetching audit data:', historyState.error);
+      toast.error('Failed to fetch audit history.');
+      setAuditHistory({
+        audits: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 0,
+          totalCount: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        }
+      });
+    } else {
+      // If there are results overall but this page returned empty, bounce to page 1
+      if ((historyState.pagination?.totalCount ?? 0) > 0 && (historyState.audits?.length ?? 0) === 0 && historyState.pagination?.currentPage && historyState.pagination.currentPage > 1) {
+        setCurrentPage(1);
+        return;
+      }
+      setAuditHistory({
+        audits: historyState.audits ?? [],
+        pagination: historyState.pagination ?? {
+          currentPage: 1,
+          totalPages: 0,
+          totalCount: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+    }
+  setLoading(false);
+  }, [historyState]);
 
   // Reset to first page when search query or filters change
   useEffect(() => {
@@ -193,24 +232,115 @@ export default function AuditTable({
     return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
   };
 
-  const openAuditDetail = async (auditId: string) => {
+  const openAuditDetail = (auditId: string) => {
     setViewingAuditId(auditId);
     setAuditDetail(null);
-    setAuditDetailLoading(true);
-    try {
-      const detail = await getAuditReport(auditId);
-      setAuditDetail(detail);
-    } catch (e) {
-      console.error('Failed to load audit detail', e);
-    } finally {
-      setAuditDetailLoading(false);
-    }
+    setViewAuditId(auditId);
+    // Dispatch server action with fresh auditId (avoid stale DOM value race)
+    const fd = new FormData();
+    fd.set('auditId', auditId);
+    startTransition(() => {
+      viewReportAction(fd);
+    });
   };
+
+  // Handle view report server response
+  useEffect(() => {
+  if (!viewReportState || !viewingAuditId) return;
+  if ('error' in viewReportState && viewReportState.error) {
+      toast.error('Failed to load audit detail.');
+      return;
+    }
+  const detail = viewReportState as Exclude<AuditReportState, { error: string } | null>;
+  // Ignore stale responses that don't match the currently viewed audit
+  if (detail.id !== viewingAuditId) return;
+    // Normalize to the shape expected by AuditDetailModal
+    const normalized: NonNullable<AuditDetail> = {
+      id: detail.id,
+      projectName: detail.projectName,
+      size: detail.size,
+      status: detail.status,
+      overallSeverity: detail.overallSeverity,
+      findingsCount: detail.findingsCount,
+      duration: detail.duration,
+      completedAt: detail.completedAt,
+      createdAt: detail.createdAt,
+      project: {
+        id: detail.project.id,
+        name: detail.project.name,
+        description: detail.project.description,
+        fileCount: detail.project.fileCount,
+      },
+  findings: detail.findings.map((f) => ({
+        id: f.id,
+        title: f.title,
+        description: f.description,
+        severity: f.severity,
+        category: f.category,
+        fileName: null,
+        lineNumber: f.lineNumber,
+        remediation: f.remediation,
+        createdAt: f.createdAt,
+      })),
+    };
+    setAuditDetail(normalized);
+  }, [viewReportState, viewingAuditId]);
 
   const closeAuditDetail = () => {
     setViewingAuditId(null);
     setAuditDetail(null);
   };
+
+  // Handle download report server response (top-level effect)
+  useEffect(() => {
+    const run = async () => {
+      if (!downloadReportState || !downloadAuditId) return;
+      if ('error' in downloadReportState && downloadReportState.error) {
+        toast.error('Failed to generate/download PDF.');
+        return;
+      }
+      try {
+        const detail = downloadReportState as Exclude<AuditReportState, { error: string } | null>;
+        const pdfBytes = await generateAuditPdf({
+          id: detail.id,
+          projectName: detail.projectName,
+          size: detail.size,
+          status: detail.status,
+          overallSeverity: detail.overallSeverity,
+          findingsCount: detail.findingsCount,
+          duration: detail.duration,
+          completedAt: detail.completedAt,
+          createdAt: detail.createdAt,
+          project: detail.project ? { name: detail.project.name, description: detail.project.description ?? null } : undefined,
+          findings: (detail.findings || []).map((f) => ({
+            title: f.title,
+            description: f.description,
+            severity: f.severity,
+            category: f.category ?? null,
+            lineNumber: f.lineNumber ?? null,
+            remediation: f.remediation ?? null,
+          }))
+        })
+        const bytes = new Uint8Array(pdfBytes)
+        const blob = new Blob([bytes], { type: 'application/pdf' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `audit-${detail.id}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        URL.revokeObjectURL(url)
+        toast.success('PDF downloaded.')
+      } catch (err) {
+        console.error('Failed to download PDF', err)
+        toast.error('Failed to generate/download PDF.')
+      } finally {
+        setDownloadAuditId(null)
+      }
+    }
+    run()
+  }, [downloadReportState, downloadAuditId])
 
   const getActionIcons = (status: AuditStatus, auditId: string) => {
     if (status === "COMPLETED" || status === "FAILED") {
@@ -227,45 +357,13 @@ export default function AuditTable({
             <button 
               className="p-1 hover:bg-secondary rounded"
               title="Download Report"
-              onClick={async () => {
-                try {
-                  const detail = await getAuditReport(auditId);
-                  const pdfBytes = await generateAuditPdf({
-                    id: detail.id,
-                    projectName: detail.projectName,
-                    size: detail.size,
-                    status: detail.status,
-                    overallSeverity: detail.overallSeverity,
-                    findingsCount: detail.findingsCount,
-                    duration: detail.duration,
-                    completedAt: detail.completedAt,
-                    createdAt: detail.createdAt,
-                    project: detail.project ? { name: detail.project.name, description: detail.project.description ?? null } : undefined,
-                    findings: detail.findings.map(f => ({
-                      title: f.title,
-                      description: f.description,
-                      severity: f.severity,
-                      category: f.category ?? null,
-                      lineNumber: f.lineNumber ?? null,
-                      remediation: f.remediation ?? null,
-                    }))
-                  })
-                  // Create a fresh Uint8Array copy to satisfy strict DOM typings
-                  const bytes = new Uint8Array(pdfBytes)
-                  const blob = new Blob([bytes], { type: 'application/pdf' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `audit-${detail.id}.pdf`
-                  document.body.appendChild(a)
-                  a.click()
-                  a.remove()
-                  URL.revokeObjectURL(url)
-                  toast.success('PDF downloaded.')
-                } catch (err) {
-                  console.error('Failed to download PDF', err)
-                  toast.error('Failed to generate/download PDF.')
-                }
+              onClick={() => {
+                setDownloadAuditId(auditId);
+                const fd = new FormData();
+                fd.set('auditId', auditId);
+                startTransition(() => {
+                  downloadReportAction(fd);
+                });
               }}
             >
               <Download className="w-4 h-4 text-muted-foreground" />
@@ -320,7 +418,7 @@ export default function AuditTable({
     );
   }
 
-  if (auditHistory.audits.length === 0) {
+  if (!loading && auditHistory.pagination.totalCount === 0) {
     return (
       <div className="bg-card rounded-lg border-2 border-border p-6">
         <div className="text-center py-8">
@@ -334,6 +432,32 @@ export default function AuditTable({
     <div className="bg-card rounded-lg border-2 border-border overflow-hidden">
   {/* Audit Detail Modal */}
   <AuditDetailModal open={!!viewingAuditId} onClose={closeAuditDetail} audit={auditDetail} />
+      {/* Hidden forms to call server actions */}
+      <form ref={historyFormRef} action={historyAction} className="hidden" key={`hist-${currentPage}-${searchQuery}-${statusFilter.join(',')}-${severityFilter.join(',')}`}>
+        <input type="hidden" name="requestId" value={`${currentPage}-${searchQuery}-${statusFilter.join(',')}-${severityFilter.join(',')}`} />
+        <input type="hidden" name="page" value={String(currentPage)} />
+        <input type="hidden" name="limit" value="20" />
+        <input type="hidden" name="search" value={(searchQuery || '').trim()} />
+        {statusFilter.length > 0 ? (
+          statusFilter.map((s, idx) => (
+            <input key={`status-${idx}`} type="hidden" name="status" value={s.toUpperCase()} />
+          ))
+        ) : null}
+        {severityFilter.map((s, idx) => (
+          <input key={`severity-${idx}`} type="hidden" name="severity" value={s.toUpperCase()} />
+        ))}
+  <button type="submit" aria-hidden="true" className="hidden" />
+      </form>
+
+      <form ref={viewFormRef} action={viewReportAction} className="hidden" key={`view-${viewAuditId ?? ''}`}>
+        <input type="hidden" name="auditId" value={viewAuditId ?? ''} />
+        <button type="submit" aria-hidden="true" className="hidden" />
+      </form>
+
+      <form ref={downloadFormRef} action={downloadReportAction} className="hidden" key={`dl-${downloadAuditId ?? ''}`}>
+        <input type="hidden" name="auditId" value={downloadAuditId ?? ''} />
+        <button type="submit" aria-hidden="true" className="hidden" />
+      </form>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-secondary border-b">
