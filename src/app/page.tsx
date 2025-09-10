@@ -1,6 +1,8 @@
 import SidebarClient from "@/components/common/SidebarClient";
 import PageRouter from "@/components/common/PageRouter";
 import { TabType } from "@/components/common/PageRouter";
+import { getCurrentUserCredits } from "@/lib/user";
+
 
 interface PageProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -12,6 +14,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
   const activeTab: TabType = tab && ["dashboard", "audits", "past-audits", "projects"].includes(tab) 
     ? tab 
     : "dashboard";
+  const creditsLeft = await getCurrentUserCredits();
 
   return (
     <div className="min-h-screen bg-background">
@@ -20,7 +23,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
       
       <div className="flex">
         {/* Left Sidebar */}
-        <SidebarClient activeTab={activeTab} />
+      <SidebarClient activeTab={activeTab} creditsLeft={creditsLeft} />
 
         {/* Main Content */}
         <PageRouter activeTab={activeTab} />

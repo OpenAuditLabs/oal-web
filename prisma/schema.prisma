@@ -22,10 +22,40 @@ model Project {
   updatedAt   DateTime @updatedAt
 
   // Relations
+  ownerId String
+  owner   User      @relation(fields: [ownerId], references: [id], onDelete: Restrict)
   audits Audit[]
   files  File[]
 
+  @@index([ownerId])
   @@map("projects")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  projects Project[]
+  credit   Credit?
+
+  @@map("users")
+}
+
+model Credit {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  balance   Int      @default(0) // user's credit score/balance, default zero
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("credits")
 }
 
 model Audit {
