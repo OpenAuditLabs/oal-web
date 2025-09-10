@@ -3,7 +3,7 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { AuditStatusCard, ActiveAuditCount } from "@/components/audits";
+import { AuditStatusCard, ActiveAuditCount, QueuedAuditCount } from "@/components/audits";
 import { type ActiveAuditCard as AuditCard, updateActiveAuditStatus as updateActivityStatusAction, removeActiveAudit as closeActivityAction } from "@/actions/active-audits";
 
 interface AuditsClientProps {
@@ -113,6 +113,7 @@ export function AuditsClient({ initialAudits, searchQuery = "", statusFilter = [
 
       {/* Queued Audits Section */}
   <div className="space-y-4">
+        <QueuedAuditCount count={queuedAudits.length} />
         <h2 className="text-xl font-bold text-foreground mb-4">Queued Audits</h2>
         {queuedAudits.map(card => (
           <AuditStatusCard
