@@ -28,6 +28,9 @@ export default function AuditTable({
   statusFilter = [],
   severityFilter = []
 }: AuditTableProps) {
+  // For stale-response guard
+  const latestRequestIdRef = useRef<string>('');
+  const requestCounterRef = useRef<number>(0);
   const [auditHistory, setAuditHistory] = useState<{
     audits: AuditHistoryItem[];
     pagination: PaginationInfo;
@@ -74,8 +77,12 @@ export default function AuditTable({
 
   // Trigger server action to fetch history when inputs change
   useEffect(() => {
+    // Generate a unique requestId for this fetch
+    requestCounterRef.current += 1;
+    const requestId = `req-${Date.now()}-${requestCounterRef.current}`;
+    latestRequestIdRef.current = requestId;
     const fd = new FormData();
-    fd.set('requestId', `${currentPage}-${searchQuery}-${statusFilter.join(',')}-${severityFilter.join(',')}`);
+    fd.set('requestId', requestId);
     fd.set('page', String(currentPage));
     fd.set('limit', '20');
     fd.set('search', (searchQuery || '').trim());
@@ -89,9 +96,14 @@ export default function AuditTable({
   }, [currentPage, searchQuery, statusFilter, severityFilter]);
 
 
-  // Sync server response to local state
+  // Sync server response to local state, only if not stale
   useEffect(() => {
     if (!historyState || !historyState.requestId) return; // ignore initial placeholder
+    // Only process if this is the latest request
+    if (historyState.requestId !== latestRequestIdRef.current) {
+      // Stale response, ignore
+      return;
+    }
     console.debug('[PastAudits] history response', {
       page: historyState.pagination?.currentPage,
       totalPages: historyState.pagination?.totalPages,
@@ -130,7 +142,7 @@ export default function AuditTable({
         },
       });
     }
-  setLoading(false);
+    setLoading(false);
   }, [historyState]);
 
   // Reset to first page when search query or filters change
@@ -277,7 +289,7 @@ export default function AuditTable({
         description: f.description,
         severity: f.severity,
         category: f.category,
-        fileName: null,
+        fileName: f.file?.path ?? f.file?.name ?? null,
         lineNumber: f.lineNumber,
         remediation: f.remediation,
         createdAt: f.createdAt,
@@ -293,15 +305,22 @@ export default function AuditTable({
 
   // Handle download report server response (top-level effect)
   useEffect(() => {
+    // capture the id at the start of the effect to guard against stale responses
+    const capturedId = downloadAuditId;
     const run = async () => {
-      if (!downloadReportState || !downloadAuditId) return;
+      if (!downloadReportState || !capturedId) return;
       if ('error' in downloadReportState && downloadReportState.error) {
         toast.error('Failed to generate/download PDF.');
         return;
       }
+      let a: HTMLAnchorElement | null = null;
+      let url: string | null = null;
       try {
         const detail = downloadReportState as Exclude<AuditReportState, { error: string } | null>;
-        const pdfBytes = await generateAuditPdf({
+        // Ignore stale responses not matching the captured id
+        if (detail.id !== capturedId) return;
+
+    const pdfBytes = await generateAuditPdf({
           id: detail.id,
           projectName: detail.projectName,
           size: detail.size,
@@ -317,29 +336,41 @@ export default function AuditTable({
             description: f.description,
             severity: f.severity,
             category: f.category ?? null,
+      file: f.file?.path ?? f.file?.name ?? null,
             lineNumber: f.lineNumber ?? null,
             remediation: f.remediation ?? null,
           }))
         })
-        const bytes = new Uint8Array(pdfBytes)
-        const blob = new Blob([bytes], { type: 'application/pdf' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `audit-${detail.id}.pdf`
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
-        URL.revokeObjectURL(url)
-        toast.success('PDF downloaded.')
+
+  // pdfBytes is a Uint8Array from generateAuditPdf; convert to a sliced ArrayBuffer for Blob
+  const arrayBuffer = pdfBytes.buffer.slice(pdfBytes.byteOffset, pdfBytes.byteOffset + pdfBytes.byteLength) as ArrayBuffer;
+  const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+        url = URL.createObjectURL(blob);
+        a = document.createElement('a');
+        a.href = url;
+        // sanitize filename
+        const sanitize = (s: string) => s.replace(/[^a-z0-9-_]+/gi, '_').replace(/^_+|_+$/g, '').slice(0, 120) || 'file';
+        const safeId = sanitize(String(detail.id));
+        a.download = `audit-${safeId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        // Allow the browser to complete the download before revoking
+        setTimeout(() => {
+          if (url) URL.revokeObjectURL(url);
+        }, 0);
+        toast.success('PDF downloaded.');
       } catch (err) {
-        console.error('Failed to download PDF', err)
-        toast.error('Failed to generate/download PDF.')
+        console.error('Failed to download PDF', err);
+        toast.error('Failed to generate/download PDF.');
       } finally {
-        setDownloadAuditId(null)
+        if (a) a.remove();
+        // Only clear if we're still acting on the same captured id
+        if (downloadAuditId === capturedId) {
+          setDownloadAuditId(null);
+        }
       }
-    }
-    run()
+    };
+    run();
   }, [downloadReportState, downloadAuditId])
 
   const getActionIcons = (status: AuditStatus, auditId: string) => {

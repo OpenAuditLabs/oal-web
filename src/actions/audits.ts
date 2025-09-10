@@ -174,8 +174,17 @@ export async function getAuditHistory({
   }
 }
 
-// Get detailed audit report with findings
-export type AuditReportWithRelations = Prisma.AuditGetPayload<{ include: { project: true; findings: true } }>
+// Get detailed audit report with findings (including file relation for path/name)
+export type AuditReportWithRelations = Prisma.AuditGetPayload<{
+  include: {
+    project: true
+    findings: {
+      include: {
+        file: { select: { name: true; path: true } }
+      }
+    }
+  }
+}>
 
 export async function getAuditReport(auditId: string): Promise<AuditReportWithRelations> {
   try {
@@ -186,6 +195,9 @@ export async function getAuditReport(auditId: string): Promise<AuditReportWithRe
       include: {
         project: true,
         findings: {
+          include: {
+            file: { select: { name: true, path: true } }
+          },
           orderBy: [
             { severity: 'desc' }, // CRITICAL, HIGH, MEDIUM, LOW
             { createdAt: 'desc' }

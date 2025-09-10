@@ -5,6 +5,7 @@ type Finding = {
   description: string
   severity: string
   category?: string | null
+  file?: string | null
   lineNumber?: number | null
   remediation?: string | null
 }
@@ -32,7 +33,8 @@ export async function generateAuditPdf(audit: AuditReport): Promise<Uint8Array> 
   const fontBold = await doc.embedFont(StandardFonts.HelveticaBold)
 
   const margin = 48
-  const maxWidth = width - margin * 2
+  // Derive current max line width from the active page width
+  const getMaxWidth = () => width - margin * 2
   let cursorY = height - margin
 
   const drawText = (text: string, opts?: { size?: number; color?: { r: number; g: number; b: number }; bold?: boolean }) => {
@@ -43,7 +45,7 @@ export async function generateAuditPdf(audit: AuditReport): Promise<Uint8Array> 
     cursorY -= size + 6
   }
 
-  const wrapText = (text: string, size: number, usedFont = font, availableWidth = maxWidth) => {
+  const wrapText = (text: string, size: number, usedFont = font, availableWidth = getMaxWidth()) => {
     const words = text.split(/\s+/)
     const lines: string[] = []
     let line = ''
@@ -125,12 +127,27 @@ export async function generateAuditPdf(audit: AuditReport): Promise<Uint8Array> 
       const pairs: Array<[string, string]> = [
         ['Severity', f.severity],
         ['Category', f.category ?? 'N/A'],
-        ['Line', f.lineNumber != null ? String(f.lineNumber) : 'N/A'],
       ]
       for (const [k, v] of pairs) {
         ensureSpace(16)
         page.drawText(`${label(k)}: ${v}`, { x: margin + 8, y: cursorY - 11, size: 11, font })
         cursorY -= 14
+      }
+
+      // Location: {path:line} (wrapped)
+      {
+        const loc = f.file
+          ? `${f.file}${f.lineNumber != null ? ':' + f.lineNumber : ''}`
+          : (f.lineNumber != null ? `:${f.lineNumber}` : 'N/A')
+        ensureSpace(16)
+        page.drawText('Location:', { x: margin + 8, y: cursorY - 11, size: 11, font: fontBold })
+        cursorY -= 14
+  const locLines = wrapText(loc, 11, font, getMaxWidth() - 12)
+        for (const line of locLines) {
+          ensureSpace(14)
+          page.drawText(line, { x: margin + 12, y: cursorY - 11, size: 11, font })
+          cursorY -= 14
+        }
       }
 
       if (f.description) {
