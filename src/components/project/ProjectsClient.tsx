@@ -5,8 +5,10 @@ import { Plus } from "lucide-react";
 import { ProjectCard } from "@/components/project";
 import CreateProjectModal from "@/components/project/CreateProjectModal";
 import EditProjectModal from "@/components/project/EditProjectModal";
-import { useState } from "react";
+import { useState, startTransition } from "react";
 import AddFilesModal from '@/components/project/AddFilesModal';
+import { runAuditAction } from '@/actions/run-audit';
+import { toast } from 'sonner';
 
 interface Project {
   id: string;
@@ -66,7 +68,16 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
   };
 
   const handleRunAudit = (id: string) => {
-    console.log(`Run audit for project ${id}`);
+    const fd = new FormData();
+    fd.set('projectId', id);
+    startTransition(() => {
+      runAuditAction(fd).then(() => {
+        toast.success('Audit queued successfully');
+      }).catch((err) => {
+        console.error('Failed to queue audit', err);
+        toast.error('Failed to start audit');
+      });
+    });
   };
 
   const handleCreateProject = () => {
