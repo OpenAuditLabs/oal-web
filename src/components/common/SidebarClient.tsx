@@ -7,14 +7,17 @@ import {
   Clock, 
   Folder, 
 } from "lucide-react";
+import CreditsCard from "@/components/common/CreditsCard";
 
 type TabType = "dashboard" | "audits" | "past-audits" | "projects";
 
 interface SidebarClientProps {
   activeTab: TabType;
+  creditsLeft?: number;
+  onTopUpClick?: () => void;
 }
 
-export default function SidebarClient({ activeTab }: SidebarClientProps) {
+export default function SidebarClient({ activeTab, creditsLeft, onTopUpClick }: SidebarClientProps) {
   const router = useRouter();
 
   const handleTabChange = (tab: TabType) => {
@@ -23,8 +26,8 @@ export default function SidebarClient({ activeTab }: SidebarClientProps) {
   };
 
   return (
-    <aside className="w-64 bg-secondary shadow-sm min-h-screen min-w-64">
-      <div className="p-6">
+    <aside className="w-64 bg-secondary shadow-sm min-h-screen min-w-64 flex flex-col">
+      <div className="p-6 flex flex-col h-full">
         {/* Empty space for logo/name */}
         <div className="h-24 mb-8"></div>
         
@@ -77,6 +80,11 @@ export default function SidebarClient({ activeTab }: SidebarClientProps) {
             <span>Projects</span>
           </button>
         </nav>
+
+        {/* Credits card pinned to bottom */}
+        <div className="mt-auto pt-8">
+          <CreditsCard credits={creditsLeft} onTopUp={onTopUpClick} fixed={true} />
+        </div>
       </div>
     </aside>
   );
