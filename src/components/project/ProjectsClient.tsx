@@ -86,7 +86,15 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
   const handleOpenDetails = (id: string) => {
     const proj = projects.find(p => p.id === id) || null;
     setDetailProject(proj);
-    setDetailOpen(true);
+    if (proj) {
+      setDetailOpen(true);
+    } else {
+      if (typeof toast === 'function') {
+        toast.error?.('Project not found');
+      } else {
+        window.alert('Project not found');
+      }
+    }
   };
 
   const handleCreateProject = () => {

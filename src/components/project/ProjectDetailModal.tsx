@@ -31,17 +31,35 @@ export default function ProjectDetailModal({ open, project, onClose }: ProjectDe
   }, [open, onClose]);
 
   useEffect(() => {
-    if (open && dialogRef.current) {
-      dialogRef.current.focus();
+    let previousActive: Element | null = null;
+    let previousOverflow: string = '';
+    if (open) {
+      previousActive = document.activeElement;
+      previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      if (dialogRef.current) {
+        dialogRef.current.focus();
+      }
     }
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      if (previousActive && document.contains(previousActive)) {
+        (previousActive as HTMLElement).focus();
+      }
+    };
   }, [open]);
 
   if (!open || !project) return null;
 
-  const createdDate = new Date(project.createdAt);
-  const formattedDate = createdDate.toLocaleDateString(undefined, {
-    year: 'numeric', month: 'long', day: 'numeric'
-  });
+  let formattedDate = '';
+  const date = new Date(project.createdAt);
+  if (!project.createdAt || Number.isNaN(date.getTime())) {
+    formattedDate = 'Unknown date';
+  } else {
+    formattedDate = date.toLocaleDateString(undefined, {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
