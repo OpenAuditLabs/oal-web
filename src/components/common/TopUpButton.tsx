@@ -1,23 +1,34 @@
 "use client";
 
-import { useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { topUpCreditsAction } from '@/actions/credits'
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { topUpCreditsAction } from '@/actions/credits';
 
-// This component is used indirectly: passed as onTopUpClick to SidebarClient.
-// When rendered (invoked), it performs a top-up and refreshes the page.
 export default function TopUpButton() {
-  const router = useRouter()
-  const [pending, startTransition] = useTransition()
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
-  startTransition(async () => {
-    const res = await topUpCreditsAction(100)
-    if ('balance' in res) {
-      router.refresh()
-    } else {
-      console.warn('Top-up failed:', res.error)
-    }
-  })
+  const handleClick = () => {
+    if (pending) return;
+    startTransition(async () => {
+      const res = await topUpCreditsAction(100);
+      if ('balance' in res) {
+        router.refresh();
+      } else {
+        console.warn('Top-up failed:', res.error);
+      }
+    });
+  };
 
-  return null
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={pending}
+      aria-label="Top up credits"
+      className="rounded-lg bg-primary text-white py-2 px-4 font-medium inline-flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-70 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+    >
+      {pending ? 'Topping up...' : 'Top up credits'}
+    </button>
+  );
 }

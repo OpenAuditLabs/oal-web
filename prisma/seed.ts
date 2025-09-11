@@ -2,7 +2,7 @@ import { PrismaClient, AuditStatus, SeverityLevel } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 import { randomInt } from 'crypto'
 
-const prisma = new PrismaClient() as any
+const prisma = new PrismaClient()
 
 // Common project types for realistic naming
 const projectTypes = [

@@ -1,8 +1,7 @@
 import SidebarClient from "@/components/common/SidebarClient";
 import PageRouter from "@/components/common/PageRouter";
 import { TabType } from "@/components/common/PageRouter";
-import { getCurrentUserCredits } from "@/actions/credits";
-import TopUpButton from "@/components/common/TopUpButton";
+import { getCurrentUserCredits } from "@/lib/user";
 
 interface PageProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
