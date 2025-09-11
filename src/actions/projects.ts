@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from "next/cache";
+import { ensureDemoUserWithCredit } from '@/lib/user'
 
 // Get all projects
 export async function getProjects() {
@@ -72,11 +73,15 @@ export async function createProject(formData: FormData) {
     const rawFileCount = formData.get('fileCount');
     const parsed = typeof rawFileCount === 'string' ? Number(rawFileCount) : 0;
     const fileCount = Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+    
+  const user = await ensureDemoUserWithCredit();
+
     await prisma.project.create({
       data: {
         name,
         description,
-        fileCount
+        fileCount,
+        ownerId: user.id
       }
     });
     revalidatePath("/projects");
