@@ -39,7 +39,7 @@ export default function LoginForm() {
       // Placeholder: implement real auth in next PR.
       await new Promise(res => setTimeout(res, 600));
       // For now just log.
-      console.log('Login attempt', validation.data);
+      console.log('Login attempt', validation.data.email);
       // TODO: redirect after successful auth
     } catch (err) {
       setError('Login failed');

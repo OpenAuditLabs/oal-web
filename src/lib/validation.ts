@@ -16,10 +16,8 @@ export function validateLogin(data: unknown) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     for (const issue of parsed.error.issues) {
-      if (issue.path.length > 0) {
-        const key = issue.path.join('.') || 'form';
-        if (!fieldErrors[key]) fieldErrors[key] = issue.message;
-      }
+      const key = issue.path.length ? issue.path.join('.') : 'form';
+      if (!fieldErrors[key]) fieldErrors[key] = issue.message;
     }
     return { success: false as const, errors: fieldErrors };
   }

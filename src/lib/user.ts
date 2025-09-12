@@ -1,20 +1,20 @@
+import 'server-only';
 import { prisma } from '@/lib/prisma'
 
 const DEMO_EMAIL = process.env.DEMO_USER_EMAIL || 'demo@oal.local'
-
 export async function ensureDemoUserWithCredit() {
-  // Find or create demo user
-  let user = await prisma.user.findUnique({ where: { email: DEMO_EMAIL } })
-  if (!user) {
-    user = await prisma.user.create({ data: { email: DEMO_EMAIL, name: 'Demo User' } })
-  }
-  // Ensure credit row exists
-  await prisma.credit.upsert({
-    where: { userId: user.id },
-    update: {},
-    create: { userId: user.id, balance: 0 }
-  })
-  return user
+  return prisma.$transaction(async (tx) => {
+    const user = await tx.user.upsert({
+      where: { email: DEMO_EMAIL },
+      update: {},
+      create: { email: DEMO_EMAIL, name: 'Demo User' },
+    });
+    await tx.credit.createMany({
+      data: { userId: user.id, balance: 0 },
+      skipDuplicates: true,
+    });
+    return user;
+  });
 }
 
 export async function getCurrentUserCredits(): Promise<number> {

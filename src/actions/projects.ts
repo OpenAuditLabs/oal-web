@@ -72,7 +72,7 @@ export async function createProject(formData: FormData) {
         : null;
     const rawFileCount = formData.get('fileCount');
     const parsed = typeof rawFileCount === 'string' ? Number(rawFileCount) : 0;
-    const fileCount = Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+    const fileCount = Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 0;
     
   const user = await ensureDemoUserWithCredit();
 
