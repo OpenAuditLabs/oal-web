@@ -95,7 +95,7 @@ async function main() {
   
   // Clear existing data
   await prisma.finding.deleteMany()
-  await prisma.$executeRawUnsafe('DELETE FROM files');
+  await prisma.file.deleteMany()
   await prisma.audit.deleteMany()
   await prisma.project.deleteMany()
   await prisma.credit.deleteMany()
