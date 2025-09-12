@@ -1,7 +1,8 @@
 import { PrismaClient, AuditStatus, SeverityLevel } from '@prisma/client'
 import { faker } from '@faker-js/faker'
+import { randomInt } from 'crypto'
 
-const prisma = new PrismaClient() as any
+const prisma = new PrismaClient()
 
 // Common project types for realistic naming
 const projectTypes = [
@@ -97,8 +98,15 @@ async function main() {
   await prisma.$executeRawUnsafe('DELETE FROM files');
   await prisma.audit.deleteMany()
   await prisma.project.deleteMany()
+  await prisma.credit.deleteMany()
+  await prisma.user.deleteMany()
   console.log('🧹 Cleared existing data')
   
+  // Ensure a demo user with a starting credit balance
+  const demoEmail = process.env.DEMO_USER_EMAIL || 'demo@oal.local'
+  const demoUser = await prisma.user.create({ data: { email: demoEmail, name: 'Demo User' } })
+  await prisma.credit.create({ data: { userId: demoUser.id, balance: randomInt(100, 1000) } })
+
   // Create projects first (ensure unique names)
   const shuffledTypes = faker.helpers.shuffle(projectTypes)
   const selectedTypes = shuffledTypes.slice(0, 6)
@@ -106,7 +114,8 @@ async function main() {
   const projects = selectedTypes.map(name => ({
     name,
     description: faker.company.catchPhrase(),
-    fileCount: 0
+    fileCount: 0,
+    ownerId: demoUser.id,
   }))
 
   const createdProjects = await Promise.all(projects.map(project => prisma.project.create({ data: project })))

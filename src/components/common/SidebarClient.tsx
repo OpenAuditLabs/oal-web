@@ -11,13 +11,9 @@ import CreditsCard from "@/components/common/CreditsCard";
 
 type TabType = "dashboard" | "audits" | "past-audits" | "projects";
 
-interface SidebarClientProps {
-  activeTab: TabType;
-  creditsLeft?: number;
-  onTopUpClick?: () => void;
-}
+interface SidebarClientProps { activeTab: TabType; creditsLeft?: number; }
 
-export default function SidebarClient({ activeTab, creditsLeft, onTopUpClick }: SidebarClientProps) {
+export default function SidebarClient({ activeTab, creditsLeft }: SidebarClientProps) {
   const router = useRouter();
 
   const handleTabChange = (tab: TabType) => {
@@ -83,7 +79,7 @@ export default function SidebarClient({ activeTab, creditsLeft, onTopUpClick }: 
 
         {/* Credits card pinned to bottom */}
         <div className="mt-auto pt-8">
-          <CreditsCard credits={creditsLeft} onTopUp={onTopUpClick} fixed={true} />
+          <CreditsCard credits={creditsLeft} fixed={true} />
         </div>
       </div>
     </aside>
