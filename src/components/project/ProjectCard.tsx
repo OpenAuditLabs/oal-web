@@ -22,6 +22,7 @@ interface ProjectCardProps {
   onDelete?: (id: string) => void;
   onAddFiles?: (id: string) => void;
   onRunAudit?: (id: string) => void;
+  onOpenDetails?: (id: string) => void;
 }
 
 export default function ProjectCard({
@@ -34,6 +35,7 @@ export default function ProjectCard({
   onDelete,
   onAddFiles,
   onRunAudit
+  , onOpenDetails
 }: ProjectCardProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -83,8 +85,29 @@ export default function ProjectCard({
     if (isPending) return; 
     setShowConfirm(false);
   };
+  const handleCardClick = (e: React.MouseEvent) => {
+    // 1. If confirm popover is open, ignore all card clicks
+    if (showConfirm) return;
+    const target = e.target as HTMLElement;
+    // 2. Ignore clicks inside the confirm popover
+    if (popoverRef.current && popoverRef.current.contains(target)) return;
+    // 3. Ignore clicks on interactive elements (buttons, links, form controls, opt-out data attr)
+    const interactiveSelector = [
+      'button',
+      'a[href]',
+      '[role="button"]',
+      'input',
+      'select',
+      'textarea',
+      '[data-ignore-card-click="true"]'
+    ].join(',');
+    if (target.closest(interactiveSelector)) return;
+    // 4. Only open details if none of the above matched
+    onOpenDetails?.(id);
+  };
+
   return (
-    <div className="bg-secondary rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow max-w-sm relative">
+    <div onClick={handleCardClick} className="cursor-pointer bg-secondary rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow max-w-sm relative">
       {error && (
         <div className="absolute -top-2 right-2 bg-destructive/10 text-destructive text-xs px-2 py-1 rounded">
           {error}

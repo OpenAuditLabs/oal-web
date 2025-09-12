@@ -3,6 +3,7 @@
 import Button from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 import { ProjectCard } from "@/components/project";
+import ProjectDetailModal from '@/components/project/ProjectDetailModal';
 import CreateProjectModal from "@/components/project/CreateProjectModal";
 import EditProjectModal from "@/components/project/EditProjectModal";
 import { useState, startTransition } from "react";
@@ -30,6 +31,8 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
   const [projectBeingEdited, setProjectBeingEdited] = useState<Project | null>(null);
   const [addFilesOpen, setAddFilesOpen] = useState(false);
   const [projectForFiles, setProjectForFiles] = useState<Project | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailProject, setDetailProject] = useState<Project | null>(null);
 
   const formatDate = (date: string | Date) => {
     const d = date instanceof Date ? date : new Date(date);
@@ -80,6 +83,20 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
     });
   };
 
+  const handleOpenDetails = (id: string) => {
+    const proj = projects.find(p => p.id === id) || null;
+    setDetailProject(proj);
+    if (proj) {
+      setDetailOpen(true);
+    } else {
+      if (typeof toast === 'function') {
+        toast.error?.('Project not found');
+      } else {
+        window.alert('Project not found');
+      }
+    }
+  };
+
   const handleCreateProject = () => {
     setModalOpen(true);
   };
@@ -107,6 +124,18 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
         onClose={() => { setAddFilesOpen(false); setProjectForFiles(null); }}
         project={projectForFiles ? { id: projectForFiles.id, name: projectForFiles.name } : null }
       />
+      <ProjectDetailModal
+        open={detailOpen}
+        onClose={() => { setDetailOpen(false); setDetailProject(null); }}
+        project={detailProject ? {
+          id: detailProject.id,
+          name: detailProject.name,
+          description: detailProject.description,
+            fileCount: detailProject.fileCount,
+          createdAt: detailProject.createdAt,
+          auditCount: detailProject.auditCount ?? detailProject._count?.audits ?? 0,
+        } : null}
+      />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-20">
         {projects.map((project) => (
           <ProjectCard
@@ -120,6 +149,7 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
             onDelete={handleDeleteProject}
             onAddFiles={handleAddFiles}
             onRunAudit={handleRunAudit}
+            onOpenDetails={handleOpenDetails}
           />
         ))}
       </div>
