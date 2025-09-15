@@ -18,8 +18,9 @@ export default function LoginForm() {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
     setFieldErrors(fe => {
       if (!fe[e.target.name]) return fe; // nothing to clear
-      const { [e.target.name]: _removed, ...rest } = fe;
-      return rest; // remove the key entirely
+      const rest = { ...fe };
+      delete rest[e.target.name];
+      return rest;
     });
   };
 
@@ -41,7 +42,7 @@ export default function LoginForm() {
       // For now just log.
       console.log('Login attempt', validation.data.email);
       // TODO: redirect after successful auth
-    } catch (err) {
+  } catch {
       setError('Login failed');
     } finally {
       setLoading(false);

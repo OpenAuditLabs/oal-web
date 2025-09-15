@@ -1,3 +1,4 @@
+import Image from 'next/image';
 interface QueuedAuditCountProps {
   count: number;
   className?: string;
@@ -9,7 +10,7 @@ export default function QueuedAuditCount({ count, className = "" }: QueuedAuditC
       <span className="text-sm font-medium text-yellow-800">
         {count} Queued Scan{count !== 1 ? 's' : ''}
       </span>
-      <img
+      <Image
         src="/icons/scan-alt.svg"
         alt="Queued scans"
         width={20}
