@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useActionState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
-import { validateLogin } from '@/lib/validation';
 import Link from 'next/link';
 import { loginUserAction, type LoginResult } from '@/actions/auth';
 import { toast } from 'sonner';

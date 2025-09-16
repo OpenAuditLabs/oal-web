@@ -2,8 +2,6 @@
 
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcrypt'
-// Precomputed dummy bcrypt hash for timing attack mitigation
-const DUMMY_HASH = '$2b$10$CwTycUXWue0Thq9StjUM0uJ8rQpQbF1r6e1uG6lQe6lQe6lQe6lQe'; // bcrypt hash for 'dummy-password'
 import { validateRegistration } from '@/lib/validation'
 import { validateLogin } from '@/lib/validation'
 
@@ -35,6 +33,7 @@ export async function registerUserAction(_prevState: RegisterResult, formData: F
   const existing = await prisma.user.findUnique({ where: { email } })
     if (existing) {
       // Timing mitigation: compare with dummy hash
+      const DUMMY_HASH = bcrypt.hashSync('dummy-password', 10)
       await bcrypt.compare(password, DUMMY_HASH);
       return { errors: { email: 'Email already in use' } }
     }
@@ -95,7 +94,7 @@ export async function loginUserAction(_prevState: LoginResult, formData: FormDat
 
   const user = await prisma.user.findUnique({ where: { email } })
     if (!user || !user.password) {
-      // Timing mitigation: always compare with dummy hash
+      const DUMMY_HASH = bcrypt.hashSync('dummy-password', 10)
       await bcrypt.compare(password, DUMMY_HASH);
       // Do not reveal which field failed
       return { errors: { form: 'Invalid email or password' } }
