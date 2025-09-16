@@ -1,6 +1,8 @@
 import { PrismaClient, AuditStatus, SeverityLevel } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 import { randomInt } from 'crypto'
+import * as bcrypt from 'bcrypt'
+
 
 const prisma = new PrismaClient()
 
@@ -104,7 +106,14 @@ async function main() {
   
   // Ensure a demo user with a starting credit balance
   const demoEmail = process.env.DEMO_USER_EMAIL || 'demo@oal.local'
-  const demoUser = await prisma.user.create({ data: { email: demoEmail, name: 'Demo User' } })
+  const demoPassword = bcrypt.hashSync('Demo@1234', 12)
+  const demoUser = await prisma.user.create({
+    data: {
+      email: demoEmail,
+      name: 'Demo User',
+      password: demoPassword
+    }
+  })
   await prisma.credit.create({ data: { userId: demoUser.id, balance: randomInt(100, 1000) } })
 
   // Create projects first (ensure unique names)

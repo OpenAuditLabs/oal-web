@@ -1,3 +1,4 @@
+import Image from 'next/image';
 interface ActiveAuditCountProps {
   count: number;
   className?: string;
@@ -9,7 +10,7 @@ export default function ActiveAuditCount({ count, className = "" }: ActiveAuditC
       <span className="text-sm font-medium text-foreground">
         {count} Active Scan{count !== 1 ? 's' : ''}
       </span>
-      <img
+      <Image
         src="/icons/scan-alt.svg"
         alt="Queued scans"
         width={20}
