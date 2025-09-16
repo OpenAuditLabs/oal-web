@@ -2,6 +2,8 @@
 
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcrypt'
+// Precomputed dummy bcrypt hash for timing attack mitigation
+const DUMMY_HASH = '$2b$10$CwTycUXWue0Thq9StjUM0uJ8rQpQbF1r6e1uG6lQe6lQe6lQe6lQe'; // bcrypt hash for 'dummy-password'
 import { validateRegistration } from '@/lib/validation'
 import { validateLogin } from '@/lib/validation'
 
