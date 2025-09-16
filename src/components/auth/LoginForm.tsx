@@ -2,6 +2,7 @@
 import React, { useState, FormEvent } from 'react';
 import Button from '@/components/ui/Button';
 import { validateLogin } from '@/lib/validation';
+import Link from 'next/link';
 
 interface LoginFormState {
   email: string;
@@ -97,13 +98,12 @@ export default function LoginForm() {
         </Button>
       </form>
       <div className="mt-6 pt-4 border-t border-border text-center">
-        <button
-          type="button"
+        <Link
+          href="/register"
           className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
-          onClick={() => { /* placeholder - registration PR */ }}
         >
           Not yet a member?
-        </button>
+        </Link>
       </div>
     </div>
   );
