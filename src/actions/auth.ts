@@ -108,6 +108,16 @@ export async function loginUserAction(_prevState: LoginResult, formData: FormDat
 
     // Issue JWT and set cookie
     const token = await signJwt({ sub: user.id, email: user.email })
+
+    // Persist latest JWT to the user record (optional; for audit/revocation)
+    try {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { jwt: token },
+      })
+    } catch (e) {
+      console.warn('Failed to save JWT to user record', e)
+    }
     const cookieStore = await cookies()
     cookieStore.set('auth_token', token, {
       httpOnly: true,

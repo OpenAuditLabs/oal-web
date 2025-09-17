@@ -36,6 +36,7 @@ model User {
   email     String    @unique
   name      String?
   password  String?   
+  jwt       String?   // last issued JWT for the user (optional)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
