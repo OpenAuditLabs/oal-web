@@ -1,8 +1,9 @@
 'use client'
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, useActionState } from "react";
 import { validateRegistration } from "@/lib/validation";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
+import { registerUserAction, type RegisterResult } from "@/actions/auth";
 
 type FormState = {
   name: string;
@@ -23,28 +24,26 @@ export default function RegistrationForm() {
     email: "",
     password: "",
   });
-  const [errors, setErrors] = useState<ErrorState>({});
-  const [success, setSuccess] = useState("");
+  const [clientErrors, setClientErrors] = useState<ErrorState>({});
+  const [serverState, formAction, isPending] = useActionState<RegisterResult, FormData>(registerUserAction, {});
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSuccess("");
-    setErrors({});
+  function preValidateAndSubmit(formData: FormData) {
+    // Client-side validation for instant field errors before server call
     const result = validateRegistration(form);
     if (!result.success) {
-      setErrors(result.errors);
+      setClientErrors(result.errors);
       return;
     }
-    // TODO: Wire up backend registration
-    setSuccess("Registration successful! (Backend not yet wired)");
+    setClientErrors({});
+    formAction(formData);
   }
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form className="space-y-4" action={preValidateAndSubmit}>
       <div>
         <label className="block text-sm font-medium">Name</label>
         <input
@@ -54,7 +53,9 @@ export default function RegistrationForm() {
           onChange={handleChange}
           className="mt-1 block w-full border rounded px-3 py-2"
         />
-        {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
+        {(clientErrors.name || serverState?.errors?.name) && (
+          <p className="text-red-500 text-xs">{clientErrors.name || serverState?.errors?.name}</p>
+        )}
       </div>
       <div>
         <label className="block text-sm font-medium">Email</label>
@@ -65,7 +66,9 @@ export default function RegistrationForm() {
           onChange={handleChange}
           className="mt-1 block w-full border rounded px-3 py-2"
         />
-        {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
+        {(clientErrors.email || serverState?.errors?.email) && (
+          <p className="text-red-500 text-xs">{clientErrors.email || serverState?.errors?.email}</p>
+        )}
       </div>
       <div>
         <label className="block text-sm font-medium">Password</label>
@@ -76,17 +79,25 @@ export default function RegistrationForm() {
           onChange={handleChange}
           className="mt-1 block w-full border rounded px-3 py-2"
         />
-        {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
+        {(clientErrors.password || serverState?.errors?.password) && (
+          <p className="text-red-500 text-xs">{clientErrors.password || serverState?.errors?.password}</p>
+        )}
       </div>
       <Button
         type="submit"
         variant="primary"
         size="md"
         className="w-full justify-center"
+        disabled={isPending}
       >
-        Register
+        {isPending ? 'Registering…' : 'Register'}
       </Button>
-      {success && <p className="text-green-600 text-sm mt-2">{success}</p>}
+      {serverState?.errors?.form && (
+        <p className="text-red-500 text-sm mt-2">{serverState.errors.form}</p>
+      )}
+      {serverState?.success && (
+        <p className="text-green-600 text-sm mt-2">{serverState.success}</p>
+      )}
       <div className="mt-6 pt-4 border-t border-border text-center">
         <Link
           href="/login"
