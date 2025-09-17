@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt'
 import { validateRegistration } from '@/lib/validation'
 import { validateLogin } from '@/lib/validation'
 import { signJwt } from '@/lib/jwt'
+import { createHash } from 'crypto'
 import { cookies } from 'next/headers'
 
 export type RegisterResult = {
@@ -109,14 +110,15 @@ export async function loginUserAction(_prevState: LoginResult, formData: FormDat
     // Issue JWT and set cookie
     const token = await signJwt({ sub: user.id, email: user.email })
 
-    // Persist latest JWT to the user record (optional; for audit/revocation)
+    // Persist SHA-256 hash of latest JWT to the user record (not the raw token)
     try {
+      const hash = createHash('sha256').update(token).digest('hex');
       await prisma.user.update({
         where: { id: user.id },
-        data: { jwt: token },
+        data: { jwt_hash: hash },
       })
     } catch (e) {
-      console.warn('Failed to save JWT to user record', e)
+      console.warn('Failed to save JWT hash to user record', e)
     }
     const cookieStore = await cookies()
     cookieStore.set('auth_token', token, {

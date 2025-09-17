@@ -35,8 +35,8 @@ model User {
   id        String    @id @default(cuid())
   email     String    @unique
   name      String?
-  password  String?   
-  jwt       String?   // last issued JWT for the user (optional)
+  password  String?
+  jwt_hash  String?   @db.Text // SHA-256 hash of the latest JWT issued to this user
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
