@@ -1,9 +1,10 @@
 'use client'
-import { useState, ChangeEvent, useActionState } from "react";
+import { useState, ChangeEvent, useActionState, useEffect } from "react";
 import { validateRegistration } from "@/lib/validation";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { registerUserAction, type RegisterResult } from "@/actions/auth";
+import { toast } from "sonner";
 
 type FormState = {
   name: string;
@@ -27,13 +28,36 @@ export default function RegistrationForm() {
   const [clientErrors, setClientErrors] = useState<ErrorState>({});
   const [serverState, formAction, isPending] = useActionState<RegisterResult, FormData>(registerUserAction, {});
 
+  // Toast notifications on server action results
+  useEffect(() => {
+    if (!serverState) return;
+    if (serverState.success) {
+      toast.success(serverState.success);
+    }
+    if (serverState.errors?.form) {
+      toast.error(serverState.errors.form);
+    }
+    if (
+      serverState.errors?.email ||
+      serverState.errors?.password ||
+      serverState.errors?.name
+    ) {
+      toast.error('Please fix the highlighted fields');
+    }
+  }, [serverState]);
+
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
   function preValidateAndSubmit(formData: FormData) {
-    // Client-side validation for instant field errors before server call
-    const result = validateRegistration(form);
+    // Extract values from FormData for validation
+    const values = {
+      name: String(formData.get('name') ?? ''),
+      email: String(formData.get('email') ?? ''),
+      password: String(formData.get('password') ?? ''),
+    };
+    const result = validateRegistration(values);
     if (!result.success) {
       setClientErrors(result.errors);
       return;

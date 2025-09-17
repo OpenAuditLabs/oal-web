@@ -1,9 +1,9 @@
 "use client";
-import React, { useState, useActionState } from 'react';
+import React, { useState, useActionState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
-import { validateLogin } from '@/lib/validation';
 import Link from 'next/link';
 import { loginUserAction, type LoginResult } from '@/actions/auth';
+import { toast } from 'sonner';
 
 interface LoginFormState {
   email: string;
@@ -14,6 +14,20 @@ export default function LoginForm() {
   const [form, setForm] = useState<LoginFormState>({ email: '', password: '' });
   const [serverState, formAction, isPending] = useActionState<LoginResult, FormData>(loginUserAction, {});
   const [fieldErrors, setFieldErrors] = useState<Record<string,string>>({});
+
+  // Toast notifications for server action results
+  useEffect(() => {
+    if (!serverState) return;
+    if (serverState.success) {
+      toast.success(serverState.success);
+    }
+    if (serverState.errors?.form) {
+      toast.error(serverState.errors.form);
+    }
+    if (serverState.errors?.email || serverState.errors?.password) {
+      toast.error('Please fix the highlighted fields');
+    }
+  }, [serverState]);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
