@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcrypt'
 import { validateRegistration } from '@/lib/validation'
 import { validateLogin } from '@/lib/validation'
+import { signJwt } from '@/lib/jwt'
+import { cookies } from 'next/headers'
 
 export type RegisterResult = {
   errors?: {
@@ -104,7 +106,18 @@ export async function loginUserAction(_prevState: LoginResult, formData: FormDat
       return { errors: { form: 'Invalid email or password' } }
     }
 
-    // In a future iteration, establish a session/cookie and redirect.
+    // Issue JWT and set cookie
+    const token = await signJwt({ sub: user.id, email: user.email })
+    const cookieStore = await cookies()
+    cookieStore.set('auth_token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      // 7 days expiry (should align with token exp)
+      maxAge: 7 * 24 * 60 * 60,
+    })
+
     return { success: 'Login successful' }
   } catch (err) {
     console.error('loginUserAction error:', err)
