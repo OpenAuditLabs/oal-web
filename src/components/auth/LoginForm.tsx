@@ -1,8 +1,9 @@
 "use client";
-import React, { useState, FormEvent } from 'react';
+import React, { useState, useActionState } from 'react';
 import Button from '@/components/ui/Button';
 import { validateLogin } from '@/lib/validation';
 import Link from 'next/link';
+import { loginUserAction, type LoginResult } from '@/actions/auth';
 
 interface LoginFormState {
   email: string;
@@ -11,8 +12,7 @@ interface LoginFormState {
 
 export default function LoginForm() {
   const [form, setForm] = useState<LoginFormState>({ email: '', password: '' });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [serverState, formAction, isPending] = useActionState<LoginResult, FormData>(loginUserAction, {});
   const [fieldErrors, setFieldErrors] = useState<Record<string,string>>({});
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,36 +25,13 @@ export default function LoginForm() {
     });
   };
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setFieldErrors({});
-
-    const validation = validateLogin(form);
-    if (!validation.success) {
-      setFieldErrors(validation.errors);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      // Placeholder: implement real auth in next PR.
-      await new Promise(res => setTimeout(res, 600));
-      // For now just log.
-      console.log('Login attempt', validation.data.email);
-      // TODO: redirect after successful auth
-  } catch {
-      setError('Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Optional: live client-side feedback via onChange; rely on server action for final validation
 
   return (
     <div className="rounded-xl border border-border bg-background p-6 shadow-sm">
       <h1 className="text-xl font-semibold mb-1 text-foreground">Welcome back</h1>
       <p className="text-sm text-muted-foreground mb-6">Sign in to continue to your dashboard.</p>
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+  <form action={formAction} className="space-y-4" noValidate>
         <div className="space-y-2">
           <label htmlFor="email" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Email</label>
           <input
@@ -69,7 +46,9 @@ export default function LoginForm() {
             aria-invalid={!!fieldErrors.email}
             aria-describedby={fieldErrors.email ? 'email-error' : undefined}
           />
-          {fieldErrors.email && <p id="email-error" className="text-xs text-red-500">{fieldErrors.email}</p>}
+          {(fieldErrors.email || serverState?.errors?.email) && (
+            <p id="email-error" className="text-xs text-red-500">{fieldErrors.email || serverState?.errors?.email}</p>
+          )}
         </div>
         <div className="space-y-2">
             <label htmlFor="password" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Password</label>
@@ -85,17 +64,20 @@ export default function LoginForm() {
               aria-invalid={!!fieldErrors.password}
               aria-describedby={fieldErrors.password ? 'password-error' : undefined}
             />
-            {fieldErrors.password && <p id="password-error" className="text-xs text-red-500">{fieldErrors.password}</p>}
+            {(fieldErrors.password || serverState?.errors?.password) && (
+              <p id="password-error" className="text-xs text-red-500">{fieldErrors.password || serverState?.errors?.password}</p>
+            )}
         </div>
-        {error && <div className="text-xs text-red-500">{error}</div>}
+        {serverState?.errors?.form && <div className="text-xs text-red-500">{serverState.errors.form}</div>}
+        {serverState?.success && <div className="text-xs text-green-600">{serverState.success}</div>}
         <Button
           type="submit"
           variant="primary"
           size="md"
-          disabled={loading}
+          disabled={isPending}
           className="w-full justify-center"
         >
-          {loading ? 'Signing in…' : 'Sign In'}
+          {isPending ? 'Signing in…' : 'Sign In'}
         </Button>
       </form>
       <div className="mt-6 pt-4 border-t border-border text-center">
