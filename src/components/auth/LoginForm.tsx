@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useActionState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
 import { loginUserAction, type LoginResult } from '@/actions/auth';
@@ -11,6 +12,7 @@ interface LoginFormState {
 }
 
 export default function LoginForm() {
+  const router = useRouter();
   const [form, setForm] = useState<LoginFormState>({ email: '', password: '' });
   const [serverState, formAction, isPending] = useActionState<LoginResult, FormData>(loginUserAction, {});
   const [fieldErrors, setFieldErrors] = useState<Record<string,string>>({});
@@ -20,6 +22,10 @@ export default function LoginForm() {
     if (!serverState) return;
     if (serverState.success) {
       toast.success(serverState.success);
+      // Redirect after a short delay for toast visibility
+      setTimeout(() => {
+        router.push('/');
+      }, 600);
     }
     if (serverState.errors?.form) {
       toast.error(serverState.errors.form);
@@ -27,7 +33,7 @@ export default function LoginForm() {
     if (serverState.errors?.email || serverState.errors?.password) {
       toast.error('Please fix the highlighted fields');
     }
-  }, [serverState]);
+  }, [serverState, router]);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
