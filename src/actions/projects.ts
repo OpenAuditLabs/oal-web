@@ -149,7 +149,7 @@ export async function deleteProjectAction(id: string) {
     const trimmed = id?.trim();
     if (!trimmed) throw new Error('Project id is required');
     const user = await requireAuthUser();
-    await prisma.project.delete({ where: { id_ownerId: { id: trimmed, ownerId: user.id } } as any });
+    await prisma.project.delete({ where: { id_ownerId: { id: trimmed, ownerId: user.id } } });
 
     // Revalidate pages that may list or depend on projects
     const pathsToRevalidate = [

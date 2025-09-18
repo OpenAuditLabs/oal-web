@@ -166,7 +166,7 @@ export async function updateActivityStatusAction(id: string, newStatus: 'active'
 
     const user = await requireAuthUser();
     const activity = await prisma.audit.update({
-      where: { id, project: { ownerId: user.id } } as any,
+      where: { id, project: { ownerId: user.id } },
       data: {
         status: mappedStatus,
         // Do NOT reset progress; preserve existing value for pause/resume behavior
@@ -204,7 +204,7 @@ export async function closeActivityAction(id: string): Promise<{ id: string; del
   try {
   if (!id) throw new Error('Audit id is required')
   const user = await requireAuthUser();
-  await prisma.audit.delete({ where: { id, project: { ownerId: user.id } } as any })
+  await prisma.audit.delete({ where: { id, project: { ownerId: user.id } }})
     return { id, deleted: true }
   } catch (error) {
     console.error('Error closing activity:', error)
