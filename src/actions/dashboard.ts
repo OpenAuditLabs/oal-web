@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { AuditStatus } from '@prisma/client'
+import { requireAuthUser } from '@/lib/auth-user'
 
 export interface DashboardKPI {
   icon: string
@@ -13,31 +14,20 @@ export interface DashboardKPI {
 
 export async function getDashboardKPIs(): Promise<DashboardKPI[]> {
   try {
-    // Get total project count
-    const projectCount = await prisma.project.count()
+  const user = await requireAuthUser();
+  // Get total project count (owned by user)
+  const projectCount = await prisma.project.count({ where: { ownerId: user.id } })
 
     // Get running audits (audits with IN_PROGRESS status)
-    const runningAudits = await prisma.audit.count({
-      where: {
-        status: AuditStatus.IN_PROGRESS
-      }
-    })
+    const runningAudits = await prisma.audit.count({ where: { status: AuditStatus.IN_PROGRESS, project: { ownerId: user.id } } })
 
     // Get completed audits
-    const completedAudits = await prisma.audit.count({
-      where: {
-        status: AuditStatus.COMPLETED
-      }
-    })
+    const completedAudits = await prisma.audit.count({ where: { status: AuditStatus.COMPLETED, project: { ownerId: user.id } } })
 
     // Get total findings from all completed audits
     const totalFindings = await prisma.audit.aggregate({
-      _sum: {
-        findingsCount: true
-      },
-      where: {
-        status: AuditStatus.COMPLETED
-      }
+      _sum: { findingsCount: true },
+      where: { status: AuditStatus.COMPLETED, project: { ownerId: user.id } }
     })
 
     const kpiData: DashboardKPI[] = [

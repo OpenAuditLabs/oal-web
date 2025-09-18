@@ -28,6 +28,7 @@ model Project {
   files  File[]
 
   @@index([ownerId])
+  @@unique([id, ownerId])
   @@map("projects")
 }
 
