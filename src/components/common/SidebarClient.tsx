@@ -8,6 +8,8 @@ import {
   Folder, 
 } from "lucide-react";
 import CreditsCard from "@/components/common/CreditsCard";
+import { logoutUserAction } from '@/actions/auth';
+import { useTransition } from 'react';
 
 type TabType = "dashboard" | "audits" | "past-audits" | "projects";
 
@@ -15,10 +17,19 @@ interface SidebarClientProps { activeTab: TabType; creditsLeft?: number; }
 
 export default function SidebarClient({ activeTab, creditsLeft }: SidebarClientProps) {
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
   const handleTabChange = (tab: TabType) => {
     const path = tab === "dashboard" ? "/" : `/?tab=${tab}`;
     router.push(path);
+  };
+
+  const handleLogout = () => {
+    if (pending) return;
+    startTransition(async () => {
+      await logoutUserAction();
+      router.push('/login');
+    });
   };
 
   return (
@@ -77,9 +88,19 @@ export default function SidebarClient({ activeTab, creditsLeft }: SidebarClientP
           </button>
         </nav>
 
-        {/* Credits card pinned to bottom */}
-        <div className="mt-auto pt-8">
-          <CreditsCard credits={creditsLeft} fixed={true} />
+        {/* Fixed footer area for credits + logout */}
+        <div className="mt-auto pt-8 relative">
+          <div className="fixed bottom-4 left-4 w-56 flex flex-col gap-3 z-40">
+            <CreditsCard credits={creditsLeft} fixed={false} />
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={pending}
+              className="rounded-lg bg-destructive text-white py-2 font-medium hover:bg-destructive/90 disabled:opacity-70 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50"
+            >
+              {pending ? 'Logging out...' : 'Log out'}
+            </button>
+          </div>
         </div>
       </div>
     </aside>
