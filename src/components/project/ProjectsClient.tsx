@@ -136,23 +136,30 @@ export default function ProjectsClient({ projects }: ProjectsClientProps) {
           auditCount: detailProject.auditCount ?? detailProject._count?.audits ?? 0,
         } : null}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-20">
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            id={project.id}
-            title={project.name}
-            description={project.description || "No description provided."}
-            fileCount={project.fileCount}
-            date={formatDate(project.createdAt)}
-            onEdit={handleEditProject}
-            onDelete={handleDeleteProject}
-            onAddFiles={handleAddFiles}
-            onRunAudit={handleRunAudit}
-            onOpenDetails={handleOpenDetails}
-          />
-        ))}
-      </div>
+      {projects.length === 0 ? (
+        <div className="rounded-md border bg-secondary border-dashed border-border p-8 text-center text-muted-foreground text-lg">
+          No projects available.<br />
+          <span className="block mt-2">Create a project to get started.</span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-20">
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              id={project.id}
+              title={project.name}
+              description={project.description || "No description provided."}
+              fileCount={project.fileCount}
+              date={formatDate(project.createdAt)}
+              onEdit={handleEditProject}
+              onDelete={handleDeleteProject}
+              onAddFiles={handleAddFiles}
+              onRunAudit={handleRunAudit}
+              onOpenDetails={handleOpenDetails}
+            />
+          ))}
+        </div>
+      )}
     </>
   );
 }

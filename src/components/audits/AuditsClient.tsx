@@ -93,44 +93,56 @@ export function AuditsClient({ initialAudits, searchQuery = "", statusFilter = [
       {/* Active Audits Section */}
   <div className="mb-8 space-y-4">
         <h2 className="text-xl font-bold text-foreground mb-4">Active Audits</h2>
-        {activeAudits.map(card => (
-          <AuditStatusCard
-            key={card.id}
-            id={card.id}
-            title={card.title}
-            currentStatus={card.currentStatus}
-            size={card.size}
-            started={card.started}
-            duration={card.duration}
-            progress={card.progress}
-            statusMessage={card.statusMessage}
-            statusType={card.statusType}
-            onStatusChange={handleStatusChange}
-            onClose={handleClose}
-          />
-        ))}
+        {activeAudits.length === 0 ? (
+          <div className="rounded-md bg-secondary border border-dashed border-border p-4 text-sm text-muted-foreground ">
+            No active audits available.
+          </div>
+        ) : (
+          activeAudits.map(card => (
+            <AuditStatusCard
+              key={card.id}
+              id={card.id}
+              title={card.title}
+              currentStatus={card.currentStatus}
+              size={card.size}
+              started={card.started}
+              duration={card.duration}
+              progress={card.progress}
+              statusMessage={card.statusMessage}
+              statusType={card.statusType}
+              onStatusChange={handleStatusChange}
+              onClose={handleClose}
+            />
+          ))
+        )}
       </div>
 
       {/* Queued Audits Section */}
   <div className="space-y-4">
         <QueuedAuditCount count={queuedAudits.length} />
         <h2 className="text-xl font-bold text-foreground mb-4">Queued Audits</h2>
-        {queuedAudits.map(card => (
-          <AuditStatusCard
-            key={card.id}
-            id={card.id}
-            title={card.title}
-            currentStatus={card.currentStatus}
-            size={card.size}
-            started={card.started}
-            duration={card.duration}
-            progress={card.progress}
-            statusMessage={card.statusMessage}
-            statusType={card.statusType}
-            onStatusChange={handleStatusChange}
-            onClose={handleClose}
-          />
-        ))}
+        {queuedAudits.length === 0 ? (
+          <div className="rounded-md border bg-secondary border-dashed border-border p-4 text-sm text-muted-foreground">
+            No queued audits available.
+          </div>
+        ) : (
+          queuedAudits.map(card => (
+            <AuditStatusCard
+              key={card.id}
+              id={card.id}
+              title={card.title}
+              currentStatus={card.currentStatus}
+              size={card.size}
+              started={card.started}
+              duration={card.duration}
+              progress={card.progress}
+              statusMessage={card.statusMessage}
+              statusType={card.statusType}
+              onStatusChange={handleStatusChange}
+              onClose={handleClose}
+            />
+          ))
+        )}
       </div>
     </>
   );
