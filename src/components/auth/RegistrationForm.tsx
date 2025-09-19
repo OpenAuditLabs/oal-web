@@ -1,6 +1,7 @@
 'use client'
 import { useState, ChangeEvent, useActionState, useEffect } from "react";
 import { validateRegistration } from "@/lib/validation";
+import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { registerUserAction, type RegisterResult } from "@/actions/auth";
@@ -25,6 +26,7 @@ export default function RegistrationForm() {
     email: "",
     password: "",
   });
+  const router = useRouter();
   const [clientErrors, setClientErrors] = useState<ErrorState>({});
   const [serverState, formAction, isPending] = useActionState<RegisterResult, FormData>(registerUserAction, {});
 
@@ -33,6 +35,9 @@ export default function RegistrationForm() {
     if (!serverState) return;
     if (serverState.success) {
       toast.success(serverState.success);
+      setTimeout(() => {
+        router.push('/login');
+      }, 1000);
     }
     if (serverState.errors?.form) {
       toast.error(serverState.errors.form);
