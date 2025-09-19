@@ -164,7 +164,7 @@ async function main() {
   const audits = []
   for (const project of createdProjects) {
     // Create 2-4 audits per project
-    const auditCount = faker.number.int({ min: 2, max: 4 })
+    const auditCount = faker.number.int({ min: 5, max: 24 })
     
     for (let i = 0; i < auditCount; i++) {
   const status = faker.helpers.arrayElement(['COMPLETED', 'FAILED'] as AuditStatus[])
