@@ -171,3 +171,36 @@ export async function logoutUserAction(): Promise<LogoutResult> {
     return { error: 'Logout failed' }
   }
 }
+
+// Forgot Password: email existence check (no token/email send yet)
+export type ForgotPasswordCheckResult = {
+  errors?: {
+    email?: string
+    form?: string
+  }
+  success?: string
+}
+
+export async function forgotPasswordCheckAction(_prev: ForgotPasswordCheckResult, formData: FormData): Promise<ForgotPasswordCheckResult> {
+  try {
+    const emailRaw = String(formData.get('email') ?? '').trim()
+    const email = emailRaw.toLowerCase()
+
+    // Use zod for validation
+    const { z } = await import('zod')
+    const emailSchema = z.string().trim().min(1, 'Email is required').email('Invalid email address')
+    const result = emailSchema.safeParse(email)
+    if (!result.success) {
+      return { errors: { email: result.error.issues[0]?.message || 'Invalid email' } }
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } })
+    if (!user) {
+      return { errors: { email: 'This email is not registered.' } }
+    }
+    return { success: 'Email found. You will receive a password reset link.' }
+  } catch (err) {
+    console.error('forgotPasswordCheckAction error:', err)
+    return { errors: { form: 'Something went wrong. Please try again.' } }
+  }
+}
