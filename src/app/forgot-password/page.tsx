@@ -7,27 +7,27 @@ import { forgotPasswordCheckAction, type ForgotPasswordCheckResult } from "@/act
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [isPendingState, formAction, isPending] = useActionState<ForgotPasswordCheckResult, FormData>(forgotPasswordCheckAction, {} as ForgotPasswordCheckResult);
+  const [formState, formAction, isPending] = useActionState(forgotPasswordCheckAction, {} as ForgotPasswordCheckResult);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    if (!isPendingState) return;
-    if (isPendingState.success) {
-      setSuccess(isPendingState.success);
+    if (!formState) return;
+    if (formState.success) {
+      setSuccess(formState.success);
       setError("");
-      toast.success(isPendingState.success);
+      toast.success(formState.success);
     }
-    if (isPendingState.errors?.email) {
-      setError(isPendingState.errors.email);
+    if (formState.errors?.email) {
+      setError(formState.errors.email);
       setSuccess("");
-      toast.error(isPendingState.errors.email);
-    } else if (isPendingState.errors?.form) {
-      setError(isPendingState.errors.form);
+      toast.error(formState.errors.email);
+    } else if (formState.errors?.form) {
+      setError(formState.errors.form);
       setSuccess("");
-      toast.error(isPendingState.errors.form);
+      toast.error(formState.errors.form);
     }
-  }, [isPendingState]);
+  }, [formState]);
 
   return (
     <div className="rounded-xl border border-border bg-background p-6 shadow-sm max-w-md mx-auto mt-16">
