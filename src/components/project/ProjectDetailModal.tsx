@@ -1,7 +1,8 @@
 "use client";
 
 import { X, FileText, Calendar, Layers3, ListChecks } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { getProjectAudits } from '@/actions/audits';
 
 export interface ProjectDetailData {
   id: string;
@@ -20,6 +21,19 @@ interface ProjectDetailModalProps {
 }
 
 export default function ProjectDetailModal({ open, project, onClose }: ProjectDetailModalProps) {
+  const [audits, setAudits] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (open && project?.id) {
+      setLoading(true);
+      getProjectAudits(project.id).then((data) => {
+        setAudits(data || []);
+        setLoading(false);
+      });
+    } else {
+      setAudits([]);
+    }
+  }, [open, project?.id]);
   const dialogRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -113,10 +127,42 @@ export default function ProjectDetailModal({ open, project, onClose }: ProjectDe
             </div>
           </div>
         </div>
-        {/* Placeholder for future audits list / recent activity */}
         <div className="mt-2">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-2">Recent Audits (coming soon)</h3>
-          <div className="text-xs text-muted-foreground">This area will display recent audits, severity distribution, and credit usage related to this project.</div>
+          <h3 className="text-sm font-semibold text-muted-foreground mb-2">Recent Audits</h3>
+          {loading ? (
+            <div className="text-xs text-muted-foreground">Loading audits…</div>
+          ) : audits.length === 0 ? (
+            <div className="text-xs text-muted-foreground">No audits found for this project.</div>
+          ) : (
+            <div className="relative">
+              <div className="max-h-64 overflow-y-auto rounded-md border border-border">
+                <table className="min-w-full text-xs">
+                  <thead className="sticky top-0 z-10" style={{ background: 'var(--accent)' }}>
+                    <tr>
+                      <th className="px-2 py-2 text-left font-semibold text-muted-foreground">Sl</th>
+                      <th className="px-2 py-2 text-left font-semibold text-muted-foreground">Status</th>
+                      <th className="px-2 py-2 text-left font-semibold text-muted-foreground">Severity</th>
+                      <th className="px-2 py-2 text-left font-semibold text-muted-foreground">Findings</th>
+                      <th className="px-2 py-2 text-left font-semibold text-muted-foreground">Started</th>
+                      <th className="px-2 py-2 text-left font-semibold text-muted-foreground">Completed</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {audits.map((audit, index) => (
+                      <tr key={audit.id} className="border-b border-border">
+                        <td className="px-2 py-2">{index + 1}</td>
+                        <td className="px-2 py-2">{audit.status}</td>
+                        <td className="px-2 py-2">{audit.overallSeverity || '-'}</td>
+                        <td className="px-2 py-2">{audit.findingsCount}</td>
+                        <td className="px-2 py-2">{new Date(audit.createdAt).toLocaleString()}</td>
+                        <td className="px-2 py-2">{audit.completedAt ? new Date(audit.completedAt).toLocaleString() : '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
