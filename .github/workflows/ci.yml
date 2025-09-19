@@ -1,4 +1,4 @@
-name: OAL-web CI
+name: CI (Lint and Build)
 
 on:
   push:
