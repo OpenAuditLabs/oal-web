@@ -136,3 +136,38 @@ export async function loginUserAction(_prevState: LoginResult, formData: FormDat
     return { errors: { form: 'Login failed. Please try again.' } }
   }
 }
+
+// Simple result type for logout
+export type LogoutResult = { success?: string; error?: string }
+
+export async function logoutUserAction(): Promise<LogoutResult> {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('auth_token')?.value
+    if (token) {
+      // Hash token to attempt clearing jwt_hash (best effort)
+      try {
+        const hash = createHash('sha256').update(token).digest('hex')
+        // Clear jwt_hash only if it matches to avoid overwriting concurrent sessions (if any)
+        await prisma.user.updateMany({
+          where: { jwt_hash: hash },
+          data: { jwt_hash: null },
+        })
+      } catch (e) {
+        console.warn('Failed to clear jwt_hash during logout', e)
+      }
+    }
+    // Expire cookie
+    cookieStore.set('auth_token', '', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 0,
+    })
+    return { success: 'Logged out' }
+  } catch (e) {
+    console.error('logoutUserAction error:', e)
+    return { error: 'Logout failed' }
+  }
+}
