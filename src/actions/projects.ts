@@ -2,11 +2,12 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from "next/cache";
-import { ensureDemoUserWithCredit } from '@/lib/user'
+import { requireAuthUser } from '@/lib/auth-user'
 
 // Get all projects
 export async function getProjects() {
   try {
+    const user = await requireAuthUser();
     const projects = await prisma.project.findMany({
       include: {
         _count: {
@@ -17,7 +18,8 @@ export async function getProjects() {
       },
       orderBy: {
         updatedAt: 'desc'
-      }
+      },
+      where: { ownerId: user.id }
     })
 
     return projects.map(project => ({
@@ -33,10 +35,9 @@ export async function getProjects() {
 // Get project by ID with audit history
 export async function getProjectWithAudits(projectId: string) {
   try {
-    const project = await prisma.project.findUnique({
-      where: {
-        id: projectId
-      },
+    const user = await requireAuthUser();
+    const project = await prisma.project.findFirst({
+      where: { id: projectId, ownerId: user.id },
       include: {
         audits: {
           orderBy: {
@@ -74,7 +75,7 @@ export async function createProject(formData: FormData) {
     const parsed = typeof rawFileCount === 'string' ? Number(rawFileCount) : 0;
     const fileCount = Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 0;
     
-  const user = await ensureDemoUserWithCredit();
+  const user = await requireAuthUser();
 
     await prisma.project.create({
       data: {
@@ -110,6 +111,8 @@ export async function updateProject(formData: FormData) {
       ? rawDescription.trim()
       : null;
 
+    const owner = await prisma.project.findFirst({ where: { id, ownerId: (await requireAuthUser()).id }, select: { id: true } });
+    if (!owner) throw new Error('Not found');
     await prisma.project.update({
       where: { id },
       data: { name, description }
@@ -145,8 +148,8 @@ export async function deleteProjectAction(id: string) {
   try {
     const trimmed = id?.trim();
     if (!trimmed) throw new Error('Project id is required');
-
-    await prisma.project.delete({ where: { id: trimmed } });
+    const user = await requireAuthUser();
+    await prisma.project.delete({ where: { id_ownerId: { id: trimmed, ownerId: user.id } } });
 
     // Revalidate pages that may list or depend on projects
     const pathsToRevalidate = [

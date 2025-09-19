@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from '@/lib/prisma';
+import { requireAuthUser } from '@/lib/auth-user';
 import { AuditStatus } from '@prisma/client';
 
 export interface ActiveAuditCard {
@@ -58,8 +59,12 @@ function calculateDuration(startDate: Date): string {
 
 export async function getActiveAuditsCards(): Promise<ActiveAuditCard[]> {
   try {
+    const user = await requireAuthUser();
     const audits = await prisma.audit.findMany({
-      where: { status: { in: [AuditStatus.IN_PROGRESS, AuditStatus.QUEUED] } },
+      where: { 
+        status: { in: [AuditStatus.IN_PROGRESS, AuditStatus.QUEUED] },
+        project: { ownerId: user.id }
+      },
       orderBy: [
         { status: 'asc' },
         { createdAt: 'desc' }
@@ -85,9 +90,11 @@ export async function getActiveAuditsCards(): Promise<ActiveAuditCard[]> {
 export async function getRecentActivities(limit: number = 10): Promise<ActivityData[]> {
   try {
     const safeLimit = Math.max(1, Math.min(100, Math.floor(Number.isFinite(limit) ? limit : 10)));
+    const user = await requireAuthUser();
     const audits = await prisma.audit.findMany({
       where: {
-        status: { in: [AuditStatus.IN_PROGRESS, AuditStatus.QUEUED, AuditStatus.COMPLETED, AuditStatus.FAILED] }
+        status: { in: [AuditStatus.IN_PROGRESS, AuditStatus.QUEUED, AuditStatus.COMPLETED, AuditStatus.FAILED] },
+        project: { ownerId: user.id }
       },
       orderBy: { updatedAt: 'desc' },
       take: safeLimit,
@@ -122,7 +129,8 @@ export async function updateActiveAuditStatus(id: string, newStatus: 'active' | 
   try {
     if (!id) throw new Error('Audit id required');
     const mapped = newStatus === 'active' ? AuditStatus.IN_PROGRESS : AuditStatus.QUEUED;
-    const audit = await prisma.audit.update({ where: { id }, data: { status: mapped } });
+  const user = await requireAuthUser();
+  const audit = await prisma.audit.update({ where: { id, project: { ownerId: user.id } } as any, data: { status: mapped } });
     return {
       id: audit.id,
       title: audit.projectName,
@@ -143,8 +151,9 @@ export async function updateActiveAuditStatus(id: string, newStatus: 'active' | 
 export async function removeActiveAudit(id: string): Promise<{ id: string; deleted: boolean }> {
   try {
     // Only allow deletion of QUEUED audits to avoid losing historical data
-    const audit = await prisma.audit.findUnique({
-      where: { id },
+    const user = await requireAuthUser();
+    const audit = await prisma.audit.findFirst({
+      where: { id, project: { ownerId: user.id } },
       select: { status: true }
     });
 
@@ -157,7 +166,7 @@ export async function removeActiveAudit(id: string): Promise<{ id: string; delet
       return { id, deleted: false };
     }
 
-    await prisma.audit.delete({ where: { id } });
+  await prisma.audit.delete({ where: { id, project: { ownerId: user.id } } as any });
     return { id, deleted: true };
   } catch (e) {
     console.error('Error removing active audit:', e);

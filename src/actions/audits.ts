@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { requireAuthUser } from '@/lib/auth-user'
 import { AuditStatus, SeverityLevel, Prisma } from '@prisma/client'
 
 // Types for the audit history
@@ -45,6 +46,7 @@ export async function getAuditHistory({
   severity = []
 }: PaginationParams = {}): Promise<AuditHistoryResult> {
   try {
+    const user = await requireAuthUser();
     // Define maximum limit to prevent excessive queries
     const MAX_LIMIT = 100;
     
@@ -133,7 +135,7 @@ export async function getAuditHistory({
     // Get audits with pagination and search
     const [audits, totalCount] = await Promise.all([
       prisma.audit.findMany({
-        where: whereClause,
+        where: { ...whereClause, project: { ownerId: user.id } },
         select: {
           id: true,
           projectName: true,
@@ -152,7 +154,7 @@ export async function getAuditHistory({
         take: safeLimit,
       }),
       prisma.audit.count({
-        where: whereClause
+        where: { ...whereClause, project: { ownerId: user.id } }
       })
     ])
 
@@ -188,10 +190,9 @@ export type AuditReportWithRelations = Prisma.AuditGetPayload<{
 
 export async function getAuditReport(auditId: string): Promise<AuditReportWithRelations> {
   try {
-    const audit = await prisma.audit.findUnique({
-      where: {
-        id: auditId
-      },
+    const user = await requireAuthUser();
+    const audit = await prisma.audit.findFirst({
+      where: { id: auditId, project: { ownerId: user.id } },
       include: {
         project: true,
         findings: {
@@ -220,6 +221,7 @@ export async function getAuditReport(auditId: string): Promise<AuditReportWithRe
 // Create a new audit (for re-run functionality)
 export async function createAuditRerun(originalAuditId: string) {
   try {
+    const user = await requireAuthUser();
     const result = await prisma.$transaction(async (tx) => {
       const originalAudit = await tx.audit.findUnique({
         where: { id: originalAuditId },
@@ -230,7 +232,8 @@ export async function createAuditRerun(originalAuditId: string) {
         throw new Error('Original audit not found')
       }
 
-      // Remove existing findings for this audit to reset state
+  if (originalAudit.project.ownerId !== user.id) throw new Error('Not authorized');
+  // Remove existing findings for this audit to reset state
       await tx.finding.deleteMany({ where: { auditId: originalAuditId } })
 
       // Move the existing audit back to active by updating its status and clearing completion fields
@@ -264,6 +267,7 @@ export async function createAuditRerun(originalAuditId: string) {
 // Get audit statistics for dashboard
 export async function getAuditStatistics() {
   try {
+    const user = await requireAuthUser();
     const [
       totalAudits,
       completedAudits,
@@ -273,32 +277,23 @@ export async function getAuditStatistics() {
       severityStats
     ] = await Promise.all([
       // Total audits
-      prisma.audit.count(),
+      prisma.audit.count({ where: { project: { ownerId: user.id } } }),
       
       // Completed audits
-      prisma.audit.count({
-        where: { status: 'COMPLETED' }
-      }),
+      prisma.audit.count({ where: { status: 'COMPLETED', project: { ownerId: user.id } } }),
       
       // Failed audits  
-      prisma.audit.count({
-        where: { status: 'FAILED' }
-      }),
+      prisma.audit.count({ where: { status: 'FAILED', project: { ownerId: user.id } } }),
       
       // Recent audits (last 30 days)
-      prisma.audit.count({
-        where: {
-          createdAt: {
-            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-          }
-        }
-      }),
+      prisma.audit.count({ where: { createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, project: { ownerId: user.id } } }),
       
       // Total findings across all audits
       prisma.audit.aggregate({
         _sum: {
           findingsCount: true
         }
+        , where: { project: { ownerId: user.id } }
       }),
       
       // Severity distribution
@@ -309,9 +304,8 @@ export async function getAuditStatistics() {
         },
         where: {
           status: 'COMPLETED',
-          overallSeverity: {
-            not: null
-          }
+          overallSeverity: { not: null },
+          project: { ownerId: user.id }
         }
       })
     ])
@@ -338,9 +332,11 @@ export async function getAuditStatistics() {
 // Get recent audit activity for dashboard
 export async function getRecentAuditActivity(limit = 5) {
   try {
+    const user = await requireAuthUser();
     const recentAudits = await prisma.audit.findMany({
       where: {
-        status: 'COMPLETED'
+        status: 'COMPLETED',
+        project: { ownerId: user.id }
       },
       select: {
         id: true,

@@ -1,12 +1,14 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { requireAuthUser } from '@/lib/auth-user'
 import { revalidatePath } from 'next/cache'
 
 export async function createAuditForProject(projectId: string) {
   if (!projectId) throw new Error('projectId is required')
   // Create a new queued audit for project
-  const project = await prisma.project.findUnique({ where: { id: projectId } })
+  const user = await requireAuthUser();
+  const project = await prisma.project.findFirst({ where: { id: projectId, ownerId: user.id } })
   if (!project) throw new Error('Project not found')
 
   const audit = await prisma.audit.create({

@@ -1,6 +1,7 @@
 'use server'
 
 import { createAuditRerun } from '@/actions/audits'
+import { requireAuthUser } from '@/lib/auth-user'
 import { revalidatePath } from 'next/cache'
 
 export async function rerunAuditAction(formData: FormData) {
@@ -17,7 +18,8 @@ export async function rerunAuditAction(formData: FormData) {
   const trimmedAuditId = auditId.trim()
   
   try {
-    await createAuditRerun(trimmedAuditId)
+  await requireAuthUser();
+  await createAuditRerun(trimmedAuditId)
     revalidatePath('/')
   } catch (error) {
     console.error('Error re-running audit:', error)
