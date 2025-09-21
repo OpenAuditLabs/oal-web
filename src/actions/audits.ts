@@ -4,6 +4,33 @@ import { prisma } from '@/lib/prisma'
 import { requireAuthUser } from '@/lib/auth-user'
 import { AuditStatus, SeverityLevel, Prisma } from '@prisma/client'
 
+// Get all audits for a specific project
+export async function getProjectAudits(projectId: string) {
+  try {
+    const user = await requireAuthUser();
+    if (!projectId) throw new Error('Missing projectId');
+    const audits = await prisma.audit.findMany({
+      where: {
+        projectId,
+        project: { ownerId: user.id }
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        status: true,
+        overallSeverity: true,
+        findingsCount: true,
+        createdAt: true,
+        completedAt: true,
+      }
+    });
+    return audits;
+  } catch (err) {
+    console.error('getProjectAudits error:', err);
+    return [];
+  }
+}
+
 // Types for the audit history
 export interface AuditHistoryItem {
   id: string
