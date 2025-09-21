@@ -107,6 +107,13 @@ export default function LoginForm() {
         >
           Not yet a member?
         </Link>
+        <br />
+        <Link
+          href="/forgot-password"
+          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+        >
+          Having trouble signing in? Reset your password.
+        </Link>
       </div>
     </div>
   );
