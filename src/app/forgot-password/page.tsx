@@ -1,40 +1,39 @@
 "use client";
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useActionState, useEffect } from "react";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { toast } from "sonner";
+import { forgotPasswordCheckAction, type ForgotPasswordCheckResult } from "@/actions/auth";
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
-  const [isPending, setIsPending] = useState(false);
+  const [formState, formAction, isPending] = useActionState(forgotPasswordCheckAction, {} as ForgotPasswordCheckResult);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsPending(true);
-    setError("");
-    setSuccess("");
-    try {
-      // TODO: Replace with actual server action for password reset
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setSuccess("If your email is registered, you will receive a password reset link.");
-      toast.success("Check your email for reset instructions.");
-    } catch (err) {
-      setError("Something went wrong. Please try again.");
-      toast.error("Failed to send reset link.");
-    } finally {
-      setIsPending(false);
+  useEffect(() => {
+    if (!formState) return;
+    if (formState.success) {
+      setSuccess(formState.success);
+      setError("");
+      toast.success(formState.success);
     }
-  };
+    if (formState.errors?.email) {
+      setError(formState.errors.email);
+      setSuccess("");
+      toast.error(formState.errors.email);
+    } else if (formState.errors?.form) {
+      setError(formState.errors.form);
+      setSuccess("");
+      toast.error(formState.errors.form);
+    }
+  }, [formState]);
 
   return (
     <div className="rounded-xl border border-border bg-background p-6 shadow-sm max-w-md mx-auto mt-16">
       <h1 className="text-xl font-semibold mb-1 text-foreground">Forgot Password?</h1>
       <p className="text-sm text-muted-foreground mb-6">Enter your email to receive a password reset link.</p>
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+      <form action={formAction} className="space-y-4" noValidate>
         <div className="space-y-2">
           <label htmlFor="email" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Email</label>
           <input
