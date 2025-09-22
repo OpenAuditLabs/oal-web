@@ -129,8 +129,14 @@ export async function updateActiveAuditStatus(id: string, newStatus: 'active' | 
   try {
     if (!id) throw new Error('Audit id required');
     const mapped = newStatus === 'active' ? AuditStatus.IN_PROGRESS : AuditStatus.QUEUED;
-  const user = await requireAuthUser();
-  const audit = await prisma.audit.update({ where: { id, project: { ownerId: user.id } } as any, data: { status: mapped } });
+    const user = await requireAuthUser();
+    // Verify ownership before updating since Prisma update cannot filter by relations
+    const owned = await prisma.audit.findFirst({ where: { id, project: { ownerId: user.id } } });
+    if (!owned) {
+      console.warn(`updateActiveAuditStatus: unauthorized access for audit ${id}`);
+      return null;
+    }
+    const audit = await prisma.audit.update({ where: { id }, data: { status: mapped } });
     return {
       id: audit.id,
       title: audit.projectName,
@@ -166,7 +172,8 @@ export async function removeActiveAudit(id: string): Promise<{ id: string; delet
       return { id, deleted: false };
     }
 
-  await prisma.audit.delete({ where: { id, project: { ownerId: user.id } } as any });
+    // Ownership was verified above; proceed to delete by id
+    await prisma.audit.delete({ where: { id } });
     return { id, deleted: true };
   } catch (e) {
     console.error('Error removing active audit:', e);

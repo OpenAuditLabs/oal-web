@@ -49,7 +49,7 @@ export default function RegistrationForm() {
     ) {
       toast.error('Please fix the highlighted fields');
     }
-  }, [serverState]);
+  }, [serverState, router]);
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });

@@ -2,6 +2,7 @@
 
 import { X, FileText, Calendar, Layers3, ListChecks } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import type { AuditStatus, SeverityLevel } from '@prisma/client';
 import { getProjectAudits } from '@/actions/audits';
 
 export interface ProjectDetailData {
@@ -20,14 +21,39 @@ interface ProjectDetailModalProps {
   onClose: () => void;
 }
 
+export type ProjectAuditRow = {
+  id: string;
+  status: string;
+  overallSeverity?: string;
+  findingsCount: number;
+  createdAt: Date;
+  completedAt?: Date | null;
+};
+
 export default function ProjectDetailModal({ open, project, onClose }: ProjectDetailModalProps) {
-  const [audits, setAudits] = useState<any[]>([]);
+  const [audits, setAudits] = useState<ProjectAuditRow[]>([]);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (open && project?.id) {
       setLoading(true);
       getProjectAudits(project.id).then((data) => {
-        setAudits(data || []);
+        type RawProjectAudit = {
+          id: string;
+          status: AuditStatus;
+          overallSeverity: SeverityLevel | null;
+          findingsCount: number;
+          createdAt: Date | string;
+          completedAt: Date | string | null;
+        };
+        const rows: ProjectAuditRow[] = ((data || []) as RawProjectAudit[]).map((a) => ({
+          id: a.id,
+          status: String(a.status),
+          overallSeverity: a.overallSeverity ? String(a.overallSeverity) : undefined,
+          findingsCount: a.findingsCount,
+          createdAt: new Date(a.createdAt),
+          completedAt: a.completedAt ? new Date(a.completedAt) : null,
+        }));
+        setAudits(rows);
         setLoading(false);
       });
     } else {
