@@ -48,6 +48,7 @@ The OpenAuditLabs Web Dashboard is designed to be the central hub for users to i
 
 3. **Configure Environment:**
    - Copy `.env.example` to `.env` and update configuration variables as needed.
+   - Set `IRON_SESSION_PASSWORD` to a long, random string (32+ characters) used to encrypt the session cookie.
 
 4. **Start the Development Server:**
    ```bash
