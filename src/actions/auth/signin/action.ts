@@ -26,7 +26,7 @@ export const signinAction = actionClient
         throw new Error(error.message, { cause: error })
       }
 
-      console.error('Sign in error:', error, { email })
+      console.error('Sign in error:', error)
       throw new Error('Something went wrong')
     }
   })

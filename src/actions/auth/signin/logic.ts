@@ -43,7 +43,7 @@ export async function signin(input: SigninInput): Promise<Result<UserWithoutPass
   const { password: _password, ...userWithoutPassword } = user
 
   const session = await getSession()
-  session.user = { id: userWithoutPassword.id, email: userWithoutPassword.email, name: userWithoutPassword.name }
+  session.user = { id: userWithoutPassword.id }
   await session.save()
 
   return success(userWithoutPassword)

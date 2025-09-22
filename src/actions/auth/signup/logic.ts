@@ -20,7 +20,8 @@ export async function signup(input: SignupInput): Promise<Result<NewUser>> {
 
   const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } })
   if (existing) {
-    return error('Email already in use')
+    console.error('Signup error: Email already in use')
+    return error('Signup Error')
   }
 
   const hashed = await bcryptjs.hash(password, 10)
@@ -31,7 +32,7 @@ export async function signup(input: SignupInput): Promise<Result<NewUser>> {
   })
 
   const session = await getSession()
-  session.user = { id: user.id, email: user.email, name: user.name }
+  session.user = { id: user.id }
   await session.save()
 
   return success(user)

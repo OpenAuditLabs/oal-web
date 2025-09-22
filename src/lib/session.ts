@@ -2,33 +2,21 @@ import 'server-only'
 import { cookies } from 'next/headers'
 import { getIronSession } from 'iron-session'
 import type { IronSession, SessionOptions } from 'iron-session'
+import { IRON_SESSION_PASSWORD } from '@/lib/env'
+import { IS_PRODUCTION, cookieName } from '@/lib/constants'
 
-// Shape of what we store in the session cookie
+
 export type SessionData = {
   user?: {
     id: string
-    email: string
-    name?: string | null
   }
-}
-
-// Ensure we always have a strong password in production
-function resolvePassword(): string {
-  const pwd = process.env.IRON_SESSION_PASSWORD
-  if (process.env.NODE_ENV === 'production') {
-    if (!pwd || pwd.length < 32) {
-      throw new Error('IRON_SESSION_PASSWORD must be set and at least 32 characters in production')
-    }
-    return pwd
-  }
-  return pwd && pwd.length >= 32 ? pwd : 'dev-only-password-must-be-32-chars-minimum-123456'
 }
 
 export const sessionOptions: SessionOptions = {
-  password: resolvePassword(),
-  cookieName: 'oal_session',
+  password: IRON_SESSION_PASSWORD,
+  cookieName: cookieName,
   cookieOptions: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: IS_PRODUCTION,
     httpOnly: true,
     sameSite: 'lax',
     path: '/',

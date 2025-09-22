@@ -26,7 +26,7 @@ export const signupAction = actionClient
         throw new Error(error.message, { cause: error })
       }
 
-      console.error('Sign up error:', error, { email })
+      console.error('Sign up error:', error)
       throw new Error('Something went wrong')
     }
   })
