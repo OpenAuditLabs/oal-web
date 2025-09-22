@@ -5,7 +5,9 @@ import { signout } from './logic'
 
 export const signoutAction = authActionClient
   .metadata({ actionName: 'signout' })
-  .action(async () => {
+  .action(async ({ ctx }) => {
+    const userId = ctx.session.user.id
+
     try {
       const result = await signout()
 
@@ -22,7 +24,7 @@ export const signoutAction = authActionClient
         throw new Error(error.message, { cause: error })
       }
 
-      console.error('Sign out error:', error)
+      console.error('Sign out error:', error, { userId })
       throw new Error('Something went wrong')
     }
   })
