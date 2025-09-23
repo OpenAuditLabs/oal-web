@@ -61,7 +61,7 @@ export function SignupForm() {
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(execute)}>
-            <CardContent className='space-y-4'>
+            <CardContent className='space-y-2'>
               <FormInput control={form.control} name='name' label='Name' placeholder='John Doe' required />
               <FormInput
                 control={form.control}
@@ -118,7 +118,7 @@ export function SignupForm() {
               </Button>
               <p className='text-center text-sm text-gray-600'>
                 Already have an account?{' '}
-                <Link href='/auth/signin' className='text-primary'>
+                <Link href='/signin' className='text-primary'>
                   Sign in
                 </Link>
               </p>
