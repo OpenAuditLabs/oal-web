@@ -10,7 +10,7 @@ if (!IRON_SESSION_PASSWORD || IRON_SESSION_PASSWORD.length < 32) {
     throw new Error('IRON_SESSION_PASSWORD must be set and at least 32 characters long');
   } else {
     // Fallback for development/CI to avoid failing builds/tests when no .env is present
-    IRON_SESSION_PASSWORD = 'dev-iron-session-password-at-least-32-chars!!';
+  IRON_SESSION_PASSWORD = 'dev-iron-session-password-at-least-32-chars!!';
     if (process.env.CI) {
       // Keep logs minimal in CI but note the fallback usage
       console.warn('[env] Using fallback IRON_SESSION_PASSWORD in non-production environment');
@@ -18,4 +18,7 @@ if (!IRON_SESSION_PASSWORD || IRON_SESSION_PASSWORD.length < 32) {
   }
 }
 
-export { APP_ENV, IRON_SESSION_PASSWORD };
+// Export as a definite string to satisfy consumers (e.g., iron-session SessionOptions)
+const IRON_SESSION_PASSWORD_STR: string = IRON_SESSION_PASSWORD as string;
+
+export { APP_ENV, IRON_SESSION_PASSWORD_STR as IRON_SESSION_PASSWORD };
