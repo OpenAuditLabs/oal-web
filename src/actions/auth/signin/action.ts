@@ -8,7 +8,6 @@ export const signinAction = actionClient
   .schema(signinSchema)
   .metadata({ actionName: 'signin' })
   .action(async ({ parsedInput }) => {
-    const { email } = parsedInput
 
     try {
       const result = await signin(parsedInput)
