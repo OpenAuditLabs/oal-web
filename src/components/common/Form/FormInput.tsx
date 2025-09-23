@@ -1,6 +1,6 @@
 import { Control, FieldValues, Path } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { HTMLInputTypeAttribute } from 'react';
 
 export function FormInput<T extends FieldValues>({
@@ -37,33 +37,29 @@ export function FormInput<T extends FieldValues>({
           <FormLabel>
             {label} {required && <span className='text-red-500'>*</span>}
           </FormLabel>
-          {helperText && <div className='text-xs text-gray-500 dark:text-gray-400 mt-0 mb-3'>{helperText}</div>}
+          {helperText && <FormDescription>{helperText}</FormDescription>}
           <div className='flex flex-row gap-1 items-center'>
             <FormControl>
               <Input
                 placeholder={placeholder}
                 {...field}
+                  value={field.value ?? ''}
                 min={min}
                 max={max}
                 step={step}
-                onChange={(e) => {
-                  if (type === 'number') {
-                    const value = e.target.value;
-                    if (value === '' || value === null || value === undefined) {
-                      field.onChange(null);
-                    } else {
-                      const num = Number(value.trim());
-                      if (Number.isNaN(num)) {
+                  onChange={(e) => {
+                    if (type === 'number') {
+                      const str = e.currentTarget.value;
+                      if (str === '') {
                         field.onChange(null);
-                        // Optionally, set an error here if you want to show a message
                       } else {
-                        field.onChange(num);
+                        const num = e.currentTarget.valueAsNumber;
+                        field.onChange(Number.isNaN(num) ? null : num);
                       }
+                    } else {
+                      field.onChange(e.target.value);
                     }
-                  } else {
-                    field.onChange(e.target.value);
-                  }
-                }}
+                  }}
                 type={type}
                 required={required}
               />

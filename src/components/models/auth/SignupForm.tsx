@@ -77,7 +77,7 @@ export function SignupForm() {
                 name='password'
                 type='password'
                 label='Password'
-                helperText='Password must be at least 8 characters long and include uppercase, lowercase, and a number.'
+                helperText='Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.'
                 required
               />
                 <FormInput
