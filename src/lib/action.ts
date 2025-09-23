@@ -1,5 +1,3 @@
-'use server'
-
 import { getSession } from '@/lib/session'
 import { prisma } from '@/lib/prisma'
 import { createSafeActionClient } from 'next-safe-action'
