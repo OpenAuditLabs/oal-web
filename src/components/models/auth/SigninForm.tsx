@@ -29,7 +29,7 @@ export function SigninForm() {
     onSuccess: () => {
       toast.success('Signin successful');
       form.reset();
-      router.push('/');
+      router.push('/dashboard');
     },
     onError: (error) => {
       const { serverError, validationErrors } = error.error;
@@ -70,7 +70,7 @@ export function SigninForm() {
 
             <CardFooter className='flex flex-col space-y-4'>
               <Button
-                className='mt-4'
+                className='mt-4 text-secondary'
                 disabled={isExecuting || !form.formState.isValid || !form.formState.isDirty}
                 type='submit'
               >
