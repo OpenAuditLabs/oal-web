@@ -6,16 +6,12 @@ import { FolderKanban, Timer, CheckCircle2, ShieldAlert } from 'lucide-react'
 import { extractNumber } from '@/lib/action-unwrap'
 
 export async function DashboardStatsGrid() {
-  // Invoke server actions (they encapsulate auth + validation). Each returns a SafeActionResult shape.
-  const [projectsRes, runningRes, completedRes] = await Promise.all([
-    projectCountAction(),
-    runningAuditCountAction(),
-    completedAuditCountAction(),
+  // Each action is wrapped with .then(extractNumber).catch(() => null) to ensure grid always renders.
+  const [projectCount, runningCount, completedCount] = await Promise.all([
+    projectCountAction().then(extractNumber).catch(() => null),
+    runningAuditCountAction().then(extractNumber).catch(() => null),
+    completedAuditCountAction().then(extractNumber).catch(() => null),
   ])
-
-  const projectCount = extractNumber(projectsRes)
-  const runningCount = extractNumber(runningRes)
-  const completedCount = extractNumber(completedRes)
 
   const totalFindings = 0
 
