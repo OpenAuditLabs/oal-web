@@ -21,9 +21,10 @@ export function AuditDetailCard({ audit }: AuditDetailCardProps) {
   const started = typeof audit.createdAt === 'string'
     ? DateTime.fromISO(audit.createdAt, { zone: 'utc' })
     : DateTime.fromJSDate(audit.createdAt, { zone: 'utc' })
+  const now = DateTime.now().setZone('utc')
 
   // Calculate duration using Luxon Duration
-  const rawDuration = started.diff(DateTime.now(), ['hours', 'minutes'])
+  const rawDuration = now.diff(started, ['hours', 'minutes'])
   // Round up minutes to nearest integer
   const hours = Math.floor(rawDuration.as('hours'))
   const minutes = Math.ceil(rawDuration.minutes)
