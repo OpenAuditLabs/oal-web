@@ -8,11 +8,11 @@ export interface AuditDetailCardProps {
 
 export function AuditDetailCard({ audit }: AuditDetailCardProps) {
   const isRunning = audit.status === 'RUNNING'
-  const progress = Math.max(0, Math.min(100, audit.progress))
+  const progress = Math.max(0, Math.min(100, Number(audit.progress ?? 0)))
 
   const progressTrack = 'bg-accent'
   const progressBar = isRunning ? 'bg-primary' : ''
-  const noteBg = isRunning ? 'bg-accent/20 border-primary border-1' : 'bg-queue/20 border-1 border-queue'
+  const noteBg = isRunning ? 'bg-accent/20 border-primary border' : 'bg-queue/20 border border-queue'
   const noteText = isRunning ? 'Analyzing security vulnerabilities and threat patterns...' : 'Queued for analysis...'
 
   const displayTitle = audit.project?.name

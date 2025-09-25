@@ -14,11 +14,11 @@ export function AuditsContainer({ audits }: AuditsContainerProps) {
         <h1 className="text-3xl font-semibold tracking-tight mb-2">Audits</h1>
         <p className="text-sm text-muted-foreground">Monitor real-time security analysis and threat detection</p>
         {activeCount > 0 && (
-          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-accent text-green-900 border border-primary text-base font-medium mt-4">
-            <span>{activeCount} Active Scan</span>
+          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-accent text-accent-foreground border border-primary text-base font-medium mt-4">
+            <span>{activeCount} {activeCount === 1 ? 'Active Scan' : 'Active Scans'}</span>
             <Image
               src="/icons/scan-alt.svg"
-              alt="Queued scans"
+              alt={`${activeCount} Active scan${activeCount === 1 ? '' : 's'}`}
               width={20}
               height={20}
               className="rotate-90 text-current"
