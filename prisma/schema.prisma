@@ -21,10 +21,51 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  
+  // Relations
+  projects  Project[]
 }
 
 enum Role {
   USER
   ADMIN
+}
+
+// Project owned by a User. Name unique. Tracks file count.
+model Project {
+  id          String   @id @default(cuid())
+  name        String   
+  description String?
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  audits      Audit[]
+
+  @@index([ownerId])
+}
+
+enum AuditStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+// Audit belonging to a Project. Tracks processing progress and file count snapshot.
+model Audit {
+  id        String      @id @default(cuid())
+  status    AuditStatus @default(QUEUED)
+  projectId String
+  fileCount Int         @default(0)
+  progress  Float       @default(0) // 0-100 percentage
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // Relations
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
 }
