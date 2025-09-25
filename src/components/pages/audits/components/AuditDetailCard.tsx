@@ -1,6 +1,6 @@
 import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
-import { X, FileText, Clock, Timer as TimerIcon } from 'lucide-react'
-import { DateTime, Duration } from 'luxon'
+import { FileText, Clock, Timer as TimerIcon } from 'lucide-react'
+import { DateTime } from 'luxon'
 
 export interface AuditDetailCardProps {
   audit: AuditWithProject
