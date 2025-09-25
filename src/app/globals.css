@@ -29,6 +29,9 @@
   --border: #E4E4E7; /* light gray border */
   --input: #E4E4E7;
   --ring: #008937; /* brand ring */
+  /* Queue status color */
+  --queue: #C9BC00;
+  --queue-foreground: #09090B;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -55,6 +58,8 @@
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-ring: var(--ring);
+  --color-queue: var(--queue);
+  --color-queue-foreground: var(--queue-foreground);
   --color-destructive: var(--destructive);
   --font-sans: var(--font-space-grotesk, var(--font-geist-sans));
   --font-mono: var(--font-geist-mono);
@@ -117,6 +122,9 @@
   --border: #27272A;
   --input: #27272A;
   --ring: #0E9F46;
+  /* Queue status color (kept consistent across themes) */
+  --queue: #C9BC00;
+  --queue-foreground: #09090B;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);

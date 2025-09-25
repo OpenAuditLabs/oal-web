@@ -1,8 +1,38 @@
-export default function AuditsPage() {
+import { safeAwait } from '@/lib/async'
+import { BasicAlert } from '@/components/common/BasicAlert'
+import { getSession } from '@/lib/session'
+import { getAuditsForUser } from '@/actions/audits/getAuditList/logic'
+import { AuditsContainer } from '@/components/pages/audits/AuditsContainer'
+
+export default async function AuditsPage() {
+  const session = await getSession()
+  const userId = session.user?.id
+
+  if (!userId) {
+    return (
+      <BasicAlert
+        variant="destructive"
+        title="Not authenticated"
+        description="Please sign in to view your audits."
+      />
+    )
+  }
+
+  const [err, res] = await safeAwait(getAuditsForUser(userId))
+  if (err || !res?.success) {
+    return (
+      <BasicAlert
+        variant="destructive"
+        title="Error loading audits"
+        description="There was a problem fetching your audits. Please try again."
+      />
+    )
+  }
+
+  const audits = res.data
+
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-semibold mb-4">Audits</h1>
-      <p className="text-sm text-muted-foreground">Placeholder audits content.</p>
-    </div>
-  );
+    
+  <AuditsContainer audits={audits} />
+  )
 }
