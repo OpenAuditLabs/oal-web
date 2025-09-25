@@ -33,7 +33,7 @@ export function SignupForm() {
     onSuccess: () => {
       toast.success('Signup successful');
       form.reset();
-      router.push('/');
+      router.push('/dashboard');
     },
     onError: (error) => {
       const { serverError, validationErrors } = error.error;
