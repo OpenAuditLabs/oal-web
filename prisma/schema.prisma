@@ -34,7 +34,7 @@ enum Role {
 // Project owned by a User. Name unique. Tracks file count.
 model Project {
   id          String   @id @default(cuid())
-  name        String   @unique
+  name        String   
   description String?
   ownerId     String
   createdAt   DateTime @default(now())
@@ -60,7 +60,7 @@ model Audit {
   status    AuditStatus @default(QUEUED)
   projectId String
   fileCount Int         @default(0)
-  progress  Int         @default(0) // 0-100 percentage
+  progress  Float       @default(0) // 0-100 percentage
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 

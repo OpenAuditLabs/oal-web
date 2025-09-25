@@ -19,15 +19,12 @@ CREATE TABLE "public"."Audit" (
     "status" "public"."AuditStatus" NOT NULL DEFAULT 'QUEUED',
     "projectId" TEXT NOT NULL,
     "fileCount" INTEGER NOT NULL DEFAULT 0,
-    "progress" INTEGER NOT NULL DEFAULT 0,
+    "progress" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Audit_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "Project_name_key" ON "public"."Project"("name");
 
 -- CreateIndex
 CREATE INDEX "Project_ownerId_idx" ON "public"."Project"("ownerId");
