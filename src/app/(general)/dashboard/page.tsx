@@ -1,17 +1,18 @@
-import { DashboardContainer } from '@/components/pages/dashboard/DashboardContainer'
+import { DashboardContainer } from '@/components/pages/dashboard/DashboardPageContainer'
 import { safeAwait } from '@/lib/async'
 import { getProjectCountForUser } from '@/actions/projects/getCount/logic'
 import { getRunningAuditCountForUser } from '@/actions/audits/getRunningCount/logic'
 import { getCompletedAuditCountForUser } from '@/actions/audits/getCompletedCount/logic'
 import { BasicAlert } from '@/components/common/BasicAlert'
 import { getSession } from '@/lib/session'
+import { redirect } from 'next/navigation'
 
 export default async function DashboardPage() {
   const session = await getSession()
   const userId = session.user?.id
 
   if (!userId) {
-    return <div className='p-10'><BasicAlert variant='destructive' title='Not authenticated' description='Please sign in to view your dashboard.' /></div>
+    redirect('/signin')
   }
 
   const [errAll, results] = await safeAwait(
