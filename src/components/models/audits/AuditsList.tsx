@@ -28,8 +28,8 @@ export function AuditsList({ audits }: AuditsListProps) {
             </div>
             <div className="grid gap-6">
               {audits
-                .filter(a => a.status === 'RUNNING')
                 .map(a => (
+                  // Using audit.id as key to prevent React list-key bugs, as it's a stable unique identifier.
                   <AuditDetailCard key={a.id} audit={a} />
                 ))}
             </div>
@@ -44,6 +44,7 @@ export function AuditsList({ audits }: AuditsListProps) {
               {audits
                 .filter(a => a.status === 'QUEUED')
                 .map(a => (
+                  // Using audit.id as key to prevent React list-key bugs, as it's a stable unique identifier.
                   <AuditDetailCard key={a.id} audit={a} />
                 ))}
             </div>
