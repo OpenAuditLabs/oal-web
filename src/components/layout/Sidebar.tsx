@@ -56,7 +56,7 @@ export function Sidebar({ className }: SidebarProps) {
           type="button"
           onClick={handleToggle}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          aria-pressed={isCollapsed}
+          aria-expanded={!isCollapsed}
           aria-controls="sidebar-navigation"
           className="ml-4 inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-sm"
         >
