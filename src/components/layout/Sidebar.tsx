@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Workflow, History, FolderKanban } from "lucide-react";
+import {
+  LayoutDashboard,
+  Workflow,
+  History,
+  FolderKanban,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -34,30 +41,33 @@ export function Sidebar({ className }: SidebarProps) {
   const handleToggle = () => setIsCollapsed(prev => !prev);
 
   return (
-    <>
-      <SidebarRoot
-        className={cn(
-          "hidden md:flex w-64 transition-[width] duration-200",
-          isCollapsed && "sidebar-collapsed",
-          className,
-        )}
-        aria-expanded={!isCollapsed}
-      >
-        <SidebarHeader className="h-16 flex items-center justify-between px-6 mb-20 mt-10 text-2xl font-semibold tracking-tight">
-          {/* Placeholder for future logo */}
-          <span className="text-primary sidebar-label">OpenAuditLabs</span>
-          <button
-            type="button"
-            onClick={handleToggle}
-            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-pressed={isCollapsed}
-            aria-controls="sidebar-navigation"
-            className="ml-4 inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-sm"
-          >
-            <span aria-hidden="true">{isCollapsed ? "›" : "‹"}</span>
-          </button>
-        </SidebarHeader>
-        <SidebarContent id="sidebar-navigation">
+    <SidebarRoot
+      className={cn(
+        "hidden md:flex transition-[width] duration-200",
+        isCollapsed ? "md:w-16" : "w-64",
+        className,
+      )}
+      aria-expanded={!isCollapsed}
+    >
+      <SidebarHeader className="mt-10 mb-20 flex h-16 items-center justify-between px-6 text-2xl font-semibold tracking-tight">
+        {/* Placeholder for future logo */}
+        <span className={cn("text-primary", isCollapsed && "sr-only")}>OpenAuditLabs</span>
+        <button
+          type="button"
+          onClick={handleToggle}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-pressed={isCollapsed}
+          aria-controls="sidebar-navigation"
+          className="ml-4 inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-sm"
+        >
+          {isCollapsed ? (
+            <ChevronRight className="size-4" aria-hidden="true" />
+          ) : (
+            <ChevronLeft className="size-4" aria-hidden="true" />
+          )}
+        </button>
+      </SidebarHeader>
+      <SidebarContent id="sidebar-navigation" aria-expanded={!isCollapsed}>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -67,9 +77,15 @@ export function Sidebar({ className }: SidebarProps) {
                 return (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton asChild isActive={active}>
-                        <Link href={item.href} className="flex items-center gap-3">
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "flex items-center gap-3 transition-[gap] duration-200",
+                          isCollapsed && "justify-center gap-0",
+                        )}
+                      >
                         <Icon className="size-5" />
-                          <span className="sidebar-label">{item.label}</span>
+                        <span className={cn(isCollapsed && "sr-only")}>{item.label}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -78,27 +94,7 @@ export function Sidebar({ className }: SidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        </SidebarContent>
-      </SidebarRoot>
-      <style jsx>{`
-        .sidebar-collapsed {
-          width: 4rem !important;
-        }
-
-        .sidebar-collapsed .sidebar-label {
-          opacity: 0;
-          pointer-events: none;
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border: 0;
-        }
-      `}</style>
-    </>
+      </SidebarContent>
+    </SidebarRoot>
   );
 }
