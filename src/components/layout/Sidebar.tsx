@@ -44,7 +44,7 @@ export function Sidebar({ className }: SidebarProps) {
     <SidebarRoot
       className={cn(
         "hidden md:flex transition-[width] duration-200",
-        isCollapsed ? "md:w-16" : "w-64",
+        isCollapsed ? "md:w-16" : "md:w-64",
         className,
       )}
     >
