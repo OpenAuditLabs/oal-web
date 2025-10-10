@@ -47,7 +47,6 @@ export function Sidebar({ className }: SidebarProps) {
         isCollapsed ? "md:w-16" : "w-64",
         className,
       )}
-      aria-expanded={!isCollapsed}
     >
       <SidebarHeader className="mt-10 mb-20 flex h-16 items-center justify-between px-6 text-2xl font-semibold tracking-tight">
         {/* Placeholder for future logo */}
@@ -67,7 +66,7 @@ export function Sidebar({ className }: SidebarProps) {
           )}
         </button>
       </SidebarHeader>
-      <SidebarContent id="sidebar-navigation" aria-expanded={!isCollapsed}>
+  <SidebarContent id="sidebar-navigation">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
