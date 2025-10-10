@@ -6,7 +6,7 @@ import { FormCheckbox } from '@/components/common/Form/FormCheckbox';
 import { FormInput } from '@/components/common/Form/FormInput';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAction } from 'next-safe-action/hooks';
 import Link from 'next/link';
