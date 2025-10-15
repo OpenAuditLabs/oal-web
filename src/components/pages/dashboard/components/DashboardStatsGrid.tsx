@@ -18,4 +18,4 @@ export const DashboardStatsGrid = React.memo(function DashboardStatsGrid({ proje
       <StatsCard label="Total Findings" value={totalFindings} icon={<ShieldAlert className="size-6" />} />
     </div>
   )
-}
+})
