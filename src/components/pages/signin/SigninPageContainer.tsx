@@ -1,3 +1,5 @@
+'use client'
+
 import { SigninForm } from '@/components/models/auth/SigninForm';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState } from 'react';
