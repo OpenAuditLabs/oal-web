@@ -42,6 +42,7 @@ export function Sidebar({ className }: SidebarProps) {
 
   return (
     <SidebarRoot
+      aria-expanded={!isCollapsed}
       className={cn(
         "hidden md:flex transition-[width] duration-200",
         isCollapsed ? "md:w-16" : "md:w-64",
@@ -66,7 +67,7 @@ export function Sidebar({ className }: SidebarProps) {
           )}
         </button>
       </SidebarHeader>
-  <SidebarContent id="sidebar-navigation">
+  <SidebarContent id="sidebar-navigation" aria-expanded={!isCollapsed}>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
