@@ -62,7 +62,7 @@ export function SignupForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(execute)}>
             <CardContent className='space-y-2'>
-              <FormInput control={form.control} name='name' label='Name' placeholder='John Doe' required />
+              <FormInput control={form.control} name='name' label='Name' placeholder='John Doe' required id='name' autoFocus />
               <FormInput
                 control={form.control}
                 name='email'
@@ -70,6 +70,7 @@ export function SignupForm() {
                 label='Email'
                 placeholder='john@example.com'
                 required
+                id='email'
               />
 
               <FormInput
@@ -79,6 +80,7 @@ export function SignupForm() {
                 label='Password'
                 helperText='Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.'
                 required
+                id='password'
               />
                 <FormInput
                 control={form.control}
@@ -87,6 +89,7 @@ export function SignupForm() {
                 label='Confirm Password'
                 helperText='Passwords must match.'
                 required
+                id='confirmPassword'
               />
 
               <FormCheckbox
