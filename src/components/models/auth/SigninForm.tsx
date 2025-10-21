@@ -12,9 +12,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import React from 'react';
 
 export function SigninForm() {
   const router = useRouter();
+  const emailInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  React.useEffect(() => {
+    emailInputRef.current?.focus();
+  }, []);
   const form = useForm({
     resolver: zodResolver(signinSchema),
     mode: 'onChange',
@@ -64,7 +70,7 @@ export function SigninForm() {
                 placeholder='john@example.com'
                 required
                 id='email'
-                autoFocus
+                ref={emailInputRef}
               />
 
               <FormInput control={form.control} name='password' type='password' label='Password' required id='password' />
