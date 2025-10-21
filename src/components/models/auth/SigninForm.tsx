@@ -63,9 +63,11 @@ export function SigninForm() {
                 label='Email'
                 placeholder='john@example.com'
                 required
+                id='email'
+                autoFocus
               />
 
-              <FormInput control={form.control} name='password' type='password' label='Password' required />
+              <FormInput control={form.control} name='password' type='password' label='Password' required id='password' />
             </CardContent>
 
             <CardFooter className='flex flex-col space-y-4'>
