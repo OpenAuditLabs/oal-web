@@ -26,7 +26,7 @@ export default async function DashboardPage() {
   if (errAll || !results) {
     return (<div className='p-10'>
         <BasicAlert
-          variant="destructive"
+          variant="error"
           title="Error loading dashboard"
           description="There was a problem fetching your data. Please try again."
         />
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
     return (
       <div className='p-10'>
         <BasicAlert
-          variant="destructive"
+          variant="error"
           title="Error loading dashboard"
           description="There was a problem fetching your data. Please try again."
           />

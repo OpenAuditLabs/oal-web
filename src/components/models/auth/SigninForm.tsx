@@ -70,7 +70,6 @@ export function SigninForm() {
                 placeholder='john@example.com'
                 required
                 id='email'
-                ref={emailInputRef}
               />
 
               <FormInput control={form.control} name='password' type='password' label='Password' required id='password' />
