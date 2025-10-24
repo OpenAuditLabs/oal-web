@@ -18,7 +18,7 @@ export default async function AuditsPage() {
     return (
       <div className='p-10'> 
           <BasicAlert
-            variant="destructive"
+            variant="error"
             title="Error loading audits"
             description="There was a problem fetching your audits. Please try again."
           />
