@@ -42,7 +42,7 @@ export function Sidebar({ className }: SidebarProps) {
 
   return (
     <SidebarRoot
-      aria-expanded={!isCollapsed}
+      collapsed={isCollapsed}
       className={cn(
         "hidden md:flex transition-[width] duration-200",
         isCollapsed ? "md:w-16" : "md:w-64",

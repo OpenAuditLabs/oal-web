@@ -48,6 +48,9 @@
   /* Custom sidebar item states */
   --sidebar-item-active: hsl(140 80% 85%); /* pale green */
   --sidebar-item-hover: hsl(140 80% 92%);
+  --spacing-4: 1rem; /* 16px, matches design system spacing-4 */
+  --sidebar-width: 16rem; /* 256px */
+  --sidebar-width-icon: 3rem; /* 48px - use if you implement the CSS variable approach above */
 }
 
 @theme inline {
