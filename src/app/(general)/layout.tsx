@@ -13,7 +13,7 @@ export default async function GeneralLayout({ children }: { children: ReactNode 
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <Sidebar />
-        <SidebarInset>
+        <SidebarInset className="md:ml-64 transition-[margin-left] duration-200">
           {children}
         </SidebarInset>
       </div>
