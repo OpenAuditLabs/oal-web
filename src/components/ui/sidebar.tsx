@@ -39,6 +39,7 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  collapsed: boolean
 }
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
@@ -116,6 +117,7 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      collapsed: !open && !isMobile,
     }),
     [open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
   )
@@ -159,7 +161,7 @@ function Sidebar({
   collapsible?: "offcanvas" | "icon" | "none"
   collapsed?: boolean
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, openMobile, setOpenMobile, collapsed } = useSidebar()
 
   if (collapsible === "none") {
     return (
@@ -506,7 +508,7 @@ function SidebarMenuButton({
   tooltip?: string | React.ComponentProps<typeof TooltipContent>
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot : "button"
-  const { isMobile, state } = useSidebar()
+  const { isMobile, collapsed } = useSidebar()
 
   const button = (
     <Comp
@@ -535,7 +537,7 @@ function SidebarMenuButton({
       <TooltipContent
         side="right"
         align="center"
-        hidden={state !== "collapsed" || isMobile}
+        hidden={!collapsed || isMobile}
         {...tooltip}
       />
     </Tooltip>
