@@ -40,6 +40,7 @@ type SidebarContextProps = {
   isMobile: boolean
   toggleSidebar: () => void
   collapsed: boolean
+  isCollapsed: boolean
 }
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
@@ -65,6 +66,7 @@ function SidebarProvider({
   defaultOpen?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  collapsed?: boolean
 }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
@@ -118,6 +120,7 @@ function SidebarProvider({
       setOpenMobile,
       toggleSidebar,
       collapsed: !open && !isMobile,
+      isCollapsed: !open && !isMobile,
     }),
     [open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
   )
@@ -159,9 +162,10 @@ function Sidebar({
   side?: "left" | "right"
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
-  collapsed?: boolean
+  collapsed: boolean
 }) {
-  const { isMobile, openMobile, setOpenMobile, collapsed } = useSidebar()
+  const { isMobile, openMobile, setOpenMobile, collapsed: contextCollapsed } = useSidebar()
+  const isCollapsed = collapsed ?? contextCollapsed
 
   if (collapsible === "none") {
     return (
@@ -206,8 +210,8 @@ function Sidebar({
   return (
     <div
       className="group peer text-sidebar-foreground hidden md:block"
-      data-state={collapsed ? "collapsed" : "expanded"}
-      data-collapsible={collapsed ? collapsible : ""}
+      data-state={isCollapsed ? "collapsed" : "expanded"}
+      data-collapsible={isCollapsed ? collapsible : ""}
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
@@ -508,7 +512,7 @@ function SidebarMenuButton({
   tooltip?: string | React.ComponentProps<typeof TooltipContent>
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot : "button"
-  const { isMobile, collapsed } = useSidebar()
+  const { isMobile, isCollapsed } = useSidebar()
 
   const button = (
     <Comp
@@ -537,7 +541,7 @@ function SidebarMenuButton({
       <TooltipContent
         side="right"
         align="center"
-        hidden={!collapsed || isMobile}
+        hidden={!isCollapsed || isMobile}
         {...tooltip}
       />
     </Tooltip>
