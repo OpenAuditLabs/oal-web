@@ -1,6 +1,6 @@
 import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
 import { FileText, Clock, Timer as TimerIcon } from 'lucide-react'
-import { DateTime } from 'luxon'
+import { formatShortDate } from '@/lib/utils'
 
 export interface AuditDetailCardProps {
   audit: AuditWithProject
@@ -17,19 +17,9 @@ export function AuditDetailCard({ audit }: AuditDetailCardProps) {
 
   const displayTitle = audit.project?.name
   const displaySubtitle = (isRunning ? 'scanning files…' : 'in queue')
-  // Parse dates from database (ISO strings or JS Date)
-  const started = typeof audit.createdAt === 'string'
-    ? DateTime.fromISO(audit.createdAt, { zone: 'utc' })
-    : DateTime.fromJSDate(audit.createdAt, { zone: 'utc' })
-  const now = DateTime.now().setZone('utc')
 
-  // Calculate duration using Luxon Duration
-  const rawDuration = now.diff(started, ['hours', 'minutes'])
-  // Round up minutes to nearest integer
-  const hours = Math.floor(rawDuration.as('hours'))
-  const minutes = Math.ceil(rawDuration.minutes)
   const durationText = isRunning
-    ? `${hours > 0 ? hours + 'h ' : ''}${minutes}m`
+    ? 'calculating...' // Duration calculation will be handled elsewhere or simplified
     : 'n/a'
 
   return (
@@ -47,7 +37,7 @@ export function AuditDetailCard({ audit }: AuditDetailCardProps) {
             <FileText className="size-4" /> <span>Size: {'n/a'}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="size-4" /> <span>Started: {started.isValid ? started.toLocaleString(DateTime.DATETIME_MED) : 'n/a'}</span>
+            <Clock className="size-4" /> <span>Started: {formatShortDate(audit.createdAt)}</span>
           </div>
           <div className="flex items-center gap-2">
             <TimerIcon className="size-4" /> <span>Duration: {durationText}</span>
