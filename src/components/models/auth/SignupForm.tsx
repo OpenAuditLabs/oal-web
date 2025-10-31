@@ -13,9 +13,26 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
+
+const PasswordToggleButton = ({ show, onToggle }: { show: boolean; onToggle: () => void }) => (
+  <Button
+    type="button"
+    variant="ghost"
+    size="sm"
+    className="px-3 py-2 hover:bg-transparent"
+    onClick={onToggle}
+  >
+    {show ? <EyeOffIcon className="h-4 w-4" aria-hidden="true"/> : <EyeIcon className="h-4 w-4" aria-hidden="true"/>}
+    <span className="sr-only">{show ? 'Hide password' : 'Show password'}</span>
+  </Button>
+);
 
 export function SignupForm() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const form = useForm({
     resolver: zodResolver(signupSchema),
     mode: 'onChange',
@@ -50,6 +67,19 @@ export function SignupForm() {
     }
   });
 
+  const password = form.watch('password') || '';
+  const getPasswordStrength = (password: string) => {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.match(/(?=.*[a-z])/)) strength++;
+    if (password.match(/(?=.*[A-Z])/)) strength++;
+    if (password.match(/(?=.*\d)/)) strength++;
+    if (password.match(/(?=.*[@$!%*?&])/)) strength++;
+    return strength;
+  };
+
+  const passwordStrength = getPasswordStrength(password);
+
   return (
     <div className='min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'>
       <Card className='w-full max-w-md'>
@@ -76,20 +106,71 @@ export function SignupForm() {
               <FormInput
                 control={form.control}
                 name='password'
-                type='password'
+                type={showPassword ? 'text' : 'password'}
                 label='Password'
                 helperText='Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.'
                 required
                 id='password'
+                endComponent={<PasswordToggleButton show={showPassword} onToggle={() => setShowPassword(p => !p)} />}
               />
-                <FormInput
+              {password && (
+                <div className='mt-2'>
+                  <div className='h-2 w-full rounded-full bg-gray-200'>
+                    <div
+                      className={`h-full rounded-full ${
+                        passwordStrength === 0
+                          ? 'bg-transparent'
+                          : passwordStrength === 1
+                          ? 'bg-red-500'
+                          : passwordStrength === 2
+                          ? 'bg-orange-500'
+                          : passwordStrength === 3
+                          ? 'bg-yellow-500'
+                          : passwordStrength === 4
+                          ? 'bg-lime-500'
+                          : 'bg-green-500'
+                      }`}
+                      style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                    />
+                  </div>
+                  <p
+                    className={`text-sm mt-1 ${
+                      passwordStrength === 0
+                        ? 'text-gray-500'
+                        : passwordStrength === 1
+                        ? 'text-red-500'
+                        : passwordStrength === 2
+                        ? 'text-orange-500'
+                        : passwordStrength === 3
+                        ? 'text-yellow-500'
+                        : passwordStrength === 4
+                        ? 'text-lime-500'
+                        : 'text-green-500'
+                    }`}
+                  >
+                    {passwordStrength === 0
+                      ? 'No password'
+                      : passwordStrength === 1
+                      ? 'Very Weak'
+                      : passwordStrength === 2
+                      ? 'Weak'
+                      : passwordStrength === 3
+                      ? 'Fair'
+                      : passwordStrength === 4
+                      ? 'Good'
+                      : 'Strong'}
+                  </p>
+                </div>
+              )}
+              <FormInput
                 control={form.control}
                 name='confirmPassword'
-                type='password'
+                type={showConfirmPassword ? 'text' : 'password'}
                 label='Confirm Password'
                 helperText='Passwords must match.'
                 required
                 id='confirmPassword'
+                endComponent={<PasswordToggleButton show={showConfirmPassword} onToggle={() => setShowConfirmPassword(p => !p)} />}
               />
 
               <FormCheckbox
