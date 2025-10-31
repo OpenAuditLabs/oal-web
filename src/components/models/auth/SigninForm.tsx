@@ -70,15 +70,29 @@ export function SigninForm() {
                 placeholder='john@example.com'
                 required
                 id='email'
+                errors={form.formState.errors}
               />
 
-              <FormInput control={form.control} name='password' type='password' label='Password' required id='password' />
+              <FormInput
+                control={form.control}
+                name='password'
+                type='password'
+                label='Password'
+                required
+                id='password'
+                errors={form.formState.errors}
+              />
             </CardContent>
 
             <CardFooter className='flex flex-col space-y-4'>
+              {form.formState.errors.root?.message && (
+                <div aria-live='assertive' className='text-red-500 text-sm'>
+                  {form.formState.errors.root.message}
+                </div>
+              )}
               <Button
                 className='mt-4 text-secondary'
-                disabled={isExecuting || !form.formState.isValid || !form.formState.isDirty}
+                disabled={isExecuting}
                 type='submit'
               >
                 {isExecuting ? 'Signing in...' : 'Sign In'}
