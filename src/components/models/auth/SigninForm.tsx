@@ -48,6 +48,15 @@ export function SigninForm() {
         : undefined;
 
       const errorMessage = serverError ?? formErrors ?? fieldErrorMessage ?? 'An unknown error occurred';
+      // Set form-level error so UI that reads form.formState.errors.root shows it
+      form.setError('root', { message: errorMessage });
+      // Optionally set field-level errors so FormInput/FormMessage show them inline
+      if (fieldErrors) {
+        Object.entries(fieldErrors).forEach(([fieldName, messages]) => {
+          const message = Array.isArray(messages) ? messages.join(', ') : String(messages ?? '');
+          form.setError(fieldName as any, { message });
+        });
+      }
       toast.error(errorMessage);
     }
   });
@@ -72,13 +81,25 @@ export function SigninForm() {
                 id='email'
               />
 
-              <FormInput control={form.control} name='password' type='password' label='Password' required id='password' />
+              <FormInput
+                control={form.control}
+                name='password'
+                type='password'
+                label='Password'
+                required
+                id='password'
+              />
             </CardContent>
 
             <CardFooter className='flex flex-col space-y-4'>
+              {form.formState.errors.root?.message && (
+                <div aria-live='assertive' className='text-red-500 text-sm'>
+                  {form.formState.errors.root.message}
+                </div>
+              )}
               <Button
                 className='mt-4 text-secondary'
-                disabled={isExecuting || !form.formState.isValid || !form.formState.isDirty}
+                disabled={isExecuting}
                 type='submit'
               >
                 {isExecuting ? 'Signing in...' : 'Sign In'}
