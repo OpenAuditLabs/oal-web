@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { MdErrorOutline } from 'react-icons/md';
@@ -62,7 +63,7 @@ export function BasicAlert({
   }[variant];
 
   return (
-    <Alert role="alert" variant={variant} className={className}>
+    <Alert role="alert" variant={variant} className={cn(onClose && 'pr-10', className)}>
       <Icon size={18} aria-hidden="true" />
       {title && <AlertTitle>{title}</AlertTitle>}
       <AlertDescription>{description}</AlertDescription>
@@ -70,8 +71,9 @@ export function BasicAlert({
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-2 h-6 w-6 text-foreground/50 hover:bg-transparent hover:text-foreground"
+          className="absolute right-2 top-2 h-6 w-6 text-foreground hover:bg-transparent"
           onClick={onClose}
+          aria-label="Close"
         >
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
