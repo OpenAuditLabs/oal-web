@@ -16,9 +16,23 @@ import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
+const PasswordToggleButton = ({ show, onToggle }: { show: boolean; onToggle: () => void }) => (
+  <Button
+    type="button"
+    variant="ghost"
+    size="sm"
+    className="px-3 py-2 hover:bg-transparent"
+    onClick={onToggle}
+  >
+    {show ? <EyeOffIcon className="h-4 w-4" aria-hidden="true"/> : <EyeIcon className="h-4 w-4" aria-hidden="true"/>}
+    <span className="sr-only">{show ? 'Hide password' : 'Show password'}</span>
+  </Button>
+);
+
 export function SignupForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const form = useForm({
     resolver: zodResolver(signupSchema),
     mode: 'onChange',
@@ -53,7 +67,7 @@ export function SignupForm() {
     }
   });
 
-  const password = form.watch('password');
+  const password = form.watch('password') || '';
   const getPasswordStrength = (password: string) => {
     let strength = 0;
     if (password.length >= 8) strength++;
@@ -89,31 +103,16 @@ export function SignupForm() {
                 id='email'
               />
 
-              <div className="relative">
-                <FormInput
-                  control={form.control}
-                  name='password'
-                  type={showPassword ? 'text' : 'password'}
-                  label='Password'
-                  helperText='Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.'
-                  required
-                  id='password'
-                />
-                <Button
-                  type='button'
-                  variant='ghost'
-                  size='sm'
-                  className='absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent'
-                  onClick={() => setShowPassword((prev) => !prev)}
-                >
-                  {showPassword ? (
-                    <EyeOffIcon className='h-4 w-4' aria-hidden='true' />
-                  ) : (
-                    <EyeIcon className='h-4 w-4' aria-hidden='true' />
-                  )}
-                  <span className='sr-only'>{showPassword ? 'Hide password' : 'Show password'}</span>
-                </Button>
-              </div>
+              <FormInput
+                control={form.control}
+                name='password'
+                type={showPassword ? 'text' : 'password'}
+                label='Password'
+                helperText='Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.'
+                required
+                id='password'
+                endComponent={<PasswordToggleButton show={showPassword} onToggle={() => setShowPassword(p => !p)} />}
+              />
               {password && (
                 <div className='mt-2'>
                   <div className='h-2 w-full rounded-full bg-gray-200'>
@@ -163,31 +162,16 @@ export function SignupForm() {
                   </p>
                 </div>
               )}
-              <div className="relative">
-                <FormInput
-                  control={form.control}
-                  name='confirmPassword'
-                  type={showPassword ? 'text' : 'password'}
-                  label='Confirm Password'
-                  helperText='Passwords must match.'
-                  required
-                  id='confirmPassword'
-                />
-                <Button
-                  type='button'
-                  variant='ghost'
-                  size='sm'
-                  className='absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent'
-                  onClick={() => setShowPassword((prev) => !prev)}
-                >
-                  {showPassword ? (
-                    <EyeOffIcon className='h-4 w-4' aria-hidden='true' />
-                  ) : (
-                    <EyeIcon className='h-4 w-4' aria-hidden='true' />
-                  )}
-                  <span className='sr-only'>{showPassword ? 'Hide password' : 'Show password'}</span>
-                </Button>
-              </div>
+              <FormInput
+                control={form.control}
+                name='confirmPassword'
+                type={showConfirmPassword ? 'text' : 'password'}
+                label='Confirm Password'
+                helperText='Passwords must match.'
+                required
+                id='confirmPassword'
+                endComponent={<PasswordToggleButton show={showConfirmPassword} onToggle={() => setShowConfirmPassword(p => !p)} />}
+              />
 
               <FormCheckbox
                 control={form.control}
