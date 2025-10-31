@@ -17,7 +17,7 @@ export function DashboardContainer({ projectCount, runningCount, completedCount,
           </div>
         <div className="space-y-8">
           {loading ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4">
               <Skeleton className="h-[120px] w-full" />
               <Skeleton className="h-[120px] w-full" />
               <Skeleton className="h-[120px] w-full" />
