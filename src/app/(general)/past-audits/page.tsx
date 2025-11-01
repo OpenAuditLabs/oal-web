@@ -1,8 +1,9 @@
 import { EmptyState } from '@/components/pages/audits/EmptyState';
+import { PastAudit } from '@/types/audit';
 
 export default function PastAuditsPage() {
   // Placeholder for fetching past audits
-  const pastAudits: any[] = []; // Simulate no past audits for now
+  const pastAudits: PastAudit[] = []; // Simulate no past audits for now
 
   return (
     <div className="p-8">
