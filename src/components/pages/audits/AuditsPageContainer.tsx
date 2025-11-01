@@ -3,10 +3,12 @@
 import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
 import { AuditsList } from '../../models/audits/AuditsList'
 import { Input } from '../../ui/input'
+import { Skeleton } from '../../ui/skeleton'
 import { useState, useEffect, useRef } from 'react'
 
 export interface AuditsContainerProps {
   audits: AuditWithProject[]
+  isLoading: boolean
 }
 
 export function AuditsContainer({ audits }: AuditsContainerProps) {
@@ -57,7 +59,15 @@ export function AuditsContainer({ audits }: AuditsContainerProps) {
         onKeyDown={handleKeyDown}
         className="max-w-sm"
       />
-      <AuditsList audits={audits} />
+      {isLoading ? (
+        <div className="space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full" />
+          ))}
+        </div>
+      ) : (
+        <AuditsList audits={audits} />
+      )}
     </div>
   )
 }
