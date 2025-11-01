@@ -43,14 +43,22 @@ export class AllAttemptsFailedError extends Error {
  *          or rejects with a TimeoutError if the timeout is reached.
  */
 export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  const timeout = new Promise<T>((_, reject) => {
-    const id = setTimeout(() => {
-      clearTimeout(id);
+  return new Promise<T>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
       reject(new TimeoutError(`Timed out after ${ms} ms`));
     }, ms);
-  });
 
-  return Promise.race([promise, timeout]);
+    promise.then(
+      (value) => {
+        clearTimeout(timeoutId);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      },
+    );
+  });
 }
 
 /**
