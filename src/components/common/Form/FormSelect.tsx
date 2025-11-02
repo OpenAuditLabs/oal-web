@@ -1,8 +1,10 @@
 'use client';
 
-import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { FormControl, FormDescription, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Control } from 'react-hook-form';
 import { BasicSelect } from '../BasicSelect';
+import { useId } from 'react';
+import { Label } from '@/components/ui/label';
 
 export type FormSelectProps = {
   // eslint-disable-next-line
@@ -32,25 +34,34 @@ export function FormSelect({
     <FormField
       control={control}
       name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormControl>
-            <BasicSelect
-              label={label}
-              items={items}
-              disabled={field.disabled}
-              className={className}
-              helperText={helperText}
-              required={required}
-              placeholder={placeholder}
-              value={field.value}
-              onChange={field.onChange}
-              allowEmpty={allowEmpty}
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
+  const id = useId();
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => {
+        return (
+          <FormItem>
+            {label && <Label htmlFor={id}>{label}</Label>}
+            <FormControl>
+              <BasicSelect
+                id={id}
+                items={items}
+                disabled={field.disabled}
+                className={className}
+                helperText={helperText}
+                required={required}
+                placeholder={placeholder}
+                value={field.value}
+                onChange={field.onChange}
+                allowEmpty={allowEmpty}
+                aria-required={required}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }
