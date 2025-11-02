@@ -3,6 +3,8 @@
 import { SigninForm } from '@/components/models/auth/SigninForm';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { Toaster } from '@/components/ui/sonner';
 
 export function SigninPageContainer() {
   const [isLoading, setIsLoading] = useState(true);
@@ -28,5 +30,10 @@ export function SigninPageContainer() {
     );
   }
 
-  return <SigninForm />;
+  return (
+    <>
+      <SigninForm />
+      <Toaster />
+    </>
+  );
 }
