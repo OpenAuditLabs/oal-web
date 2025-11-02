@@ -34,12 +34,15 @@ export function FormSelect({
     <FormField
       control={control}
       name={name}
+  const id = useId();
+  return (
+    <FormField
+      control={control}
+      name={name}
       render={({ field }) => {
-        const id = useId();
         return (
           <FormItem>
             {label && <Label htmlFor={id}>{label}</Label>}
-            {helperText && <FormDescription>{helperText}</FormDescription>}
             <FormControl>
               <BasicSelect
                 id={id}
