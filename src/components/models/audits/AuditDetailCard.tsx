@@ -1,6 +1,7 @@
 import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
 import { FileText, Clock, Timer as TimerIcon } from 'lucide-react'
 import { formatShortDate } from '@/lib/utils'
+import { ActiveScanBadge } from './ActiveScanBadge'
 
 export interface AuditDetailCardProps {
   audit: AuditWithProject
@@ -27,7 +28,10 @@ export function AuditDetailCard({ audit }: AuditDetailCardProps) {
       <div className="p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-lg font-semibold leading-tight">{displayTitle}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold leading-tight">{displayTitle}</h3>
+              {isRunning && <ActiveScanBadge count={1} />} {/* Render badge for running audits */}
+            </div>
             <p className="text-sm text-muted-foreground mt-0.5">{displaySubtitle}</p>
           </div>
         </div>
