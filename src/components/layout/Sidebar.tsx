@@ -83,6 +83,7 @@ export function Sidebar({ className }: SidebarProps) {
                           "flex items-center gap-3 transition-[gap] duration-200",
                           isCollapsed && "justify-center gap-0",
                         )}
+                        aria-current={active ? "page" : undefined}
                       >
                         <Icon className="size-5" />
                         <span className={cn(isCollapsed && "sr-only")}>{item.label}</span>
