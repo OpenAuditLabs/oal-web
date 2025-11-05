@@ -18,8 +18,8 @@ export function StatsCard({ label, value, icon, compact, className }: StatsCardP
   return (
     <Card className={cn('border border-border bg-card/80 backdrop-blur-sm', className)}>
       <CardContent className={cn(
-        'flex flex-col gap-4',
-        compact && 'gap-2 p-4' // Reduced padding and gap for compact variant
+        'flex flex-col gap-4 p-6',
+        compact && 'gap-2 p-4' // Reduced vertical and horizontal padding and gap for compact variant
       )}>
         <div className={cn(
           'flex items-center gap-3 text-sm font-medium',
