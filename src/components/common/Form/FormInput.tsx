@@ -1,6 +1,6 @@
 import { Control, FieldValues, Path } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField } from '@/components/ui/form';
 import { HTMLInputTypeAttribute } from 'react';
 
 export function FormInput<T extends FieldValues>({
@@ -69,64 +69,111 @@ export function FormInput<T extends FieldValues>({
 
       name={name}
 
-      render={({ field, formDescriptionId, formMessageId, formState }) => (
+            render={({ field, formState }) => {
 
-        <FormItem className='space-y-1'>
+              const { formDescriptionId, formMessageId } = useFormField();
 
-          <FormLabel htmlFor={id}>
+              return (
 
-            {label} {required && <span className='text-red-500'>*</span>}
+                <FormItem className='space-y-1'>
 
-          </FormLabel>
+                  <FormLabel htmlFor={id}>
 
-          {helperText && <FormDescription>{helperText}</FormDescription>}
+                    {label} {required && <span className='text-red-500'>*</span>}
 
-          <div className='flex flex-row gap-1 items-center'>
+                  </FormLabel>
 
-            <FormControl>
+                  {helperText && <FormDescription>{helperText}</FormDescription>}
 
-              <Input
-                placeholder={placeholder}
-                {...field}
-                value={field.value ?? ''}
-                min={min}
-                max={max}
-                step={step}
-                onChange={(e) => {
-                  if (type === 'number') {
-                    const str = e.currentTarget.value;
-                    if (str === '') {
-                      field.onChange(null);
-                    } else {
-                      const num = e.currentTarget.valueAsNumber;
-                      field.onChange(Number.isNaN(num) ? null : num);
-                    }
-                  } else {
-                    field.onChange(e.target.value);
-                  }
-                }}
-                type={type}
-                required={required}
-                id={id}
-                autoFocus={autoFocus}
-                aria-invalid={!!formState.errors[name]}
-                aria-describedby={
-                  formState.errors[name]
-                    ? formMessageId
-                    : helperText
-                      ? formDescriptionId
-                      : undefined
-                }
-              />
-            </FormControl>
-            {endComponent}
-          </div>
-          
-          <div style={{ minHeight: '1em' }}>
-            <FormMessage />
-          </div>
-        </FormItem>
-      )}
+                  <div className='flex flex-row gap-1 items-center'>
+
+                    <FormControl>
+
+                      <Input
+
+                        placeholder={placeholder}
+
+                        {...field}
+
+                        value={field.value ?? ''}
+
+                        min={min}
+
+                        max={max}
+
+                        step={step}
+
+                        onChange={(e) => {
+
+                          if (type === 'number') {
+
+                            const str = e.currentTarget.value;
+
+                            if (str === '') {
+
+                              field.onChange(null);
+
+                            } else {
+
+                              const num = e.currentTarget.valueAsNumber;
+
+                              field.onChange(Number.isNaN(num) ? null : num);
+
+                            }
+
+                          } else {
+
+                            field.onChange(e.target.value);
+
+                          }
+
+                        }}
+
+                        type={type}
+
+                        required={required}
+
+                        id={id}
+
+                        autoFocus={autoFocus}
+
+                        aria-invalid={!!formState.errors[name]}
+
+                        aria-describedby={
+
+                          formState.errors[name]
+
+                            ? formMessageId
+
+                            : helperText
+
+                              ? formDescriptionId
+
+                              : undefined
+
+                        }
+
+                      />
+
+                    </FormControl>
+
+                    {endComponent}
+
+                  </div>
+
+                  
+
+                  <div style={{ minHeight: '1em' }}>
+
+                    <FormMessage />
+
+                  </div>
+
+                </FormItem>
+
+              );
+
+            }}
     />
   );
 }

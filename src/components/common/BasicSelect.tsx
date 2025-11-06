@@ -2,7 +2,7 @@ import { FormDescription } from '@/components/ui/form';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
-import { useId } from 'react';
+import { ReactNode, useId } from 'react';
 
 export type BasicSelectProps = {
   placeholder?: string;
