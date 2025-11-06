@@ -69,7 +69,7 @@ export function FormInput<T extends FieldValues>({
 
       name={name}
 
-      render={({ field }) => (
+      render={({ field, formDescriptionId, formMessageId, formState }) => (
 
         <FormItem className='space-y-1'>
 
@@ -86,55 +86,37 @@ export function FormInput<T extends FieldValues>({
             <FormControl>
 
               <Input
-
                 placeholder={placeholder}
-
                 {...field}
-
-                  value={field.value ?? ''}
-
+                value={field.value ?? ''}
                 min={min}
-
                 max={max}
-
                 step={step}
-
-                  onChange={(e) => {
-
-                    if (type === 'number') {
-
-                      const str = e.currentTarget.value;
-
-                      if (str === '') {
-
-                        field.onChange(null);
-
-                      }
-
-                      else {
-
-                        const num = e.currentTarget.valueAsNumber;
-
-                        field.onChange(Number.isNaN(num) ? null : num);
-
-                      }
-
+                onChange={(e) => {
+                  if (type === 'number') {
+                    const str = e.currentTarget.value;
+                    if (str === '') {
+                      field.onChange(null);
                     } else {
-
-                      field.onChange(e.target.value);
-
+                      const num = e.currentTarget.valueAsNumber;
+                      field.onChange(Number.isNaN(num) ? null : num);
                     }
-
-                  }}
-
+                  } else {
+                    field.onChange(e.target.value);
+                  }
+                }}
                 type={type}
-
                 required={required}
-
                 id={id}
-
                 autoFocus={autoFocus}
-
+                aria-invalid={!!formState.errors[name]}
+                aria-describedby={
+                  formState.errors[name]
+                    ? formMessageId
+                    : helperText
+                      ? formDescriptionId
+                      : undefined
+                }
               />
             </FormControl>
             {endComponent}
