@@ -61,129 +61,226 @@ export function FormInput<T extends FieldValues>({
 
 }) {
 
-    const { formDescriptionId, formMessageId } = useFormField();
+        return (
 
-    return (
+          <FormField
 
-  
+            control={control}
 
-      <FormField
+            name={name}
 
-  
+            render={({ field, formState }) => (
 
-        control={control}
+              <FormInputInner
 
-  
+                field={field}
 
-        name={name}
+                formState={formState}
 
-  
+                label={label}
 
-              render={({ field, formState }) => {
+                required={required}
 
-  
+                helperText={helperText}
 
-                return (
+                placeholder={placeholder}
 
-                  <FormItem className='space-y-1'>
+                type={type}
 
-                  <FormLabel htmlFor={id}>
+                min={min}
 
-                    {label} {required && <span className='text-red-500'>*</span>}
+                max={max}
 
-                  </FormLabel>
+                step={step}
 
-                  {helperText && <FormDescription>{helperText}</FormDescription>}
+                id={id}
 
-                  <div className='flex flex-row gap-1 items-center'>
+                autoFocus={autoFocus}
 
-                    <FormControl>
+                endComponent={endComponent}
 
-                      <Input
+                name={name}
 
-                        placeholder={placeholder}
+              />
 
-                        {...field}
+            )}
 
-                        value={field.value ?? ''}
+          />
 
-                        min={min}
+        );
 
-                        max={max}
+    }
 
-                        step={step}
+    
 
-                        onChange={(e) => {
+    interface FormInputInnerProps<T extends FieldValues> {
 
-                          if (type === 'number') {
+      field: any; // Adjust type as needed, FieldInputProps<T> from react-hook-form
 
-                            const str = e.currentTarget.value;
+      formState: any; // Adjust type as needed, FormState<T> from react-hook-form
 
-                            if (str === '') {
+      label: string;
 
-                              field.onChange(null);
+      required: boolean;
 
-                            } else {
+      helperText?: string;
 
-                              const num = e.currentTarget.valueAsNumber;
+      placeholder?: string;
 
-                              field.onChange(Number.isNaN(num) ? null : num);
+      type: HTMLInputTypeAttribute;
 
-                            }
+      min?: number;
 
-                          } else {
+      max?: number;
 
-                            field.onChange(e.target.value);
+      step?: number;
 
-                          }
+      id?: string;
 
-                        }}
+      autoFocus?: boolean;
 
-                        type={type}
+      endComponent?: React.ReactNode;
 
-                        required={required}
+      name: Path<T>;
 
-                        id={id}
+    }
 
-                        autoFocus={autoFocus}
+    
 
-                        aria-invalid={!!formState.errors[name]}
+    function FormInputInner<T extends FieldValues>({
 
-                        aria-describedby={
+      field,
 
-                          formState.errors[name]
+      formState,
 
-                            ? formMessageId
+      label,
 
-                            : helperText
+      required,
 
-                              ? formDescriptionId
+      helperText,
 
-                              : undefined
+      placeholder,
 
-                        }
+      type,
 
-                      />
+      min,
 
-                    </FormControl>
+      max,
 
-                    {endComponent}
+      step,
 
-                  </div>
+      id,
 
-                  
+      autoFocus,
 
-                  <div style={{ minHeight: '1em' }}>
+      endComponent,
 
-                    <FormMessage />
+      name,
 
-                  </div>
+    }: FormInputInnerProps<T>) {
 
-                </FormItem>
+      const { formDescriptionId, formMessageId } = useFormField();
 
-              );
+    
 
-            }}
-    />
-  );
-}
+      return (
+
+        <FormItem className='space-y-1'>
+
+          <FormLabel htmlFor={id}>
+
+            {label} {required && <span className='text-red-500'>*</span>}
+
+          </FormLabel>
+
+          {helperText && <FormDescription>{helperText}</FormDescription>}
+
+          <div className='flex flex-row gap-1 items-center'>
+
+            <FormControl>
+
+              <Input
+
+                placeholder={placeholder}
+
+                {...field}
+
+                value={field.value ?? ''}
+
+                min={min}
+
+                max={max}
+
+                step={step}
+
+                onChange={(e) => {
+
+                  if (type === 'number') {
+
+                    const str = e.currentTarget.value;
+
+                    if (str === '') {
+
+                      field.onChange(null);
+
+                    } else {
+
+                      const num = e.currentTarget.valueAsNumber;
+
+                      field.onChange(Number.isNaN(num) ? null : num);
+
+                    }
+
+                  } else {
+
+                    field.onChange(e.target.value);
+
+                  }
+
+                }}
+
+                type={type}
+
+                required={required}
+
+                id={id}
+
+                autoFocus={autoFocus}
+
+                aria-invalid={!!formState.errors[name]}
+
+                aria-describedby={
+
+                  formState.errors[name]
+
+                    ? formMessageId
+
+                    : helperText
+
+                      ? formDescriptionId
+
+                      : undefined
+
+                }
+
+              />
+
+            </FormControl>
+
+            {endComponent}
+
+          </div>
+
+          
+
+          <div style={{ minHeight: '1em' }}>
+
+            <FormMessage />
+
+          </div>
+
+        </FormItem>
+
+      );
+
+    }
