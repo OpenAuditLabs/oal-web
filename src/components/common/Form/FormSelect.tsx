@@ -30,10 +30,6 @@ export function FormSelect({
   allowEmpty = false,
   required
 }: FormSelectProps) {
-  return (
-    <FormField
-      control={control}
-      name={name}
   const id = useId();
   return (
     <FormField
