@@ -1,6 +1,6 @@
 import { Control, FieldValues, Path } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField } from '@/components/ui/form';
 import { HTMLInputTypeAttribute } from 'react';
 
 export function FormInput<T extends FieldValues>({
@@ -61,15 +61,129 @@ export function FormInput<T extends FieldValues>({
 
 }) {
 
-  return (
+        return (
 
-    <FormField
+          <FormField
 
-      control={control}
+            control={control}
 
-      name={name}
+            name={name}
 
-      render={({ field }) => (
+            render={({ field, formState }) => (
+
+              <FormInputInner
+
+                field={field}
+
+                formState={formState}
+
+                label={label}
+
+                required={required}
+
+                helperText={helperText}
+
+                placeholder={placeholder}
+
+                type={type}
+
+                min={min}
+
+                max={max}
+
+                step={step}
+
+                id={id}
+
+                autoFocus={autoFocus}
+
+                endComponent={endComponent}
+
+                name={name}
+
+              />
+
+            )}
+
+          />
+
+        );
+
+    }
+
+    
+
+    interface FormInputInnerProps<T extends FieldValues> {
+
+      field: any; // Adjust type as needed, FieldInputProps<T> from react-hook-form
+
+      formState: any; // Adjust type as needed, FormState<T> from react-hook-form
+
+      label: string;
+
+      required: boolean;
+
+      helperText?: string;
+
+      placeholder?: string;
+
+      type: HTMLInputTypeAttribute;
+
+      min?: number;
+
+      max?: number;
+
+      step?: number;
+
+      id?: string;
+
+      autoFocus?: boolean;
+
+      endComponent?: React.ReactNode;
+
+      name: Path<T>;
+
+    }
+
+    
+
+    function FormInputInner<T extends FieldValues>({
+
+      field,
+
+      formState,
+
+      label,
+
+      required,
+
+      helperText,
+
+      placeholder,
+
+      type,
+
+      min,
+
+      max,
+
+      step,
+
+      id,
+
+      autoFocus,
+
+      endComponent,
+
+      name,
+
+    }: FormInputInnerProps<T>) {
+
+      const { formDescriptionId, formMessageId } = useFormField();
+
+    
+
+      return (
 
         <FormItem className='space-y-1'>
 
@@ -91,7 +205,7 @@ export function FormInput<T extends FieldValues>({
 
                 {...field}
 
-                  value={field.value ?? ''}
+                value={field.value ?? ''}
 
                 min={min}
 
@@ -99,33 +213,31 @@ export function FormInput<T extends FieldValues>({
 
                 step={step}
 
-                  onChange={(e) => {
+                onChange={(e) => {
 
-                    if (type === 'number') {
+                  if (type === 'number') {
 
-                      const str = e.currentTarget.value;
+                    const str = e.currentTarget.value;
 
-                      if (str === '') {
+                    if (str === '') {
 
-                        field.onChange(null);
-
-                      }
-
-                      else {
-
-                        const num = e.currentTarget.valueAsNumber;
-
-                        field.onChange(Number.isNaN(num) ? null : num);
-
-                      }
+                      field.onChange(null);
 
                     } else {
 
-                      field.onChange(e.target.value);
+                      const num = e.currentTarget.valueAsNumber;
+
+                      field.onChange(Number.isNaN(num) ? null : num);
 
                     }
 
-                  }}
+                  } else {
+
+                    field.onChange(e.target.value);
+
+                  }
+
+                }}
 
                 type={type}
 
@@ -135,16 +247,40 @@ export function FormInput<T extends FieldValues>({
 
                 autoFocus={autoFocus}
 
+                aria-invalid={!!formState.errors[name]}
+
+                aria-describedby={
+
+                  formState.errors[name]
+
+                    ? formMessageId
+
+                    : helperText
+
+                      ? formDescriptionId
+
+                      : undefined
+
+                }
+
               />
+
             </FormControl>
+
             {endComponent}
+
           </div>
+
           
+
           <div style={{ minHeight: '1em' }}>
+
             <FormMessage />
+
           </div>
+
         </FormItem>
-      )}
-    />
-  );
-}
+
+      );
+
+    }
