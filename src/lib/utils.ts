@@ -25,3 +25,53 @@ export function formatShortDate(date: string | Date): string {
     hour12: true,
   }).format(d);
 }
+
+export function debounce<T extends (...args: any[]) => any>(
+  fn: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  return function(this: ThisParameterType<T>, ...args: Parameters<T>) {
+    const later = () => {
+      timeout = null;
+      fn.apply(this, args);
+    };
+
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(later, wait);
+  };
+}
+
+export function throttle<T extends (...args: any[]) => any>(
+  fn: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let lastCall = 0;
+  let timerId: ReturnType<typeof setTimeout> | null = null;
+
+  return function(this: ThisParameterType<T>, ...args: Parameters<T>) {
+    const now = Date.now();
+    const elapsed = now - lastCall;
+
+    if (elapsed >= wait) {
+      if (timerId) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
+      fn.apply(this, args);
+      lastCall = now;
+    } else {
+      if (timerId) {
+        clearTimeout(timerId);
+      }
+      timerId = setTimeout(() => {
+        lastCall = Date.now();
+        timerId = null;
+        fn.apply(this, args);
+      }, wait - elapsed);
+    }
+  };
+}
