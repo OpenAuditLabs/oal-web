@@ -1,4 +1,4 @@
-import { getCount } from '@/actions/projects/getCount/logic';
+import { getCount } from '@/actions/projects/getCount/action';
 import { EmptyState } from '@/components/pages/projects/EmptyState';
 
 export default async function ProjectsPage() {
