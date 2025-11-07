@@ -30,12 +30,12 @@ export function debounce<T extends (...args: any[]) => any>(
   fn: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
 
-  return function(...args: Parameters<T>) {
+  return function(this: ThisParameterType<T>, ...args: Parameters<T>) {
     const later = () => {
       timeout = null;
-      fn(...args);
+      fn.apply(this, args);
     };
 
     if (timeout) {
@@ -49,20 +49,29 @@ export function throttle<T extends (...args: any[]) => any>(
   fn: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let inThrottle: boolean, lastFn: NodeJS.Timeout, lastTime: number;
-  return function(this: any, ...args: Parameters<T>) {
-    if (!inThrottle) {
+  let lastCall = 0;
+  let timerId: ReturnType<typeof setTimeout> | null = null;
+
+  return function(this: ThisParameterType<T>, ...args: Parameters<T>) {
+    const now = Date.now();
+    const elapsed = now - lastCall;
+
+    if (elapsed >= wait) {
+      if (timerId) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
       fn.apply(this, args);
-      lastTime = Date.now();
-      inThrottle = true;
+      lastCall = now;
     } else {
-      clearTimeout(lastFn);
-      lastFn = setTimeout(() => {
-        if (Date.now() - lastTime >= wait) {
-          fn.apply(this, args);
-          lastTime = Date.now();
-        }
-      }, Math.max(wait - (Date.now() - lastTime), 0));
+      if (timerId) {
+        clearTimeout(timerId);
+      }
+      timerId = setTimeout(() => {
+        lastCall = Date.now();
+        timerId = null;
+        fn.apply(this, args);
+      }, wait - elapsed);
     }
   };
 }
