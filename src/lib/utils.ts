@@ -25,3 +25,44 @@ export function formatShortDate(date: string | Date): string {
     hour12: true,
   }).format(d);
 }
+
+export function debounce<T extends (...args: any[]) => any>(
+  fn: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+
+  return function(...args: Parameters<T>) {
+    const later = () => {
+      timeout = null;
+      fn(...args);
+    };
+
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(later, wait);
+  };
+}
+
+export function throttle<T extends (...args: any[]) => any>(
+  fn: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean, lastFn: NodeJS.Timeout, lastTime: number;
+  return function(this: any, ...args: Parameters<T>) {
+    if (!inThrottle) {
+      fn.apply(this, args);
+      lastTime = Date.now();
+      inThrottle = true;
+    } else {
+      clearTimeout(lastFn);
+      lastFn = setTimeout(() => {
+        if (Date.now() - lastTime >= wait) {
+          fn.apply(this, args);
+          lastTime = Date.now();
+        }
+      }, Math.max(wait - (Date.now() - lastTime), 0));
+    }
+  };
+}
