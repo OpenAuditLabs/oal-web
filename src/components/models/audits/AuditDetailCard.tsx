@@ -1,7 +1,9 @@
 import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
-import { FileText, Clock, Timer as TimerIcon } from 'lucide-react'
+import { FileText, Clock, Timer as TimerIcon, Copy } from 'lucide-react'
 import { formatShortDate } from '@/lib/utils'
 import { ActiveScanBadge } from './ActiveScanBadge'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 export interface AuditDetailCardProps {
   audit: AuditWithProject
@@ -33,6 +35,28 @@ export function AuditDetailCard({ audit }: AuditDetailCardProps) {
               {isRunning && <ActiveScanBadge count={1} />} {/* Render badge for running audits */}
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">{displaySubtitle}</p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-sm font-medium text-muted-foreground">Audit ID: {audit.id}</span>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-6"
+                      onClick={() => {
+                        navigator.clipboard.writeText(audit.id)
+                      }}
+                    >
+                      <Copy className="size-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Copy Audit ID</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
         </div>
 
