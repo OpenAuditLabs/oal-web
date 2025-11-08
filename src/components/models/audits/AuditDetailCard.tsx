@@ -1,15 +1,19 @@
 import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
+import { useState } from 'react'
+import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
 import { FileText, Clock, Timer as TimerIcon, Copy } from 'lucide-react'
 import { formatShortDate } from '@/lib/utils'
 import { ActiveScanBadge } from './ActiveScanBadge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { toast } from 'sonner'
 
 export interface AuditDetailCardProps {
   audit: AuditWithProject
 }
 
 export function AuditDetailCard({ audit }: AuditDetailCardProps) {
+  const [isCopying, setIsCopying] = useState(false)
   const isRunning = audit.status === 'RUNNING'
   const progress = Math.max(0, Math.min(100, Number(audit.progress ?? 0)))
 
@@ -24,6 +28,27 @@ export function AuditDetailCard({ audit }: AuditDetailCardProps) {
   const durationText = isRunning
     ? 'calculating...' // Duration calculation will be handled elsewhere or simplified
     : 'n/a'
+
+  const handleCopy = async () => {
+    setIsCopying(true)
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(audit.id)
+        toast.success('Audit ID copied!', {
+          description: 'The audit ID has been copied to your clipboard.',
+        })
+      } else {
+        throw new Error('Clipboard API not supported')
+      }
+    } catch (error) {
+      console.error('Failed to copy audit ID:', error)
+      toast.error('Failed to copy Audit ID', {
+        description: 'Please try again or copy manually.',
+      })
+    } finally {
+      setIsCopying(false)
+    }
+  }
 
   return (
     <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
@@ -44,9 +69,9 @@ export function AuditDetailCard({ audit }: AuditDetailCardProps) {
                       variant="ghost"
                       size="icon"
                       className="size-6"
-                      onClick={() => {
-                        navigator.clipboard.writeText(audit.id)
-                      }}
+                      aria-label="Copy Audit ID"
+                      onClick={handleCopy}
+                      disabled={isCopying}
                     >
                       <Copy className="size-3" />
                     </Button>
