@@ -3,11 +3,10 @@ import { useState, useEffect } from "react";
 const MOBILE_BREAKPOINT = 768;
 
 /**
- * Custom hook to detect if the current view is mobile based on a predefined breakpoint.
- * This hook is safe for Server-Side Rendering (SSR) as it initializes to `false`
- * and only performs client-side detection within a `useEffect` hook.
+ * Determines if the current viewport width is considered mobile based on a predefined breakpoint.
+ * This hook is SSR-safe, initializing to `false` and updating on the client side.
  *
- * @returns {boolean} `true` if the view is mobile, `false` otherwise.
+ * @returns `true` if the viewport is mobile, `false` otherwise.
  */
 export function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState<boolean>(false);
