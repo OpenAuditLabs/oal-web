@@ -28,16 +28,22 @@ export const DashboardStatsGrid = React.memo(function DashboardStatsGrid({ timef
       }
 
       setLoading(true)
-      const [projectRes, runningRes, completedRes] = await Promise.all([
-        getProjectCountAction(userId, timeframe),
-        getRunningAuditCountAction(userId, timeframe),
-        getCompletedAuditCountAction(userId, timeframe),
-      ])
+      try {
+        const [projectRes, runningRes, completedRes] = await Promise.all([
+          getProjectCountAction(userId, timeframe),
+          getRunningAuditCountAction(userId, timeframe),
+          getCompletedAuditCountAction(userId, timeframe),
+        ])
 
-      setProjectCount(projectRes)
-      setRunningCount(runningRes)
-      setCompletedCount(completedRes)
-      setLoading(false)
+        setProjectCount(projectRes)
+        setRunningCount(runningRes)
+        setCompletedCount(completedRes)
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error)
+        // Optionally, set an error state here if you want to display an error message to the user
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchData()
