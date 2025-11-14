@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { StatsCard } from '@/components/common/StatsCard'
 import { FolderKanban, Timer, CheckCircle2, ShieldAlert } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { getProjectCountForUser } from '@/actions/projects/getCount/logic'
-import { getRunningAuditCountForUser } from '@/actions/audits/getRunningCount/logic'
-import { getCompletedAuditCountForUser } from '@/actions/audits/getCompletedCount/logic'
+import { getProjectCountAction } from '@/actions/projects/getCount/action'
+import { getRunningAuditCountAction } from '@/actions/audits/getRunningCount/action'
+import { getCompletedAuditCountAction } from '@/actions/audits/getCompletedCount/action'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export interface DashboardStatsGridProps {
@@ -22,24 +22,21 @@ export const DashboardStatsGrid = React.memo(function DashboardStatsGrid({ timef
 
   useEffect(() => {
     async function fetchData() {
-      if (!userId) return
+      if (!userId) {
+        setLoading(false)
+        return
+      }
 
       setLoading(true)
       const [projectRes, runningRes, completedRes] = await Promise.all([
-        getProjectCountForUser(userId, timeframe),
-        getRunningAuditCountForUser(userId, timeframe),
-        getCompletedAuditCountForUser(userId, timeframe),
+        getProjectCountAction(userId, timeframe),
+        getRunningAuditCountAction(userId, timeframe),
+        getCompletedAuditCountAction(userId, timeframe),
       ])
 
-      if (projectRes.success) {
-        setProjectCount(projectRes.data)
-      }
-      if (runningRes.success) {
-        setRunningCount(runningRes.data)
-      }
-      if (completedRes.success) {
-        setCompletedCount(completedRes.data)
-      }
+      setProjectCount(projectRes)
+      setRunningCount(runningRes)
+      setCompletedCount(completedRes)
       setLoading(false)
     }
 

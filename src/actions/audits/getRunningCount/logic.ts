@@ -3,7 +3,7 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 import { Result, success, error } from '@/lib/result'
 import { AuditStatus } from '@prisma/client'
-import { addDays } from 'date-fns'
+import { getTimeframeFilter } from '@/lib/timeframe'
 
 /**
  * Retrieves the count of running audits for a specific user.
@@ -16,15 +16,7 @@ export async function getRunningAuditCountForUser(userId: string, timeframe: str
     return error('User ID cannot be empty.')
   }
 
-  let createdAtFilter = {}
-
-  if (timeframe === '30d') {
-    createdAtFilter = { gte: addDays(new Date(), -30) }
-  } else if (timeframe === '7d') {
-    createdAtFilter = { gte: addDays(new Date(), -7) }
-  } else if (timeframe === '24h') {
-    createdAtFilter = { gte: addDays(new Date(), -1) }
-  }
+  const createdAtFilter = getTimeframeFilter(timeframe)
 
   try {
     const count = await prisma.audit.count({

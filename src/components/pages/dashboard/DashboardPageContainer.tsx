@@ -26,9 +26,9 @@ export function DashboardContainer({}: DashboardContainerProps) {
               <p className="text-muted-foreground text-sm">Monitor real-time security analysis and threat detection</p>
             </div>
             <BasicSelect
-              options={timeframeOptions}
+              items={timeframeOptions}
               value={timeframe}
-              onValueChange={setTimeframe}
+              onChange={setTimeframe}
               placeholder="Select timeframe"
               className="w-[180px]"
             />
