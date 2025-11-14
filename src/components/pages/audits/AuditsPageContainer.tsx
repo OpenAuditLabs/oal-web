@@ -1,17 +1,17 @@
 'use client'
 
-import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { getAuditList } from '@/actions/audits/getAuditList/logic'
+import type { AuditWithProject, AuditStatus } from '@/types/audit'
 import { AuditsList } from '../../models/audits/AuditsList'
 import { Input } from '../../ui/input'
 import { Skeleton } from '../../ui/skeleton'
-import { useState, useEffect, useRef } from 'react'
+import { Button } from '../../ui/button'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
-export interface AuditsContainerProps {
-  audits: AuditWithProject[]
-  isLoading: boolean
-}
+export interface AuditsContainerProps {}
 
-export function AuditsContainer({ audits }: AuditsContainerProps) {
+export function AuditsContainer({}: AuditsContainerProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
