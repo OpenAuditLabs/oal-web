@@ -18,9 +18,14 @@ export const DashboardStatsGrid = React.memo(function DashboardStatsGrid({ timef
   const [projectCount, setProjectCount] = useState(0)
   const [runningCount, setRunningCount] = useState(0)
   const [completedCount, setCompletedCount] = useState(0)
+  const [totalFindings, setTotalFindings] = useState(0) // New state for Total Findings
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    const abortController = new AbortController()
+    const signal = abortController.signal
+
     async function fetchData() {
       if (!userId) {
         setLoading(false)
@@ -28,6 +33,7 @@ export const DashboardStatsGrid = React.memo(function DashboardStatsGrid({ timef
       }
 
       setLoading(true)
+      setError(null) // Clear any previous errors
       try {
         const [projectRes, runningRes, completedRes] = await Promise.all([
           getProjectCountAction(userId, timeframe),
@@ -35,18 +41,32 @@ export const DashboardStatsGrid = React.memo(function DashboardStatsGrid({ timef
           getCompletedAuditCountAction(userId, timeframe),
         ])
 
-        setProjectCount(projectRes)
-        setRunningCount(runningRes)
-        setCompletedCount(completedRes)
+        if (!signal.aborted) {
+          setProjectCount(projectRes)
+          setRunningCount(runningRes)
+          setCompletedCount(completedRes)
+        }
       } catch (error) {
-        console.error('Failed to fetch dashboard stats:', error)
-        // Optionally, set an error state here if you want to display an error message to the user
+        if (error instanceof Error && error.name === 'AbortError') {
+          // console.log('Fetch aborted:', error.message)
+        } else {
+          console.error('Failed to fetch dashboard stats:', error)
+          if (!signal.aborted) {
+            setError('Failed to load dashboard statistics.')
+          }
+        }
       } finally {
-        setLoading(false)
+        if (!signal.aborted) {
+          setLoading(false)
+        }
       }
     }
 
     fetchData()
+
+    return () => {
+      abortController.abort()
+    }
   }, [userId, timeframe])
 
   if (loading) {
@@ -62,10 +82,11 @@ export const DashboardStatsGrid = React.memo(function DashboardStatsGrid({ timef
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4">
+      {error && <div className="col-span-full text-destructive">{error}</div>}
       <StatsCard label="Projects" value={projectCount} icon={<FolderKanban className="size-6" />} />
       <StatsCard label="Running Audits" value={runningCount} icon={<Timer className="size-6" />} />
       <StatsCard label="Completed" value={completedCount} icon={<CheckCircle2 className="size-6" />} />
-      <StatsCard label="Total Findings" value={0} icon={<ShieldAlert className="size-6" />} />
+      <StatsCard label="Total Findings" value={totalFindings} icon={<ShieldAlert className="size-6" />} />
     </div>
   )
 })
