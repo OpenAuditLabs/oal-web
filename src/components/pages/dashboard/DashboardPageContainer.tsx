@@ -1,19 +1,37 @@
+"use client"
+
+import { useState } from 'react'
 import { DashboardStatsGrid } from './components/DashboardStatsGrid'
 import { Skeleton } from '@/components/ui/skeleton'
+import { BasicSelect } from '@/components/common/BasicSelect'
 
 export interface DashboardContainerProps {
-  projectCount: number
-  runningCount: number
-  completedCount: number
-  loading: boolean
 }
 
-export function DashboardContainer({ projectCount, runningCount, completedCount, loading }: DashboardContainerProps) {
+export function DashboardContainer({}: DashboardContainerProps) {
+  const [timeframe, setTimeframe] = useState('all')
+
+  const timeframeOptions = [
+    { value: 'all', label: 'All Time' },
+    { value: '30d', label: 'Last 30 Days' },
+    { value: '7d', label: 'Last 7 Days' },
+    { value: '24h', label: 'Last 24 Hours' },
+  ]
+
   return (
     <div className="p-10 space-y-8">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight mb-2">Dashboard</h1>
-            <p className="text-muted-foreground text-sm">Monitor real-time security analysis and threat detection</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-semibold tracking-tight mb-2">Dashboard</h1>
+              <p className="text-muted-foreground text-sm">Monitor real-time security analysis and threat detection</p>
+            </div>
+            <BasicSelect
+              options={timeframeOptions}
+              value={timeframe}
+              onValueChange={setTimeframe}
+              placeholder="Select timeframe"
+              className="w-[180px]"
+            />
           </div>
         <div className="space-y-8">
           {loading ? (
@@ -24,7 +42,7 @@ export function DashboardContainer({ projectCount, runningCount, completedCount,
               <Skeleton className="h-[120px] w-full" />
             </div>
           ) : (
-            <DashboardStatsGrid projectCount={projectCount} runningCount={runningCount} completedCount={completedCount} totalFindings={0} />
+            <DashboardStatsGrid timeframe={timeframe} />
           )}
           {loading ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
