@@ -1,17 +1,17 @@
 'use client'
 
-import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
+import { useState, useEffect, useRef } from 'react'
+import type { AuditWithProject } from '@/types/audit'
 import { AuditsList } from '../../models/audits/AuditsList'
 import { Input } from '../../ui/input'
 import { Skeleton } from '../../ui/skeleton'
-import { useState, useEffect, useRef } from 'react'
 
 export interface AuditsContainerProps {
   audits: AuditWithProject[]
   isLoading: boolean
 }
 
-export function AuditsContainer({ audits }: AuditsContainerProps) {
+export function AuditsContainer({ audits, isLoading }: AuditsContainerProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
