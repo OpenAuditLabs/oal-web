@@ -11,12 +11,12 @@ import { getTimeframeFilter } from '@/lib/timeframe'
  * @param userId The ID of the user.
  * @returns A Result object containing the count of running audits, or an error if the operation fails.
  */
-export async function getRunningAuditCountForUser(userId: string, timeframe: string): Promise<Result<number>> {
+export async function getRunningAuditCountForUser(userId: string, timeframe: string, offset: number = 0): Promise<Result<number>> {
   if (!userId) {
     return error('User ID cannot be empty.')
   }
 
-  const createdAtFilter = getTimeframeFilter(timeframe)
+  const createdAtFilter = getTimeframeFilter(timeframe, offset)
 
   try {
     const count = await prisma.audit.count({
