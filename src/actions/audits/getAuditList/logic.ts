@@ -41,6 +41,10 @@ export async function getAuditsForUser(
     include: {
       project: true,
     },
+    orderBy: [
+      { createdAt: 'desc' },
+      { id: 'asc' },
+    ],
     skip,
     take: normalizedPageSize,
   })

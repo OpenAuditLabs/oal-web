@@ -26,7 +26,7 @@ export default async function AuditsPage() {
     )
   }
 
-  const audits = res.data
+  const audits = res.data.audits
 
   return (
     
