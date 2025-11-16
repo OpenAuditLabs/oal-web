@@ -23,7 +23,10 @@ export async function getAuditsForUser(
   page: number = 1,
   pageSize: number = 10,
 ): Promise<Result<PaginatedAudits>> {
-  const skip = (page - 1) * pageSize
+  const normalizedPage = Math.max(1, Math.floor(Number(page) || 1))
+  const normalizedPageSize = Math.min(100, Math.max(1, Math.floor(Number(pageSize) || 10)))
+
+  const skip = (normalizedPage - 1) * normalizedPageSize
 
   const totalItems = await prisma.audit.count({
     where: {
@@ -39,18 +42,18 @@ export async function getAuditsForUser(
       project: true,
     },
     skip,
-    take: pageSize,
+    take: normalizedPageSize,
   })
 
-  const totalPages = Math.ceil(totalItems / pageSize)
+  const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / normalizedPageSize)
 
   return success({
     audits,
     pagination: {
       totalItems,
       totalPages,
-      currentPage: page,
-      pageSize,
+      currentPage: normalizedPage,
+      pageSize: normalizedPageSize,
     },
   })
 }
