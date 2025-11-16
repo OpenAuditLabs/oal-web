@@ -6,8 +6,34 @@ import type { Prisma } from '@prisma/client'
 
 export type AuditWithProject = Prisma.AuditGetPayload<{ include: { project: true } }>
 
-export async function getAuditsForUser(userId: string): Promise<Result<AuditWithProject[]>> {
-  // Return all audits that belong to projects owned by the given user
+export interface PaginationMetaData {
+  totalItems: number
+  totalPages: number
+  currentPage: number
+  pageSize: number
+}
+
+export interface PaginatedAudits {
+  audits: AuditWithProject[]
+  pagination: PaginationMetaData
+}
+
+export async function getAuditsForUser(
+  userId: string,
+  page: number = 1,
+  pageSize: number = 10,
+): Promise<Result<PaginatedAudits>> {
+  const normalizedPage = Math.max(1, Math.floor(Number(page) || 1))
+  const normalizedPageSize = Math.min(100, Math.max(1, Math.floor(Number(pageSize) || 10)))
+
+  const skip = (normalizedPage - 1) * normalizedPageSize
+
+  const totalItems = await prisma.audit.count({
+    where: {
+      project: { is: { ownerId: userId } },
+    },
+  })
+
   const audits = await prisma.audit.findMany({
     where: {
       project: { is: { ownerId: userId } },
@@ -15,6 +41,23 @@ export async function getAuditsForUser(userId: string): Promise<Result<AuditWith
     include: {
       project: true,
     },
+    orderBy: [
+      { createdAt: 'desc' },
+      { id: 'asc' },
+    ],
+    skip,
+    take: normalizedPageSize,
   })
-  return success(audits)
+
+  const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / normalizedPageSize)
+
+  return success({
+    audits,
+    pagination: {
+      totalItems,
+      totalPages,
+      currentPage: normalizedPage,
+      pageSize: normalizedPageSize,
+    },
+  })
 }
