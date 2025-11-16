@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { getProjectCountAction } from '@/actions/projects/getCount/action'
 import { getRunningAuditCountAction } from '@/actions/audits/getRunningCount/action'
 import { getCompletedAuditCountAction } from '@/actions/audits/getCompletedCount/action'
+import { getTotalFindingsAction } from '@/actions/audits/getTotalFindings/logic'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export interface DashboardStatsGridProps {
@@ -18,7 +19,11 @@ export const DashboardStatsGrid = React.memo(function DashboardStatsGrid({ timef
   const [projectCount, setProjectCount] = useState(0)
   const [runningCount, setRunningCount] = useState(0)
   const [completedCount, setCompletedCount] = useState(0)
-  const [totalFindings, setTotalFindings] = useState(0) // New state for Total Findings
+  const [totalFindings, setTotalFindings] = useState(0)
+  const [projectCountDelta, setProjectCountDelta] = useState(0)
+  const [runningCountDelta, setRunningCountDelta] = useState(0)
+  const [completedCountDelta, setCompletedCountDelta] = useState(0)
+  const [totalFindingsDelta, setTotalFindingsDelta] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,18 +38,26 @@ export const DashboardStatsGrid = React.memo(function DashboardStatsGrid({ timef
       }
 
       setLoading(true)
-      setError(null) // Clear any previous errors
+      setError(null)
       try {
-        const [projectRes, runningRes, completedRes] = await Promise.all([
+        const [projectRes, runningRes, completedRes, totalFindingsRes] = await Promise.all([
           getProjectCountAction(userId, timeframe),
           getRunningAuditCountAction(userId, timeframe),
           getCompletedAuditCountAction(userId, timeframe),
+          getTotalFindingsAction(userId, timeframe),
         ])
 
         if (!signal.aborted) {
           setProjectCount(projectRes)
           setRunningCount(runningRes)
           setCompletedCount(completedRes)
+          setTotalFindings(totalFindingsRes)
+
+          // Mocking delta values for demonstration
+          setProjectCountDelta(5)
+          setRunningCountDelta(-2)
+          setCompletedCountDelta(10)
+          setTotalFindingsDelta(7)
         }
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
@@ -69,24 +82,43 @@ export const DashboardStatsGrid = React.memo(function DashboardStatsGrid({ timef
     }
   }, [userId, timeframe])
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4">
-        <Skeleton className="h-[120px] w-full" />
-        <Skeleton className="h-[120px] w-full" />
-        <Skeleton className="h-[120px] w-full" />
-        <Skeleton className="h-[120px] w-full" />
-      </div>
-    )
+  const getTrend = (delta: number) => {
+    if (delta > 0) return 'up'
+    if (delta < 0) return 'down'
+    return 'neutral'
   }
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4">
       {error && <div className="col-span-full text-destructive">{error}</div>}
-      <StatsCard label="Projects" value={projectCount} icon={<FolderKanban className="size-6" />} />
-      <StatsCard label="Running Audits" value={runningCount} icon={<Timer className="size-6" />} />
-      <StatsCard label="Completed" value={completedCount} icon={<CheckCircle2 className="size-6" />} />
-      <StatsCard label="Total Findings" value={totalFindings} icon={<ShieldAlert className="size-6" />} />
+      <StatsCard
+        label="Projects"
+        value={projectCount}
+        icon={<FolderKanban className="size-6" />}
+        trend={getTrend(projectCountDelta)}
+        delta={projectCountDelta}
+      />
+      <StatsCard
+        label="Running Audits"
+        value={runningCount}
+        icon={<Timer className="size-6" />}
+        trend={getTrend(runningCountDelta)}
+        delta={runningCountDelta}
+      />
+      <StatsCard
+        label="Completed"
+        value={completedCount}
+        icon={<CheckCircle2 className="size-6" />}
+        trend={getTrend(completedCountDelta)}
+        delta={completedCountDelta}
+      />
+      <StatsCard
+        label="Total Findings"
+        value={totalFindings}
+        icon={<ShieldAlert className="size-6" />}
+        trend={getTrend(totalFindingsDelta)}
+        delta={totalFindingsDelta}
+      />
     </div>
   )
 })
