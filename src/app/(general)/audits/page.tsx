@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { safeAwait } from '@/lib/async'
 import { BasicAlert } from '@/components/common/BasicAlert'
 import { getSession } from '@/lib/session'
 import { getAuditsForUser } from '@/actions/audits/getAuditList/logic'
 import { AuditsContainer } from '@/components/pages/audits/AuditsPageContainer'
+import { AuditsListSkeleton } from '@/components/pages/audits/AuditsListSkeleton'
 import { redirect } from 'next/navigation'
 
 export default async function AuditsPage() {
@@ -29,7 +31,8 @@ export default async function AuditsPage() {
   const audits = res.data.audits
 
   return (
-    
-  <AuditsContainer audits={audits} />
+    <Suspense fallback={<AuditsListSkeleton />}>
+      <AuditsContainer audits={audits} />
+    </Suspense>
   )
 }
