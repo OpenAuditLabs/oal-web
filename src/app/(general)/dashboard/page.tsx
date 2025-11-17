@@ -5,7 +5,15 @@ import { getRunningAuditCountForUser } from '@/actions/audits/getRunningCount/lo
 import { getCompletedAuditCountForUser } from '@/actions/audits/getCompletedCount/logic'
 import { BasicAlert } from '@/components/common/BasicAlert'
 import { getSession } from '@/lib/session'
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  description: 'View your project and audit statistics on the OpenAuditLabs dashboard.',
+}
+
+
 
 export default async function DashboardPage() {
   const session = await getSession()
