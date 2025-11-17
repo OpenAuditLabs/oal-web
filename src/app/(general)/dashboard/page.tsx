@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: 'View your project and audit statistics on the OpenAuditLabs dashboard.',
 }
 
-export const revalidate = 60
+
 
 export default async function DashboardPage() {
   const session = await getSession()
