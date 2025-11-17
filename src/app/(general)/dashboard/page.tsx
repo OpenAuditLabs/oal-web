@@ -7,6 +7,13 @@ import { BasicAlert } from '@/components/common/BasicAlert'
 import { getSession } from '@/lib/session'
 import { redirect } from 'next/navigation'
 
+export const metadata = {
+  title: 'Dashboard - OpenAuditLabs',
+  description: 'View your project and audit statistics on the OpenAuditLabs dashboard.',
+}
+
+export const revalidate = 60
+
 export default async function DashboardPage() {
   const session = await getSession()
   const userId = session.user?.id
