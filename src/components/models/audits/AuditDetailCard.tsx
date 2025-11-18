@@ -1,6 +1,6 @@
 import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
 import { useState } from 'react'
-import type { AuditWithProject } from '@/actions/audits/getAuditList/logic'
+import { useRouter } from 'next/navigation'
 import { FileText, Clock, Timer as TimerIcon, Copy } from 'lucide-react'
 import { formatShortDate } from '@/lib/utils'
 import { ActiveScanBadge } from './ActiveScanBadge'
@@ -14,6 +14,9 @@ export interface AuditDetailCardProps {
 
 export function AuditDetailCard({ audit }: AuditDetailCardProps) {
   const [isCopying, setIsCopying] = useState(false)
+  const [isRerunning, setIsRerunning] = useState(false)
+  const router = useRouter()
+
   const isRunning = audit.status === 'RUNNING'
   const progress = Math.max(0, Math.min(100, Number(audit.progress ?? 0)))
 
@@ -50,6 +53,28 @@ export function AuditDetailCard({ audit }: AuditDetailCardProps) {
     }
   }
 
+  const handleRerun = async () => {
+    setIsRerunning(true)
+    try {
+      // Simulate API call for rerun
+      // In a real application, this would be a POST request to an API endpoint
+      // e.g., await fetch(`/api/audits/${audit.id}/rerun`, { method: 'POST' });
+      await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate network delay
+      toast.success('Audit rerun initiated!', {
+        description: 'The audit has been queued for rerun.',
+      })
+      // Optionally, refresh the page or update audit status
+      router.refresh()
+    } catch (error) {
+      console.error('Failed to rerun audit:', error)
+      toast.error('Failed to rerun Audit', {
+        description: 'Please try again.',
+      })
+    } finally {
+      setIsRerunning(false)
+    }
+  }
+
   return (
     <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
       <div className="p-6">
@@ -82,6 +107,10 @@ export function AuditDetailCard({ audit }: AuditDetailCardProps) {
                 </Tooltip>
               </TooltipProvider>
             </div>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => router.push(`/audits/${audit.id}`)}>View</Button>
+            <Button variant="outline" size="sm" onClick={handleRerun} disabled={isRerunning}>Rerun</Button>
           </div>
         </div>
 

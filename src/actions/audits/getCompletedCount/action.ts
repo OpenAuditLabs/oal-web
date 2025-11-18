@@ -1,10 +1,10 @@
 'use server'
 
 import { getCompletedAuditCountForUser } from './logic'
-import { unwrapResult } from '@/lib/action-unwrap'
+import { unwrapNumber } from '@/lib/action-unwrap'
 
 export async function getCompletedAuditCountAction(userId: string, timeframe: string) {
-  const currentCount = unwrapResult(await getCompletedAuditCountForUser(userId, timeframe, 0))
-  const previousCount = unwrapResult(await getCompletedAuditCountForUser(userId, timeframe, 1))
+  const currentCount = unwrapNumber(await getCompletedAuditCountForUser(userId, timeframe, 0))
+  const previousCount = unwrapNumber(await getCompletedAuditCountForUser(userId, timeframe, 1))
   return { current: currentCount, previous: previousCount }
 }
