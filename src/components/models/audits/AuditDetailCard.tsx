@@ -83,6 +83,10 @@ export function AuditDetailCard({ audit }: AuditDetailCardProps) {
               </TooltipProvider>
             </div>
           </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => console.log('View Audit', audit.id)}>View</Button>
+            <Button variant="outline" size="sm" onClick={() => console.log('Rerun Audit', audit.id)}>Rerun</Button>
+          </div>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
