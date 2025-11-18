@@ -1,10 +1,14 @@
 import { getProjectCountAction } from '@/actions/projects/getCount/action';
 import { EmptyState } from '@/components/pages/projects/EmptyState';
+import { getSession } from '@/lib/session';
 
 export default async function ProjectsPage() {
-  const count = await getProjectCountAction();
+  const session = await getSession();
+  const userId = session?.user?.id;
 
-  if (count === 0) {
+  const count = await getProjectCountAction({ userId, timeframe: 'all' });
+
+  if (count.current.value === 0) {
     return <EmptyState />;
   }
 
