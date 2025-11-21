@@ -53,3 +53,26 @@ export const authActionClient = actionClient.use(async ({ next, ctx }) => {
     },
   })
 })
+
+type ActionResult<T> =
+  | {
+      success: true
+      data: T
+    }
+  | {
+      success: false
+      error: string
+    }
+
+export function createActionResult<T>() {
+  return {
+    success: (data: T): ActionResult<T> => ({
+      success: true,
+      data,
+    }),
+    error: (error: string): ActionResult<T> => ({
+      success: false,
+      error,
+    }),
+  }
+}
