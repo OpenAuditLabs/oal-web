@@ -7,6 +7,10 @@ import { getTimeframeFilter } from '@/lib/timeframe'
 // Simple in-memory cache for project counts within a request cycle
 const projectCountCache = new Map<string, number>();
 
+export const clearProjectCountCache = () => {
+  projectCountCache.clear();
+};
+
 export async function getProjectCountForUser(
   userId: string,
   timeframe: string,

@@ -1,4 +1,4 @@
-import { getProjectCountForUser } from './logic';
+import { clearProjectCountCache, getProjectCountForUser } from './logic';
 import { prisma } from '@/lib/prisma';
 import { success } from '@/lib/result';
 
@@ -16,10 +16,7 @@ describe('getProjectCountForUser', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset the cache before each test to ensure isolation
-    // This is a bit hacky, but necessary for testing the in-memory cache
-    // In a real application, the cache would likely be cleared per request or have a TTL
-    (getProjectCountForUser as any).projectCountCache = new Map<string, number>();
+    clearProjectCountCache();
   });
 
   it('should cache the result and avoid duplicate prisma calls', async () => {
@@ -64,11 +61,8 @@ describe('getProjectCountForUser', () => {
   });
 
   it('should return different results for different arguments', async () => {
-    mockPrismaCount.mockImplementation((args) => {
-      if (args.where.ownerId === 'user123' && args.where.createdAt.gte === '2025-10-01T00:00:00.000Z') {
-        return 10;
-      }
-      return 20;
+    mockPrismaCount.mockImplementation(({ where }) => {
+      return where.ownerId === 'user123' ? 10 : 20;
     });
 
     const userId1 = 'user123';
