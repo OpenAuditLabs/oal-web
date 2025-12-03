@@ -4,6 +4,12 @@ import { getIronSession } from 'iron-session'
 import type { IronSession, SessionOptions } from 'iron-session'
 import { IRON_SESSION_PASSWORD } from '@/lib/env'
 import { IS_PRODUCTION, cookieName } from '@/lib/constants'
+import prisma from '@/lib/prisma'
+
+/**
+ * Type representing the authenticated user, derived from Prisma's User model.
+ */
+export type AuthenticatedUser = Omit<Awaited<ReturnType<typeof prisma.user.findUniqueOrThrow>>, 'password'>
 
 
 /**
@@ -76,3 +82,31 @@ export async function destroySession(): Promise<void> {
   const session = await getSession()
   await session.destroy()
 }
+
+/**
+ * Retrieves the currently authenticated user based on the session.
+ * @returns A Promise that resolves to the AuthenticatedUser object if a user is authenticated, otherwise null.
+ */
+export async function getCurrentUser(): Promise<AuthenticatedUser | null> {
+  const session = await getSession()
+
+  if (!session.user?.id) {
+    return null
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+  })
+
+  if (!user) {
+    return null
+  }
+
+  // Exclude sensitive information like password
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password, ...rest } = user
+  return rest
+}
+
