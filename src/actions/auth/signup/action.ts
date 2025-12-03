@@ -13,6 +13,7 @@ export const signupAction = actionClient
       const sanitizedInput = {
         ...parsedInput,
         email: parsedInput.email.trim().toLowerCase(),
+        name: parsedInput.name.trim(),
       }
       const result = await signup(sanitizedInput)
 
