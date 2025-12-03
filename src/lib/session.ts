@@ -9,7 +9,7 @@ import prisma from '@/lib/prisma'
 /**
  * Type representing the authenticated user, derived from Prisma's User model.
  */
-export type AuthenticatedUser = Omit<Awaited<ReturnType<typeof prisma.user.findUniqueOrThrow>>, 'password'>
+export type AuthenticatedUser = Omit<Awaited<ReturnType<typeof prisma.user.findUnique>>, 'password'> | null
 
 
 /**
