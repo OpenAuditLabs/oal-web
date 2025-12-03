@@ -14,8 +14,8 @@ export type NewUser = {
 }
 
 export async function signup(input: SignupInput): Promise<Result<NewUser>> {
-  const name = input.name.trim()
-  const email = input.email.trim().toLowerCase()
+  const name = input.name
+  const email = input.email
   const password = input.password
 
   const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } })

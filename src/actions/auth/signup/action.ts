@@ -10,7 +10,12 @@ export const signupAction = actionClient
   .action(async ({ parsedInput }) => {
 
     try {
-      const result = await signup(parsedInput)
+      const sanitizedInput = {
+        ...parsedInput,
+        email: parsedInput.email.trim().toLowerCase(),
+        name: parsedInput.name.trim(),
+      }
+      const result = await signup(sanitizedInput)
 
       if (result.success) {
         return result.data
