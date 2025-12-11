@@ -7,13 +7,15 @@ export function FormCheckbox<T extends FieldValues>({
   name,
   label,
   required = false,
-  helperText
+  helperText,
+  indeterminate = false
 }: {
   label: string | React.ReactNode;
   control: Control<T>;
   name: Path<T>;
   required?: boolean;
   helperText?: string;
+  indeterminate?: boolean;
 }) {
   return (
     <FormField
@@ -22,7 +24,11 @@ export function FormCheckbox<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <FormItem className='flex flex-row items-start space-x-2 rounded-md'>
           <FormControl>
-            <Checkbox checked={field.value} onCheckedChange={field.onChange} disabled={field.disabled} />
+            <Checkbox
+              checked={indeterminate ? 'indeterminate' : field.value}
+              onCheckedChange={field.onChange}
+              disabled={field.disabled}
+            />
           </FormControl>
           <div className='space-y-1 leading-none'>
             <FormLabel>
