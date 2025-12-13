@@ -1,23 +1,15 @@
 import { EmptyState } from '@/components/pages/audits/EmptyState';
-import { PastAudit } from '@/types/audit';
 import { getPastAudits } from '@/actions/audits/getPastAudits/action';
-import { Button } from '@/components/ui/button';
-import { downloadCsv } from '@/lib/csv';
+import { DownloadCsvButton } from '@/components/pages/audits/DownloadCsvButton';
 
 export default async function PastAuditsPage() {
   const { data: pastAudits = [] } = await getPastAudits({});
-
-  const handleDownloadCsv = () => {
-    downloadCsv('past-audits.csv', pastAudits);
-  };
 
   return (
     <div className="p-8">
       <h1 className="text-2xl font-semibold mb-4">Past Audits</h1>
       <div className="mb-4">
-        {pastAudits.length > 0 && (
-          <Button onClick={handleDownloadCsv}>Download CSV</Button>
-        )}
+        <DownloadCsvButton pastAudits={pastAudits} />
       </div>
       {pastAudits.length === 0 ? (
         <EmptyState />

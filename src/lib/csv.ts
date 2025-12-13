@@ -37,6 +37,7 @@ export function downloadCsv<T extends Record<string, unknown>>(filename: string,
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   } else {
     // Fallback for browsers that don't support HTML5 download attribute
     window.open('data:text/csv;charset=utf-8,' + encodeURIComponent(csvString));
