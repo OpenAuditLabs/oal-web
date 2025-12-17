@@ -24,6 +24,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { ChevronDownIcon } from "lucide-react"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -384,36 +390,106 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
+function SidebarGroup({
+  className,
+  isCollapsible = false,
+  children,
+  ...props
+}: React.ComponentProps<"div"> & {
+  isCollapsible?: boolean
+}) {
+  const { collapsed } = useSidebar()
+
+  if (isCollapsible) {
+    return (
+      <CollapsibleSidebarGroup collapsed={collapsed} className={className} {...props}>
+        {children}
+      </CollapsibleSidebarGroup>
+    )
+  }
+
   return (
     <div
       data-slot="sidebar-group"
       data-sidebar="group"
+      data-collapsed={collapsed ? "true" : "false"}
       className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
       {...props}
-    />
+    >
+      {children}
+    </div>
+  )
+}
+
+type CollapsibleSidebarGroupProps = React.ComponentProps<"div"> & {
+  collapsed: boolean
+}
+
+function CollapsibleSidebarGroup({
+  collapsed,
+  className,
+  children,
+  ...props
+}: CollapsibleSidebarGroupProps) {
+  const [open, setOpen] = React.useState(false)
+
+  return (
+    <Collapsible
+      open={open}
+      onOpenChange={setOpen}
+      data-slot="sidebar-group"
+      data-sidebar="group"
+      data-collapsed={collapsed ? "true" : "false"}
+      className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
+      {...props}
+    >
+      {children}
+    </Collapsible>
   )
 }
 
 function SidebarGroupLabel({
   className,
   asChild = false,
+  children,
   ...props
 }: React.ComponentProps<"div"> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "div"
+  const { collapsed } = useSidebar()
+  const isCollapsible = 
+    React.useContext(Collapsible.CollapsibleContext) !== undefined
+  const open = React.useContext(Collapsible.CollapsibleContext)?.open
 
-  return (
+  const content = (
     <Comp
       data-slot="sidebar-group-label"
       data-sidebar="group-label"
       className={cn(
         "text-sidebar-foreground/70 ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
+        isCollapsible && "pr-7",
         className
       )}
       {...props}
-    />
+    >
+      {!collapsed && children}
+
+      {isCollapsible && !collapsed && (
+        <ChevronDownIcon
+          className={cn(
+            "ml-auto size-4 transition-transform duration-200",
+            open && "rotate-180"
+          )}
+        />
+      )}
+    </Comp>
   )
+
+  if (isCollapsible) {
+    return <CollapsibleTrigger asChild>{content}</CollapsibleTrigger>
+  }
+
+  return content
 }
 
 function SidebarGroupAction({
@@ -441,16 +517,28 @@ function SidebarGroupAction({
 
 function SidebarGroupContent({
   className,
+  children,
   ...props
 }: React.ComponentProps<"div">) {
-  return (
+  const isCollapsible = 
+    React.useContext(Collapsible.CollapsibleContext) !== undefined
+
+  const content = (
     <div
       data-slot="sidebar-group-content"
       data-sidebar="group-content"
       className={cn("w-full text-sm", className)}
       {...props}
-    />
+    >
+      {children}
+    </div>
   )
+
+  if (isCollapsible) {
+    return <CollapsibleContent>{content}</CollapsibleContent>
+  }
+
+  return content
 }
 
 function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
